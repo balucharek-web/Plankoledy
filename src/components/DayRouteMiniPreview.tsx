@@ -7,6 +7,7 @@ import {
   ParishCenter,
 } from '../types/parish';
 import { computeManualOrderForStops } from '../utils/seasonScheduler';
+import { buildCleanRouteCorridor } from '../utils/spatial';
 
 interface DayRouteMiniPreviewProps {
   parish: ParishCenter | null;
@@ -61,19 +62,23 @@ export const DayRouteMiniPreview: React.FC<DayRouteMiniPreviewProps> = ({
       }
       const palette =
         PRIEST_PALETTE.find((p) => p.id === priestId) ?? PRIEST_PALETTE[0];
+      const corridor = buildCleanRouteCorridor(ordered);
       priestPaths.push({
         priestId,
         color: palette.color,
-        points: ordered.map((s) => s.location),
+        points:
+          corridor.mainCorridorPoints.length >= 2
+            ? corridor.mainCorridorPoints
+            : ordered.map((s) => s.location),
       });
     }
 
-    // Focus camera primarily on the day's stops (+ church if nearby, or boundary softly for orientation)
+    // Focus camera tightly on the day's street corridor (fallback to church/boundary if 1 stop)
     const focusPts: LatLng[] = [];
     for (const p of priestPaths) {
       for (const pt of p.points) focusPts.push(pt);
     }
-    if (parish) focusPts.push(parish.location);
+    if (focusPts.length < 2 && parish) focusPts.push(parish.location);
     if (focusPts.length < 2 && boundary.length >= 3) {
       for (const b of boundary) focusPts.push(b);
     }

@@ -492,18 +492,52 @@ export function estimateDayRoutes(
       ordered.push(...sorted);
     } else {
       let cursor = parish.location;
+      let prevCursor: LatLng | null = null;
       let currentStreet = '';
+      let currentParity: boolean | null = null;
 
       while (pool.length > 0) {
         let bestIdx = 0;
         let bestScore = Number.POSITIVE_INFINITY;
+        const headingDx = prevCursor ? cursor.lng - prevCursor.lng : 0;
+        const headingDy = prevCursor ? cursor.lat - prevCursor.lat : 0;
+        const headingLen = Math.hypot(headingDx, headingDy);
+
         for (let i = 0; i < pool.length; i++) {
           const candidate = pool[i];
           const dist = haversineMeters(cursor, candidate.location);
           const street = extractStreetName(candidate);
-          const sameStreetBonus =
-            currentStreet && street === currentStreet && dist < 450 ? 0.42 : 1;
-          const score = dist * sameStreetBonus;
+          const isSameStreet = Boolean(currentStreet && street === currentStreet && dist < 450);
+          let multiplier = isSameStreet ? 0.42 : 1;
+
+          if (isSameStreet) {
+            const candParity = isEvenHouseNumberStr(
+              extractHouseNumberLabel(candidate)
+            );
+            // Gently stay on the same side of the street before crossing back
+            if (
+              currentParity !== null &&
+              candParity !== null &&
+              candParity === currentParity &&
+              dist < 140
+            ) {
+              multiplier *= 0.78;
+            }
+            // Gently prefer continuing forward along the street rather than zig-zagging backwards
+            if (headingLen > 1e-5 && dist > 12 && dist < 200) {
+              const cdx = candidate.location.lng - cursor.lng;
+              const cdy = candidate.location.lat - cursor.lat;
+              const cLen = Math.hypot(cdx, cdy);
+              if (cLen > 1e-5) {
+                const cosAngle = (headingDx * cdx + headingDy * cdy) / (headingLen * cLen);
+                if (cosAngle < -0.55) {
+                  multiplier *= 1.32;
+                }
+              }
+            }
+          }
+
+          const score = dist * multiplier;
           if (score < bestScore) {
             bestScore = score;
             bestIdx = i;
@@ -511,8 +545,10 @@ export function estimateDayRoutes(
         }
         const chosen = pool.splice(bestIdx, 1)[0];
         ordered.push(chosen);
+        prevCursor = cursor;
         cursor = chosen.location;
         currentStreet = extractStreetName(chosen);
+        currentParity = isEvenHouseNumberStr(extractHouseNumberLabel(chosen));
       }
     }
 

@@ -1732,6 +1732,283 @@ export function clusterAndDeclutterStops(params: {
   return { clusters, singles, declutteredLabelIds };
 }
 
+export interface CleanRouteCorridor {
+  mainCorridorPoints: LatLng[];
+  approachLeg: [LatLng, LatLng] | null;
+  returnLeg: [LatLng, LatLng] | null;
+}
+
+export interface RouteDirectionArrow {
+  lat: number;
+  lng: number;
+  bearingDeg: number;
+}
+
+function approxDistMeters(a: LatLng, b: LatLng, cosLat: number): number {
+  return Math.hypot(
+    (a.lat - b.lat) * 111320,
+    (a.lng - b.lng) * 111320 * cosLat
+  );
+}
+
+/**
+ * Collapses a list of stops along a single street into a clean, monotonic road-axis ribbon
+ * so odd/even house zig-zags and side-yard offsets never create a tangled web on mobile maps.
+ */
+function buildSingleStreetCorridorSegment(segStops: VisitStop[]): LatLng[] {
+  if (segStops.length === 0) return [];
+  if (segStops.length <= 2) {
+    return segStops.map((s) => s.location);
+  }
+
+  const avgLat =
+    segStops.reduce((sum, s) => sum + s.location.lat, 0) / segStops.length;
+  const cosLat = Math.max(0.2, Math.cos((avgLat * Math.PI) / 180));
+  const mLat = 111320;
+  const mLng = 111320 * cosLat;
+
+  const entry = segStops[0].location;
+  const exit = segStops[segStops.length - 1].location;
+
+  // Find farthest point from entry to detect out-and-back (e.g. even side up, odd side back)
+  let farStop = segStops[segStops.length - 1];
+  let maxDistFromEntry = 0;
+  for (let i = 1; i < segStops.length; i++) {
+    const d = approxDistMeters(entry, segStops[i].location, cosLat);
+    if (d > maxDistFromEntry) {
+      maxDistFromEntry = d;
+      farStop = segStops[i];
+    }
+  }
+
+  if (maxDistFromEntry < 28) {
+    return [entry, exit];
+  }
+
+  const directEntryExit = approxDistMeters(entry, exit, cosLat);
+  const isOutAndBack = directEntryExit < maxDistFromEntry * 0.45;
+  const axisEnd = isOutAndBack ? farStop.location : exit;
+
+  const dxAxis = (axisEnd.lng - entry.lng) * mLng;
+  const dyAxis = (axisEnd.lat - entry.lat) * mLat;
+  const axisLen = Math.hypot(dxAxis, dyAxis);
+  if (axisLen < 20) {
+    return [entry, exit];
+  }
+
+  const ux = dxAxis / axisLen;
+  const uy = dyAxis / axisLen;
+
+  let minProj = 0;
+  let maxProj = axisLen;
+  const projected = segStops.map((s) => {
+    const dx = (s.location.lng - entry.lng) * mLng;
+    const dy = (s.location.lat - entry.lat) * mLat;
+    const proj = dx * ux + dy * uy;
+    if (proj < minProj) minProj = proj;
+    if (proj > maxProj) maxProj = proj;
+    return { loc: s.location, proj };
+  });
+
+  const span = Math.max(25, maxProj - minProj);
+  const binCount = Math.max(2, Math.min(22, Math.round(span / 48)));
+  const bins: Array<{ sumLat: number; sumLng: number; count: number }> =
+    Array.from({ length: binCount }, () => ({ sumLat: 0, sumLng: 0, count: 0 }));
+
+  for (const item of projected) {
+    const t = Math.max(0, Math.min(0.9999, (item.proj - minProj) / span));
+    const bIdx = Math.floor(t * binCount);
+    bins[bIdx].sumLat += item.loc.lat;
+    bins[bIdx].sumLng += item.loc.lng;
+    bins[bIdx].count += 1;
+  }
+
+  const spine: LatLng[] = [entry];
+  for (const bin of bins) {
+    if (bin.count === 0) continue;
+    const pt = { lat: bin.sumLat / bin.count, lng: bin.sumLng / bin.count };
+    const prev = spine[spine.length - 1];
+    if (approxDistMeters(prev, pt, cosLat) >= 18) {
+      spine.push(pt);
+    }
+  }
+
+  const finalAnchor = isOutAndBack ? farStop.location : exit;
+  if (approxDistMeters(spine[spine.length - 1], finalAnchor, cosLat) >= 12) {
+    spine.push(finalAnchor);
+  } else if (spine.length >= 2) {
+    spine[spine.length - 1] = finalAnchor;
+  }
+
+  // Light smoothing pass to eliminate minor lateral kinks
+  if (spine.length >= 4) {
+    const smoothOnce = (pts: LatLng[]): LatLng[] =>
+      pts.map((pt, i) => {
+        if (i === 0 || i === pts.length - 1) return pt;
+        const prev = pts[i - 1];
+        const next = pts[i + 1];
+        if (
+          approxDistMeters(prev, pt, cosLat) > 160 ||
+          approxDistMeters(pt, next, cosLat) > 160
+        ) {
+          return pt;
+        }
+        return {
+          lat: prev.lat * 0.25 + pt.lat * 0.5 + next.lat * 0.25,
+          lng: prev.lng * 0.25 + pt.lng * 0.5 + next.lng * 0.25,
+        };
+      });
+    const smoothed = smoothOnce(smoothOnce(spine));
+    const metricPts = smoothed.map((p) => ({
+      lat: p.lat,
+      lng: p.lng,
+      x: p.lng * mLng,
+      y: p.lat * mLat,
+    }));
+    return rdpSimplifyMetric(metricPts, 8).map(({ lat, lng }) => ({ lat, lng }));
+  }
+
+  return spine;
+}
+
+/**
+ * Builds a clean, mobile-legible day route corridor separated from the optional
+ * church approach/return legs so day previews read clearly like Google Maps.
+ */
+export function buildCleanRouteCorridor(
+  orderedStops: VisitStop[],
+  parishLocation?: LatLng | null,
+  includeReturn = false
+): CleanRouteCorridor {
+  if (orderedStops.length === 0) {
+    return { mainCorridorPoints: [], approachLeg: null, returnLeg: null };
+  }
+
+  const firstLoc = orderedStops[0].location;
+  const lastLoc = orderedStops[orderedStops.length - 1].location;
+  const avgLat = (firstLoc.lat + lastLoc.lat) / 2;
+  const cosLat = Math.max(0.2, Math.cos((avgLat * Math.PI) / 180));
+
+  const approachLeg: [LatLng, LatLng] | null =
+    parishLocation && approxDistMeters(parishLocation, firstLoc, cosLat) >= 25
+      ? [parishLocation, firstLoc]
+      : null;
+
+  const returnLeg: [LatLng, LatLng] | null =
+    includeReturn &&
+    parishLocation &&
+    approxDistMeters(lastLoc, parishLocation, cosLat) >= 25
+      ? [lastLoc, parishLocation]
+      : null;
+
+  if (orderedStops.length === 1) {
+    return { mainCorridorPoints: [firstLoc], approachLeg, returnLeg };
+  }
+
+  // Group consecutive stops by street so each street collapses into one clean centerline ribbon
+  const streetRuns: VisitStop[][] = [];
+  let currentStreet = extractStreetName(orderedStops[0]);
+  let currentRun: VisitStop[] = [orderedStops[0]];
+
+  for (let i = 1; i < orderedStops.length; i++) {
+    const stop = orderedStops[i];
+    const street = extractStreetName(stop);
+    if (street === currentStreet) {
+      currentRun.push(stop);
+    } else {
+      streetRuns.push(currentRun);
+      currentStreet = street;
+      currentRun = [stop];
+    }
+  }
+  streetRuns.push(currentRun);
+
+  const combined: LatLng[] = [];
+  for (const run of streetRuns) {
+    const segPts = buildSingleStreetCorridorSegment(run);
+    for (const pt of segPts) {
+      const prev = combined[combined.length - 1];
+      if (!prev || approxDistMeters(prev, pt, cosLat) >= 6) {
+        combined.push(pt);
+      }
+    }
+  }
+
+  // Ensure exact START anchor is preserved cleanly
+  if (combined.length === 0) {
+    combined.push(firstLoc);
+  } else if (approxDistMeters(combined[0], firstLoc, cosLat) > 2) {
+    combined[0] = firstLoc;
+  }
+
+  return {
+    mainCorridorPoints: combined,
+    approachLeg,
+    returnLeg,
+  };
+}
+
+/**
+ * Samples evenly spaced directional chevron bearings along a polyline,
+ * avoiding both ends so arrows never collide with START / META badges.
+ */
+export function sampleRouteDirectionArrows(
+  path: LatLng[],
+  maxArrows = 5
+): RouteDirectionArrow[] {
+  if (path.length < 2) return [];
+
+  const avgLat = path.reduce((sum, p) => sum + p.lat, 0) / path.length;
+  const cosLat = Math.max(0.2, Math.cos((avgLat * Math.PI) / 180));
+  const cumDist: number[] = [0];
+
+  for (let i = 1; i < path.length; i++) {
+    cumDist.push(
+      cumDist[i - 1] + approxDistMeters(path[i - 1], path[i], cosLat)
+    );
+  }
+
+  const totalLen = cumDist[cumDist.length - 1];
+  if (totalLen < 45) return [];
+
+  const count =
+    totalLen < 160
+      ? 1
+      : Math.max(2, Math.min(maxArrows, Math.round(totalLen / 210)));
+
+  const pointAtDist = (targetD: number): LatLng => {
+    const d = Math.max(0, Math.min(totalLen, targetD));
+    for (let i = 1; i < cumDist.length; i++) {
+      if (cumDist[i] >= d) {
+        const segLen = Math.max(0.001, cumDist[i] - cumDist[i - 1]);
+        const t = (d - cumDist[i - 1]) / segLen;
+        return {
+          lat: path[i - 1].lat + (path[i].lat - path[i - 1].lat) * t,
+          lng: path[i - 1].lng + (path[i].lng - path[i - 1].lng) * t,
+        };
+      }
+    }
+    return path[path.length - 1];
+  };
+
+  const arrows: RouteDirectionArrow[] = [];
+  for (let i = 0; i < count; i++) {
+    const frac = count === 1 ? 0.5 : 0.18 + (i * 0.64) / (count - 1);
+    const d = totalLen * frac;
+    const p = pointAtDist(d);
+    const pBack = pointAtDist(Math.max(0, d - 16));
+    const pFwd = pointAtDist(Math.min(totalLen, d + 16));
+    const dx = (pFwd.lng - pBack.lng) * cosLat;
+    const dy = pFwd.lat - pBack.lat;
+    if (Math.hypot(dx, dy) < 1e-7) continue;
+    // Geographic bearing: 0° = North (up), 90° = East (right)
+    const bearingDeg = ((Math.atan2(dx, dy) * 180) / Math.PI + 360) % 360;
+    arrows.push({ lat: p.lat, lng: p.lng, bearingDeg });
+  }
+
+  return arrows;
+}
+
 
 
 

@@ -1,6 +1,5 @@
 import React, {
   Suspense,
-  lazy,
   useCallback,
   useEffect,
   useMemo,
@@ -54,28 +53,29 @@ import {
 } from './components/SidebarStops';
 import { StreetMapModal } from './components/StreetMapModal';
 import { MapEngineProvider } from './contexts/MapEngineContext';
+import { lazyWithRetry } from './utils/lazyRetry';
 
-const ArchitectureGuideModal = lazy(() =>
+const ArchitectureGuideModal = lazyWithRetry(() =>
   import('./components/ArchitectureGuideModal').then((m) => ({
     default: m.ArchitectureGuideModal,
   }))
 );
-const BlockUnitsModal = lazy(() =>
+const BlockUnitsModal = lazyWithRetry(() =>
   import('./components/BlockUnitsModal').then((m) => ({
     default: m.BlockUnitsModal,
   }))
 );
-const OsmStreetFetcherModal = lazy(() =>
+const OsmStreetFetcherModal = lazyWithRetry(() =>
   import('./components/OsmStreetFetcherModal').then((m) => ({
     default: m.OsmStreetFetcherModal,
   }))
 );
-const PrintScheduleSheet = lazy(() =>
+const PrintScheduleSheet = lazyWithRetry(() =>
   import('./components/PrintScheduleSheet').then((m) => ({
     default: m.PrintScheduleSheet,
   }))
 );
-const MapFieldOverlay = lazy(() =>
+const MapFieldOverlay = lazyWithRetry(() =>
   import('./components/MapFieldOverlay').then((m) => ({
     default: m.MapFieldOverlay,
   }))

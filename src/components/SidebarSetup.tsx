@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
   Ban,
@@ -54,12 +54,13 @@ import {
   getStopUnitCount,
   isBlockStop,
 } from '../utils/spatial';
+import { lazyWithRetry } from '../utils/lazyRetry';
 import { PlaceSearchInput, SelectedPlaceData } from './PlaceSearchInput';
 
-const CsvImportModal = lazy(() =>
+const CsvImportModal = lazyWithRetry(() =>
   import('./CsvImportModal').then((m) => ({ default: m.CsvImportModal }))
 );
-const OsmStreetFetcherModal = lazy(() =>
+const OsmStreetFetcherModal = lazyWithRetry(() =>
   import('./OsmStreetFetcherModal').then((m) => ({
     default: m.OsmStreetFetcherModal,
   }))

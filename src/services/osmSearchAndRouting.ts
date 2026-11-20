@@ -7,6 +7,7 @@ import {
   PlanConfig,
   PriestRouteResult,
   ScheduledStopItem,
+  TravelModeOption,
   VisitStop,
 } from '../types/parish';
 import { extractStreetName, isBlockStop } from '../utils/spatial';
@@ -1035,6 +1036,99 @@ export async function fetchStreetRoadGeometry(
   }
 
   streetRoadGeometryCache.set(cacheKey, null);
+  return null;
+}
+
+const dayCorridorRoadCache = new Map<string, LatLng[] | null>();
+
+/**
+ * Snaps a clean day corridor (already free of house-to-house zig-zags) onto actual
+ * OSM roads via OSRM so mobile and desktop previews immediately follow real streets.
+ */
+export async function fetchDayCorridorRoadGeometry(
+  corridorPoints: LatLng[],
+  travelMode: TravelModeOption = 'WALKING'
+): Promise<LatLng[] | null> {
+  if (corridorPoints.length < 2) return null;
+
+  const first = corridorPoints[0];
+  const last = corridorPoints[corridorPoints.length - 1];
+  const cacheKey = `${travelMode}:${corridorPoints.length}:${first.lat.toFixed(5)},${first.lng.toFixed(5)}:${last.lat.toFixed(5)},${last.lng.toFixed(5)}`;
+  if (dayCorridorRoadCache.has(cacheKey)) {
+    return dayCorridorRoadCache.get(cacheKey) ?? null;
+  }
+
+  // Pick up to 10 evenly spaced anchors along the smoothed corridor
+  const maxAnchors = 10;
+  const anchors: LatLng[] = [];
+  if (corridorPoints.length <= maxAnchors) {
+    anchors.push(...corridorPoints);
+  } else {
+    for (let i = 0; i < maxAnchors; i++) {
+      const idx = Math.round(
+        (i * (corridorPoints.length - 1)) / (maxAnchors - 1)
+      );
+      anchors.push(corridorPoints[idx]);
+    }
+  }
+
+  let directLenMeters = 0;
+  for (let i = 0; i < anchors.length - 1; i++) {
+    directLenMeters += haversineMeters(anchors[i], anchors[i + 1]);
+  }
+  if (directLenMeters < 30) {
+    dayCorridorRoadCache.set(cacheKey, null);
+    return null;
+  }
+
+  const coordStr = anchors
+    .map((p) => `${p.lng.toFixed(6)},${p.lat.toFixed(6)}`)
+    .join(';');
+  const isDriving = travelMode === 'DRIVING';
+  const urls = isDriving
+    ? [
+        `https://routing.openstreetmap.de/routed-car/route/v1/driving/${coordStr}?overview=full&geometries=geojson&steps=false`,
+        `https://router.project-osrm.org/route/v1/driving/${coordStr}?overview=full&geometries=geojson&steps=false`,
+      ]
+    : [
+        `https://routing.openstreetmap.de/routed-foot/route/v1/foot/${coordStr}?overview=full&geometries=geojson&steps=false`,
+        `https://router.project-osrm.org/route/v1/foot/${coordStr}?overview=full&geometries=geojson&steps=false`,
+      ];
+
+  for (const url of urls) {
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 4500);
+    try {
+      const res = await fetch(url, { signal: controller.signal });
+      if (!res.ok) continue;
+      const data = (await res.json()) as OsrmRouteResponse;
+      const route = data.routes?.[0];
+      if (!route || data.code !== 'Ok' || !route.geometry?.coordinates?.length) {
+        continue;
+      }
+
+      // Guard against unreasonable detours
+      const routeDist = route.distance ?? 0;
+      if (routeDist > directLenMeters * 2.45 + 280) {
+        continue;
+      }
+
+      const path: LatLng[] = route.geometry.coordinates.map(([lng, lat]) => ({
+        lat,
+        lng,
+      }));
+      if (path.length >= 2) {
+        dayCorridorRoadCache.set(cacheKey, path);
+        return path;
+      }
+    } catch {
+      // Try next mirror
+    } finally {
+      window.clearTimeout(timer);
+    }
+  }
+
+  dayCorridorRoadCache.set(cacheKey, null);
   return null;
 }
 

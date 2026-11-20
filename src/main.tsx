@@ -1,6 +1,14 @@
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import { triggerSingleChunkRecoveryReload } from './utils/lazyRetry';
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('vite:preloadError', (event) => {
+    event.preventDefault();
+    triggerSingleChunkRecoveryReload();
+  });
+}
 
 // Tier 1 Demo Key quota and auth monitoring
 (window as any).gm_authFailure = () => {

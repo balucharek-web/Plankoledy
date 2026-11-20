@@ -48,6 +48,7 @@ import {
   RouteStopMeta,
   StopMapCluster,
   StopMarkerAppearance,
+  buildCleanRouteCorridor,
   buildRouteStopLookup,
   buildStreetOverlayPaths,
   clusterAndDeclutterStops,
@@ -371,6 +372,7 @@ const ParishChurchMarker: React.FC<{ parish: ParishCenter }> = ({ parish }) => {
 const RoutePolylinesLayer: React.FC<{
   routeObjects: RoutePolylineEntry[];
   routes: PriestRouteResult[];
+  parishLocation: LatLng | null;
   isExactRoute: boolean;
   selectedDate: string | null;
   focusedPriestId: number | null;
@@ -378,6 +380,7 @@ const RoutePolylinesLayer: React.FC<{
 }> = ({
   routeObjects,
   routes,
+  parishLocation,
   isExactRoute,
   selectedDate,
   focusedPriestId,
@@ -459,14 +462,75 @@ const RoutePolylinesLayer: React.FC<{
       }
     } else if (routes.length > 0) {
       for (const route of routes) {
-        if (route.encodedPathPoints.length >= 2) {
-          const isFocused =
-            focusedPriestId === null || focusedPriestId === route.priestId;
+        const orderedStops = route.orderedStops.map((item) => item.stop);
+        const corridor = buildCleanRouteCorridor(
+          orderedStops,
+          parishLocation,
+          route.returnLegDistanceMeters > 0
+        );
+        const isFocused =
+          focusedPriestId === null || focusedPriestId === route.priestId;
+
+        if (isFocused && corridor.approachLeg) {
+          created.push(
+            new google.maps.Polyline({
+              path: corridor.approachLeg,
+              strokeColor: route.color,
+              strokeOpacity: 0,
+              icons: [
+                {
+                  icon: {
+                    path: 'M 0,-1 0,1',
+                    strokeOpacity: 0.36,
+                    strokeWeight: 2,
+                    scale: 1,
+                  },
+                  offset: '0',
+                  repeat: '10px',
+                },
+              ],
+              clickable: false,
+              zIndex: 35 + route.priestId,
+              map,
+            })
+          );
+        }
+        if (isFocused && corridor.returnLeg) {
+          created.push(
+            new google.maps.Polyline({
+              path: corridor.returnLeg,
+              strokeColor: route.color,
+              strokeOpacity: 0,
+              icons: [
+                {
+                  icon: {
+                    path: 'M 0,-1 0,1',
+                    strokeOpacity: 0.28,
+                    strokeWeight: 1.75,
+                    scale: 1,
+                  },
+                  offset: '0',
+                  repeat: '11px',
+                },
+              ],
+              clickable: false,
+              zIndex: 34 + route.priestId,
+              map,
+            })
+          );
+        }
+
+        const displayPath =
+          corridor.mainCorridorPoints.length >= 2
+            ? corridor.mainCorridorPoints
+            : route.encodedPathPoints;
+
+        if (displayPath.length >= 2) {
           const halo = new google.maps.Polyline({
-            path: route.encodedPathPoints,
+            path: displayPath,
             strokeColor: '#FFFFFF',
-            strokeWeight: isFocused ? 6 : 3,
-            strokeOpacity: isFocused ? 0.85 : 0.2,
+            strokeWeight: isFocused ? 8.5 : 4,
+            strokeOpacity: isFocused ? 0.9 : 0.22,
             clickable: false,
             zIndex: isFocused ? 45 + route.priestId : 15 + route.priestId,
             map,
@@ -474,52 +538,41 @@ const RoutePolylinesLayer: React.FC<{
           created.push(halo);
 
           const pl = new google.maps.Polyline({
-            path: route.encodedPathPoints,
+            path: displayPath,
             strokeColor: route.color,
-            strokeOpacity: 0,
-            icons: [
-              {
-                icon: {
-                  path: 'M 0,-2 0,2',
-                  strokeOpacity: isFocused ? 0.92 : 0.24,
-                  strokeWeight: isFocused ? 3.2 : 2,
-                  scale: 1,
-                },
-                offset: '0',
-                repeat: '12px',
-              },
-              ...(isFocused
-                ? [
-                    {
-                      icon: {
-                        path: google.maps.SymbolPath.FORWARD_OPEN_ARROW,
-                        scale: 2.1,
-                        strokeColor: route.color,
-                        strokeOpacity: 0.95,
-                        strokeWeight: 2,
-                      },
-                      offset: '65px',
-                      repeat: '150px',
+            strokeWeight: isFocused ? 4.8 : 2.2,
+            strokeOpacity: isFocused ? 0.94 : 0.25,
+            icons: isFocused
+              ? [
+                  {
+                    icon: {
+                      path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                      scale: 2.3,
+                      fillColor: '#FFFFFF',
+                      fillOpacity: 1,
+                      strokeColor: route.color,
+                      strokeOpacity: 1,
+                      strokeWeight: 1.4,
                     },
-                  ]
-                : []),
-            ],
+                    offset: '65px',
+                    repeat: '130px',
+                  },
+                ]
+              : [],
+            clickable: false,
             zIndex: isFocused ? 65 + route.priestId : 25 + route.priestId,
             map,
           });
           created.push(pl);
-          if (isFocused) {
-            route.encodedPathPoints.forEach((pt) => {
-              bounds.extend(pt);
-              hasBounds = true;
-            });
-          }
-        } else if (
-          route.orderedStops.length > 0 &&
-          (focusedPriestId === null || focusedPriestId === route.priestId)
-        ) {
+        }
+
+        if (isFocused) {
           route.orderedStops.forEach((item) => {
             bounds.extend(item.stop.location);
+            hasBounds = true;
+          });
+          displayPath.forEach((pt) => {
+            bounds.extend(pt);
             hasBounds = true;
           });
         }
@@ -530,7 +583,14 @@ const RoutePolylinesLayer: React.FC<{
 
     if (hasBounds && lastFittedKeyRef.current !== routeSignature) {
       lastFittedKeyRef.current = routeSignature;
-      map.fitBounds(bounds, { top: 64, right: 56, bottom: 140, left: 32 });
+      const isNarrow =
+        typeof window !== 'undefined' && window.innerWidth < 640;
+      map.fitBounds(
+        bounds,
+        isNarrow
+          ? { top: 54, right: 22, bottom: 162, left: 22 }
+          : { top: 64, right: 56, bottom: 140, left: 32 }
+      );
     }
 
     return () => {
@@ -541,6 +601,7 @@ const RoutePolylinesLayer: React.FC<{
     map,
     routeObjects,
     routes,
+    parishLocation,
     isExactRoute,
     selectedDate,
     focusedPriestId,
@@ -1717,6 +1778,7 @@ export const ParishMap: React.FC<ParishMapProps> = ({
         <RoutePolylinesLayer
           routeObjects={routeObjects}
           routes={routes}
+          parishLocation={parish?.location ?? null}
           isExactRoute={isExactRoute}
           selectedDate={selectedDate}
           focusedPriestId={focusedPriestId}
