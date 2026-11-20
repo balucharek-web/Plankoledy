@@ -41,21 +41,48 @@ if (typeof window !== 'undefined') {
   window.addEventListener('online', () => {
     void enableNetwork(db).catch(() => {});
   });
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && navigator.onLine !== false) {
+        void enableNetwork(db).catch(() => {});
+      }
+    });
+  }
 }
 
-function waitForPageReady(): Promise<void> {
-  if (typeof document === 'undefined' || document.readyState === 'complete') {
-    return new Promise((resolve) => setTimeout(resolve, 300));
-  }
-  return new Promise((resolve) => {
-    const done = () => {
-      window.removeEventListener('load', done);
-      clearTimeout(timer);
-      setTimeout(resolve, 250);
-    };
-    const timer = setTimeout(done, 1500);
-    window.addEventListener('load', done, { once: true });
-  });
+function waitForForegroundAndReady(): Promise<void> {
+  const waitVisible = (): Promise<void> => {
+    if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => {
+      const onVis = () => {
+        if (document.visibilityState === 'visible') {
+          document.removeEventListener('visibilitychange', onVis);
+          // Give mobile browsers a moment to restore sockets after waking from background
+          setTimeout(resolve, 400);
+        }
+      };
+      document.addEventListener('visibilitychange', onVis);
+    });
+  };
+
+  const waitLoaded = (): Promise<void> => {
+    if (typeof document === 'undefined' || document.readyState === 'complete') {
+      return new Promise((resolve) => setTimeout(resolve, 300));
+    }
+    return new Promise((resolve) => {
+      const done = () => {
+        window.removeEventListener('load', done);
+        clearTimeout(timer);
+        setTimeout(resolve, 250);
+      };
+      const timer = setTimeout(done, 1500);
+      window.addEventListener('load', done, { once: true });
+    });
+  };
+
+  return waitLoaded().then(waitVisible);
 }
 
 async function testConnection(): Promise<void> {
@@ -73,7 +100,11 @@ async function testConnection(): Promise<void> {
     return;
   }
 
-  await waitForPageReady();
+  await waitForForegroundAndReady();
+
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    return;
+  }
 
   const retryDelaysMs = [2500, 4500];
 
@@ -104,7 +135,10 @@ async function testConnection(): Promise<void> {
 
       if (attempt < retryDelaysMs.length) {
         await new Promise((resolve) => setTimeout(resolve, retryDelaysMs[attempt]));
-        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        if (
+          (typeof navigator !== 'undefined' && navigator.onLine === false) ||
+          (typeof document !== 'undefined' && document.visibilityState !== 'visible')
+        ) {
           return;
         }
         await enableNetwork(db).catch(() => {});
