@@ -1992,8 +1992,12 @@ export const OsmParishMap: React.FC<OsmParishMapProps> = ({
     <div className="relative w-full h-full min-h-[340px] bg-slate-100">
       <div ref={containerRef} className="w-full h-full z-0" />
 
-      {/* Live GPS Tracker & Quick Map Controls (compact on mobile to maximize visible map) */}
-      <div className="no-print absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-[460] flex flex-col items-end gap-1.5">
+      {/* Live GPS Tracker & Quick Map Controls (offset below floating mobile top bar in pan mode) */}
+      <div
+        className={`no-print absolute right-2.5 sm:right-3 z-[460] flex flex-col items-end gap-1.5 ${
+          interactionMode === 'pan' ? 'top-[64px] lg:top-3' : 'top-2.5 sm:top-3'
+        }`}
+      >
         <div className="flex items-center gap-1.5">
           {gps.active && gps.position && (
             <button

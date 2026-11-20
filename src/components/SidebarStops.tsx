@@ -195,7 +195,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
     'split' | number
   >(() => (config.priestCount > 1 ? 'split' : 1));
   const [singleStartDirection, setSingleStartDirection] =
-    useState<StreetStartDirection>('asc');
+    useState<StreetStartDirection>('auto');
   const [singleStartStopId, setSingleStartStopId] = useState<string>('');
   const [previewCreatorStreet, setPreviewCreatorStreet] = useState<string | null>(
     null

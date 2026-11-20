@@ -426,24 +426,24 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
       {hasSavedStops && currentDayPlan && (
         <section className="p-4 sm:p-5">
           <div
-            className={`rounded-xl border p-3.5 space-y-2.5 ${
+            className={`rounded-2xl border p-4 space-y-3 shadow-xs ${
               currentDayPlan.kind === 'today'
-                ? 'border-amber-300 bg-amber-50/85'
-                : 'border-slate-200 bg-slate-50/75'
+                ? 'border-amber-300 bg-amber-50/45'
+                : 'border-slate-200 bg-white'
             }`}
           >
             <div className="flex items-center justify-between gap-2">
               <span
-                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold ${
+                className={`inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide ${
                   currentDayPlan.kind === 'today'
-                    ? 'bg-amber-700 text-white'
-                    : 'bg-slate-200/80 text-slate-800'
+                    ? 'text-amber-800'
+                    : 'text-slate-500'
                 }`}
               >
-                <CalendarDays className="w-3 h-3 shrink-0" />
+                <CalendarDays className="w-3.5 h-3.5 shrink-0" />
                 {currentDayPlan.badge}
               </span>
-              <span className="text-xs font-medium text-slate-700 tabular-nums">
+              <span className="text-xs font-semibold text-slate-800 tabular-nums">
                 {currentDayPlan.day.startTime}–
                 {currentDayPlan.day.plannedEndTime ||
                   currentDayPlan.day.estimatedEndTime}
@@ -451,11 +451,11 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
             </div>
 
             <div className="min-w-0">
-              <div className="text-sm font-semibold text-slate-900">
+              <div className="text-base font-bold tracking-tight text-slate-900">
                 {currentDayPlan.day.weekdayLabel},{' '}
                 {currentDayPlan.day.shortDateLabel}
               </div>
-              <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
+              <p className="text-xs sm:text-[13px] text-slate-700 font-medium mt-0.5 line-clamp-2">
                 {currentDayPlan.day.streetNames.length > 0
                   ? `${currentDayPlan.day.streetNames.slice(0, 3).join(', ')}${
                       currentDayPlan.day.streetNames.length > 3
@@ -464,25 +464,42 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
                     }`
                   : 'Wybrane punkty na mapie'}
               </p>
-              <div className="text-[11px] text-slate-500 mt-1 tabular-nums flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              <div className="text-xs text-slate-500 mt-1.5 tabular-nums flex flex-wrap items-center gap-x-2 gap-y-0.5">
                 <span>
-                  <strong className="text-slate-800">
+                  <strong className="font-semibold text-slate-900">
                     {currentDayPlan.day.stops.length}
                   </strong>{' '}
                   {currentDayPlan.day.stops.length === 1 ? 'dom' : 'domów'}
                 </span>
                 {currentDayPlan.day.totalDistanceMeters > 0 && (
                   <>
-                    <span aria-hidden="true">·</span>
+                    <span aria-hidden="true" className="text-slate-300">
+                      ·
+                    </span>
                     <span>
                       {formatDistance(currentDayPlan.day.totalDistanceMeters)}
                     </span>
                   </>
                 )}
+                {currentDayPlan.day.estimatedRoutes.length > 0 && (
+                  <>
+                    <span aria-hidden="true" className="text-slate-300">
+                      ·
+                    </span>
+                    <span>
+                      {currentDayPlan.day.estimatedRoutes.length}{' '}
+                      {currentDayPlan.day.estimatedRoutes.length === 1
+                        ? 'ksiądz'
+                        : 'księży'}
+                    </span>
+                  </>
+                )}
                 {currentDayPlan.visitedCount > 0 && (
                   <>
-                    <span aria-hidden="true">·</span>
-                    <span className="text-emerald-700 font-medium">
+                    <span aria-hidden="true" className="text-slate-300">
+                      ·
+                    </span>
+                    <span className="text-emerald-700 font-semibold">
                       Odwiedzono {currentDayPlan.visitedCount}/
                       {currentDayPlan.day.stops.length}
                     </span>
@@ -491,7 +508,7 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
               </div>
             </div>
 
-            {/* Interactive real-coordinate mini-map preview of this day's kolęda */}
+            {/* Clean cartographic preview of this day's kolęda */}
             <DayRouteMiniPreview
               parish={parish}
               boundary={boundary}
@@ -499,11 +516,11 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
               onOpenMap={() => onViewDayOnMap(currentDayPlan.day.date)}
             />
 
-            <div className="grid grid-cols-3 gap-1.5 pt-0.5">
+            <div className="grid grid-cols-3 gap-2 pt-0.5">
               <button
                 type="button"
                 onClick={() => onViewDayOnMap(currentDayPlan.day.date)}
-                className="min-h-[42px] sm:min-h-[38px] px-2.5 py-1.5 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+                className="min-h-[44px] sm:min-h-[40px] px-2.5 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
               >
                 <MapIcon className="w-3.5 h-3.5 shrink-0" />
                 <span>Mapa dnia</span>
@@ -511,7 +528,7 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenDayRoute(currentDayPlan.day.date)}
-                className="min-h-[42px] sm:min-h-[38px] px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-800 text-xs font-medium inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+                className="min-h-[44px] sm:min-h-[40px] px-2.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
               >
                 <Route className="w-3.5 h-3.5 text-amber-700 shrink-0" />
                 <span>Rozpiska</span>
@@ -519,7 +536,7 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
               <button
                 type="button"
                 onClick={() => onEditDay(currentDayPlan.day.date)}
-                className="min-h-[42px] sm:min-h-[38px] px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-800 text-xs font-medium inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+                className="min-h-[44px] sm:min-h-[40px] px-2.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
               >
                 <Pencil className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                 <span>Edytuj</span>

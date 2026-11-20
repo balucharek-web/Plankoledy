@@ -14,6 +14,7 @@ import {
 } from '../types/parish';
 import {
   addMinutesToHHMM,
+  buildCleanRouteCorridor,
   extractHouseNumberLabel,
   extractHouseNumberSortKey,
   extractStreetName,
@@ -552,6 +553,42 @@ export function estimateDayRoutes(
       }
     }
 
+    // Pre-compute raw legs and detect exaggerated intra-street zig-zagging (e.g. strict 1,2,3,4 numbering across side branches)
+    const rawLegs = ordered.map((stop, idx) => {
+      const fromPt = idx === 0 ? parish.location : ordered[idx - 1].location;
+      return estimateLegMetrics(fromPt, stop.location, config.travelMode);
+    });
+
+    let interStopScale = 1;
+    if (ordered.length >= 4) {
+      let rawInterStopMeters = 0;
+      for (let i = 1; i < rawLegs.length; i++) {
+        rawInterStopMeters += rawLegs[i].distanceMeters;
+      }
+
+      const corridor = buildCleanRouteCorridor(
+        ordered,
+        parish.location,
+        false
+      );
+      let corridorRawMeters = 0;
+      for (let i = 1; i < corridor.mainCorridorPoints.length; i++) {
+        corridorRawMeters += haversineMeters(
+          corridor.mainCorridorPoints[i - 1],
+          corridor.mainCorridorPoints[i]
+        );
+      }
+      // Realistic house-to-house street walk: corridor length * road factor + modest per-house entrance offset
+      const realisticInterStopMeters = Math.max(
+        120,
+        Math.round(corridorRawMeters * 1.2 + ordered.length * 14)
+      );
+
+      if (rawInterStopMeters > realisticInterStopMeters * 1.85) {
+        interStopScale = realisticInterStopMeters / rawInterStopMeters;
+      }
+    }
+
     let cursorAbs = startAbsBase;
     let priestVisitMinutes = 0;
     let priestDistanceMeters = 0;
@@ -560,7 +597,20 @@ export function estimateDayRoutes(
     const pathPoints: LatLng[] = [parish.location];
 
     const scheduledItems: ScheduledStopItem[] = ordered.map((stop, idx) => {
-      const leg = estimateLegMetrics(prevPoint, stop.location, config.travelMode);
+      const rawLeg = rawLegs[idx];
+      const leg =
+        idx === 0 || interStopScale >= 0.999
+          ? rawLeg
+          : {
+              distanceMeters: Math.max(
+                8,
+                Math.round(rawLeg.distanceMeters * interStopScale)
+              ),
+              durationMillis: Math.max(
+                6000,
+                Math.round(rawLeg.durationMillis * interStopScale)
+              ),
+            };
       prevPoint = stop.location;
       pathPoints.push(stop.location);
 

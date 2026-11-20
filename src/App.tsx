@@ -41,6 +41,7 @@ import { MapDayRouteBar } from './components/MapDayRouteBar';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { OsmParishMap } from './components/OsmParishMap';
 import { PWAInstallButton } from './components/PWAInstallButton';
+import { PwaUpdateBanner } from './components/PwaUpdateBanner';
 import { ParishMap, RoutePolylineEntry } from './components/ParishMap';
 import { PlanDashboard, WorkspaceSection } from './components/PlanDashboard';
 import { SelectedPlaceData } from './components/PlaceSearchInput';
@@ -2806,11 +2807,18 @@ function ParishPlannerWorkspace({
 
   const isScheduleView =
     activeSection === 'schedule' && mobilePane === 'panel';
+  const isMobileFullMap = mobilePane === 'map' && !isScheduleView;
 
   return (
     <div className="flex flex-col h-full min-h-0 bg-slate-50 print-reset">
-      {/* Three-Zone Top Bar */}
-      <header className="no-print h-14 px-3 sm:px-5 bg-white border-b border-slate-200 flex items-center justify-between gap-3 shrink-0">
+      <PwaUpdateBanner />
+
+      {/* Three-Zone Top Bar (hidden on mobile during full-screen map view for Google Maps-grade immersion) */}
+      <header
+        className={`no-print h-14 px-3 sm:px-5 bg-white border-b border-slate-200 items-center justify-between gap-3 shrink-0 ${
+          isMobileFullMap ? 'hidden lg:flex' : 'flex'
+        }`}
+      >
         <div className="flex items-center gap-2 min-w-0">
           <button
             type="button"
@@ -3298,9 +3306,9 @@ function ParishPlannerWorkspace({
                 mobilePane === 'map' ? 'flex' : 'hidden lg:flex'
               }`}
             >
-              {/* Quick Exit (Mobile) & 1-Tap Map Actions Toolbar */}
+              {/* Desktop Compact Map Actions Toolbar (mobile uses sleek floating glass top bar on the map) */}
               {interactionMode === 'pan' && (
-                <div className="no-print shrink-0 bg-white border-b border-slate-200 px-2.5 sm:px-3 py-1.5 flex items-center gap-1.5 overflow-x-auto">
+                <div className="no-print hidden lg:flex shrink-0 bg-white border-b border-slate-200 px-3 py-1.5 items-center gap-1.5 overflow-x-auto">
                   <button
                     type="button"
                     onClick={() => setMobilePane('panel')}
@@ -3504,6 +3512,90 @@ function ParishPlannerWorkspace({
               )}
 
               <div className="flex-1 min-h-0 relative w-full">
+                {/* Sleek Floating Mobile Glass Top Bar (Google Maps / Apple Maps style — leaves ~85% screen for the map) */}
+                {interactionMode === 'pan' && !fieldModeOnMap && (
+                  <div className="no-print lg:hidden absolute top-2.5 left-2.5 right-2.5 z-[470] flex items-center gap-2 pointer-events-none">
+                    <button
+                      type="button"
+                      onClick={() => setMobilePane('panel')}
+                      aria-label="Wróć do panelu"
+                      className="pointer-events-auto min-w-[44px] min-h-[44px] rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md text-slate-900 hover:bg-white inline-flex items-center justify-center shrink-0 transition-colors"
+                    >
+                      <ArrowLeft className="w-5 h-5" />
+                    </button>
+
+                    <div className="pointer-events-auto flex-1 min-w-0 min-h-[44px] px-3.5 py-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        {selectedDaySummary ? (
+                          <>
+                            <div className="text-xs font-bold text-slate-900 truncate leading-tight">
+                              {formatPolishDateChip(selectedDaySummary.date)}
+                              {selectedDaySummary.streetNames[0]
+                                ? ` · ${selectedDaySummary.streetNames[0]}${
+                                    selectedDaySummary.streetNames.length > 1
+                                      ? ` +${selectedDaySummary.streetNames.length - 1}`
+                                      : ''
+                                  }`
+                                : ''}
+                            </div>
+                            <div className="text-[10px] text-slate-500 truncate leading-tight mt-0.5 tabular-nums">
+                              {selectedDaySummary.startTime}–
+                              {selectedDaySummary.plannedEndTime ||
+                                selectedDaySummary.estimatedEndTime}{' '}
+                              · {selectedDaySummary.stops.length}{' '}
+                              {selectedDaySummary.stops.length === 1
+                                ? 'dom'
+                                : 'domów'}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-xs font-bold text-slate-900 truncate leading-tight">
+                              {parish?.name || 'Mapa parafii'}
+                            </div>
+                            <div className="text-[10px] text-slate-500 truncate leading-tight mt-0.5">
+                              Cały teren parafii
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {selectedDate ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedDate(null);
+                          setFocusedPriestId(null);
+                          setFocusedStreet(null);
+                          setFieldModeOnMap(false);
+                        }}
+                        aria-label="Pokaż całą parafię"
+                        title="Pokaż całą parafię"
+                        className="pointer-events-auto min-h-[44px] px-3 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md text-xs font-semibold text-slate-800 hover:bg-white inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
+                      >
+                        <Church className="w-4 h-4 text-amber-700 shrink-0" />
+                        <span>Parafia</span>
+                      </button>
+                    ) : nearestPlannedDayDate ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedDate(nearestPlannedDayDate);
+                          setFocusedPriestId(null);
+                          setFocusedStreet(null);
+                          setInspectedStreet(null);
+                        }}
+                        aria-label="Przejdź do dnia kolędy"
+                        className="pointer-events-auto min-h-[44px] px-3 rounded-2xl bg-amber-700 hover:bg-amber-800 text-white shadow-md text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
+                      >
+                        <CalendarDays className="w-4 h-4 shrink-0" />
+                        <span>Kolęda</span>
+                      </button>
+                    ) : null}
+                  </div>
+                )}
+
               {useGoogleMaps ? (
                 <ParishMap
                   parish={parish}
@@ -4001,10 +4093,12 @@ function ParishPlannerWorkspace({
         )}
       </div>
 
-      {/* Mobile Thumb-Zone Bottom Tab Bar (< lg) */}
+      {/* Mobile Thumb-Zone Bottom Tab Bar (< lg, hidden during immersive full-screen map view) */}
       <nav
         aria-label="Nawigacja mobilna"
-        className="no-print lg:hidden shrink-0 bg-white border-t border-slate-200 grid grid-cols-5 h-16 px-1"
+        className={`no-print shrink-0 bg-white border-t border-slate-200 grid-cols-5 h-16 px-1 ${
+          isMobileFullMap ? 'hidden' : 'lg:hidden grid'
+        }`}
       >
         <button
           type="button"

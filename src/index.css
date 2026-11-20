@@ -27,6 +27,27 @@
   font-variant-numeric: tabular-nums;
 }
 
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  .leaflet-control-zoom {
+    display: none !important;
+  }
+
+  .leaflet-control-attribution {
+    font-size: 9px !important;
+    padding: 0 4px !important;
+    background: rgba(255, 255, 255, 0.72) !important;
+  }
+}
+
 .print-offscreen {
   position: fixed;
   left: -99999px;
