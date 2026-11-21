@@ -2,7 +2,10 @@
 <html lang="pl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <title>Planer Kolędy — Planowanie Odwiedzin Duszpasterskich</title>
     <meta name="theme-color" content="#B45309" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -28,8 +31,22 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('planer_koledy_theme') || 'system';
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var isDark = saved === 'dark' || (saved === 'system' && prefersDark);
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', '#0F172A');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
-  <body class="bg-slate-50 text-slate-900 antialiased selection:bg-amber-100 selection:text-amber-950">
+  <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-amber-100 dark:selection:bg-amber-900/60 selection:text-amber-950 dark:selection:text-amber-100">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

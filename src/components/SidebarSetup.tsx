@@ -431,19 +431,19 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
   return (
     <div className="min-h-full flex flex-col">
       {/* Sticky Top Step Switcher (Compact on both Mobile & Desktop) */}
-      <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-slate-200 px-3 pt-2.5 pb-2.5 space-y-2 shrink-0">
+      <div className="sticky top-0 z-10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-3 pt-2.5 pb-2.5 space-y-2 shrink-0">
         {parish && setupTab !== 'parish' && (
-          <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-amber-50/80 border border-amber-200/80">
+          <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60">
             <div className="min-w-0 flex items-center gap-1.5">
-              <Church className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-              <span className="text-xs font-semibold text-slate-900 truncate">
+              <Church className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
+              <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
                 {parish.name}
               </span>
             </div>
             <button
               type="button"
               onClick={() => setSetupTab('parish')}
-              className="px-2 py-1 text-[11px] font-semibold text-amber-900 hover:bg-amber-100 rounded-lg shrink-0 transition-colors"
+              className="px-2 py-1 text-[11px] font-semibold text-amber-900 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-lg shrink-0 transition-colors"
             >
               Zmień
             </button>
@@ -453,7 +453,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
         <div
           role="tablist"
           aria-label="Kroki konfiguracji parafii"
-          className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-slate-100"
+          className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800"
         >
           <button
             type="button"
@@ -462,12 +462,12 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
             onClick={() => setSetupTab('parish')}
             className={`min-h-[40px] px-2 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center justify-center gap-1 transition-colors whitespace-nowrap ${
               setupTab === 'parish'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             {parish && (
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" />
             )}
             <span>1. Parafia</span>
           </button>
@@ -480,12 +480,12 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
             onClick={() => setSetupTab('area')}
             className={`min-h-[40px] px-2 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center justify-center gap-1 transition-colors whitespace-nowrap disabled:opacity-45 ${
               setupTab === 'area'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             {boundary.length >= 3 && (
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" />
             )}
             <span>2. Teren</span>
           </button>
@@ -498,8 +498,8 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
             onClick={() => setSetupTab('streets')}
             className={`min-h-[40px] px-2 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center justify-center gap-1 transition-colors whitespace-nowrap tabular-nums disabled:opacity-45 ${
               setupTab === 'streets'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             <span>3. Ulice ({savedStreets.length})</span>
@@ -514,17 +514,17 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
           <div className="p-4 sm:p-5 space-y-4">
             <div>
               <div className="flex items-center justify-between gap-2">
-                <h2 className="text-sm font-semibold text-slate-900">
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                   Wybierz parafię lub kościół
                 </h2>
                 {parish && (
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     Aktywna
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                 Wpisz nazwę parafii, wezwanie lub miejscowość — wybór automatycznie
                 zapisuje się na Twoim koncie.
               </p>
@@ -542,12 +542,12 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                 type="button"
                 disabled={nearbyLoading}
                 onClick={() => void handleFindNearbyGps()}
-                className="min-h-[42px] py-2 px-3 text-xs font-medium rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 inline-flex items-center justify-center gap-1.5 transition-colors"
+                className="min-h-[42px] py-2 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 inline-flex items-center justify-center gap-1.5 transition-colors"
               >
                 {nearbyLoading ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-700" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-700 dark:text-amber-400" />
                 ) : (
-                  <LocateFixed className="w-3.5 h-3.5 text-amber-700" />
+                  <LocateFixed className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                 )}
                 <span>Parafie w pobliżu (GPS)</span>
               </button>
@@ -557,34 +557,36 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                   type="button"
                   disabled={nearbyLoading}
                   onClick={() => void loadChurchesAround(parish.location)}
-                  className="min-h-[42px] py-2 px-3 text-xs font-medium rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 inline-flex items-center justify-center gap-1.5 transition-colors"
+                  className="min-h-[42px] py-2 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 inline-flex items-center justify-center gap-1.5 transition-colors"
                 >
-                  <Church className="w-3.5 h-3.5 text-amber-700" />
+                  <Church className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                   <span>Kościoły w okolicy</span>
                 </button>
               )}
             </div>
 
             {nearbyError && (
-              <p className="text-xs text-red-600 leading-snug">{nearbyError}</p>
+              <p className="text-xs text-red-600 dark:text-red-400 leading-snug">
+                {nearbyError}
+              </p>
             )}
 
             {nearbyChurches && nearbyChurches.length > 0 && (
-              <div className="border border-slate-200 rounded-xl bg-white overflow-hidden">
-                <div className="px-3 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                  <span className="text-xs font-medium text-slate-700">
+              <div className="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 overflow-hidden">
+                <div className="px-3 py-2 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                  <span className="text-xs font-medium text-slate-700 dark:text-slate-200">
                     Kościoły w promieniu 7 km ({nearbyChurches.length})
                   </span>
                   <button
                     type="button"
                     onClick={() => setNearbyChurches(null)}
                     aria-label="Zamknij listę kościołów"
-                    className="p-1 text-slate-400 hover:text-slate-700 rounded"
+                    className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <ul className="divide-y divide-slate-100">
+                <ul className="divide-y divide-slate-100 dark:divide-slate-800">
                   {nearbyChurches.map((item) => (
                     <li key={item.id}>
                       <button
@@ -601,20 +603,20 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                           setLastGpsLocation(null);
                           setSetupTab('area');
                         }}
-                        className="w-full min-h-[48px] px-3 py-2.5 text-left hover:bg-amber-50/60 flex items-start justify-between gap-2 transition-colors"
+                        className="w-full min-h-[48px] px-3 py-2.5 text-left hover:bg-amber-50/60 dark:hover:bg-amber-950/30 flex items-start justify-between gap-2 transition-colors"
                       >
                         <div className="min-w-0 flex items-start gap-2">
-                          <Church className="w-3.5 h-3.5 text-amber-700 shrink-0 mt-0.5" />
+                          <Church className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
                           <div className="min-w-0">
-                            <div className="text-xs font-medium text-slate-900 truncate">
+                            <div className="text-xs font-medium text-slate-900 dark:text-slate-100 truncate">
                               {item.name}
                             </div>
-                            <div className="text-[11px] text-slate-500 truncate">
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                               {item.address}
                             </div>
                           </div>
                         </div>
-                        <span className="text-[11px] font-mono tabular-nums text-slate-500 shrink-0 mt-0.5">
+                        <span className="text-[11px] font-mono tabular-nums text-slate-500 dark:text-slate-400 shrink-0 mt-0.5">
                           {formatShortDistance(item.distanceMeters)}
                         </span>
                       </button>
@@ -642,32 +644,34 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                   setNearbyError(null);
                   setSetupTab('area');
                 }}
-                className="w-full min-h-[44px] px-3 py-2 text-left rounded-xl border border-amber-200 bg-amber-50/70 hover:bg-amber-100/70 flex items-center justify-between gap-2 transition-colors"
+                className="w-full min-h-[44px] px-3 py-2 text-left rounded-xl border border-amber-200 dark:border-amber-800/60 bg-amber-50/70 dark:bg-amber-950/40 hover:bg-amber-100/70 dark:hover:bg-amber-950/60 flex items-center justify-between gap-2 transition-colors"
               >
                 <div className="min-w-0">
-                  <div className="text-xs font-semibold text-amber-950 truncate">
+                  <div className="text-xs font-semibold text-amber-950 dark:text-amber-200 truncate">
                     Użyj mojej bieżącej pozycji GPS
                   </div>
-                  <div className="text-[11px] text-amber-800 truncate">
+                  <div className="text-[11px] text-amber-800 dark:text-amber-300/90 truncate">
                     {lastGpsLocation.address}
                   </div>
                 </div>
-                <ArrowRight className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                <ArrowRight className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
               </button>
             )}
 
             {parish && (
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-2">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 space-y-2">
                 <div>
-                  <div className="font-semibold text-slate-900">
+                  <div className="font-semibold text-slate-900 dark:text-slate-100">
                     {parish.name}
                   </div>
-                  <div className="mt-0.5 text-slate-500">{parish.address}</div>
+                  <div className="mt-0.5 text-slate-500 dark:text-slate-400">
+                    {parish.address}
+                  </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSetupTab('area')}
-                  className="w-full min-h-[40px] py-2 px-3 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors"
+                  className="w-full min-h-[40px] py-2 px-3 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <span>Przejdź do granic i ulic</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -676,19 +680,19 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
             )}
 
             {isSignedIn ? (
-              <div className="pt-3 border-t border-slate-200 space-y-2">
+              <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-slate-700">
+                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
                     Zapamiętane parafie ({savedParishes.length})
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700">
+                  <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 dark:text-emerald-400">
                     <Cloud className="w-3 h-3" />
                     {userEmail?.split('@')[0] || 'Google'}
                   </span>
                 </div>
 
                 {savedParishes.length === 0 ? (
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Wyszukaj pierwszą parafię powyżej — zostanie zapisana na
                     Twoim koncie.
                   </p>
@@ -701,8 +705,8 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                           key={rec.id}
                           className={`flex items-center gap-2 rounded-xl border px-2.5 py-2 transition-colors ${
                             isActive
-                              ? 'bg-amber-50/70 border-amber-300'
-                              : 'bg-white border-slate-200 hover:bg-slate-50'
+                              ? 'bg-amber-50/70 dark:bg-amber-950/35 border-amber-300 dark:border-amber-700/70'
+                              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
                           }`}
                         >
                           <button
@@ -715,14 +719,16 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                           >
                             <MapPin
                               className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${
-                                isActive ? 'text-amber-700' : 'text-slate-400'
+                                isActive
+                                  ? 'text-amber-700 dark:text-amber-400'
+                                  : 'text-slate-400 dark:text-slate-500'
                               }`}
                             />
                             <div className="min-w-0">
-                              <div className="text-xs font-medium text-slate-900 truncate">
+                              <div className="text-xs font-medium text-slate-900 dark:text-slate-100 truncate">
                                 {rec.parish.name}
                               </div>
-                              <div className="text-[11px] text-slate-500 truncate">
+                              <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                                 {rec.parish.address}
                               </div>
                             </div>
@@ -732,7 +738,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                             onClick={() => onDeleteSavedParish(rec.id)}
                             title="Usuń zapamiętaną parafię"
                             aria-label="Usuń zapamiętaną parafię"
-                            className="min-w-[38px] min-h-[38px] inline-flex items-center justify-center text-slate-400 hover:text-red-600 rounded-lg transition-colors shrink-0"
+                            className="min-w-[38px] min-h-[38px] inline-flex items-center justify-center text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors shrink-0"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -743,17 +749,17 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                 )}
               </div>
             ) : (
-              <div className="pt-3 border-t border-slate-200 space-y-2">
-                <p className="text-xs text-slate-600">
+              <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
+                <p className="text-xs text-slate-600 dark:text-slate-400">
                   Zaloguj się przez Google lub e-mail, aby zapamiętywać parafie,
                   granice i kartotekę na stałe.
                 </p>
                 <button
                   type="button"
                   onClick={onSignInGoogle}
-                  className="w-full min-h-[42px] py-2 px-3 text-xs font-medium text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors"
+                  className="w-full min-h-[42px] py-2 px-3 text-xs font-medium text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors"
                 >
-                  <LogIn className="w-3.5 h-3.5 text-amber-700" />
+                  <LogIn className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                   Zaloguj się lub załóż konto
                 </button>
               </div>
@@ -768,10 +774,10 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
               <div
                 className={`p-2.5 rounded-xl border text-xs flex items-center justify-between gap-2 ${
                   streetPickFeedback.status === 'success'
-                    ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                    ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60 text-emerald-900 dark:text-emerald-200'
                     : streetPickFeedback.status === 'error'
-                      ? 'bg-red-50 border-red-200 text-red-900'
-                      : 'bg-amber-50 border-amber-200 text-amber-900'
+                      ? 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-800/60 text-red-900 dark:text-red-200'
+                      : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-200'
                 }`}
               >
                 <span>{streetPickFeedback.message}</span>
@@ -789,14 +795,14 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
             )}
 
             {/* Karta A: Skan z mapy (najprostsza ścieżka) */}
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
               <div className="flex items-center justify-between gap-2">
-                <h2 className="text-xs sm:text-sm font-semibold text-slate-900">
+                <h2 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">
                   Skan z mapy (granice + domy)
                 </h2>
                 {boundary.length >= 3 && (
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-medium text-emerald-700 tabular-nums">
+                    <span className="text-[11px] font-medium text-emerald-700 dark:text-emerald-400 tabular-nums">
                       {boundaryAreaText || `${boundary.length} pkt`}
                     </span>
                     <button
@@ -804,7 +810,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                       onClick={onClearBoundary}
                       title="Usuń obszar"
                       aria-label="Usuń obszar"
-                      className="p-1 text-slate-400 hover:text-red-600 rounded-lg transition-colors"
+                      className="p-1 text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -819,8 +825,8 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                   onClick={onToggleDrawBoundary}
                   className={`w-full min-h-[44px] py-2.5 px-3 text-xs font-semibold rounded-xl border inline-flex items-center justify-center gap-2 transition-colors ${
                     isDrawing
-                      ? 'bg-amber-700 border-amber-700 text-white'
-                      : 'bg-slate-900 border-slate-900 text-white hover:bg-slate-800 disabled:opacity-50'
+                      ? 'bg-amber-700 dark:bg-amber-600 border-amber-700 dark:border-amber-600 text-white'
+                      : 'bg-slate-900 dark:bg-slate-100 border-slate-900 dark:border-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-white disabled:opacity-50'
                   }`}
                 >
                   <Pentagon className="w-4 h-4 shrink-0" />
@@ -838,8 +844,8 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                     onClick={onToggleEditBoundary}
                     className={`min-h-[40px] py-1.5 px-2.5 text-xs font-semibold rounded-xl border inline-flex items-center justify-center gap-1.5 transition-colors ${
                       isEditingBoundary
-                        ? 'bg-slate-900 border-slate-900 text-white'
-                        : 'bg-white border-slate-300 text-slate-900 hover:bg-slate-100'
+                        ? 'bg-slate-900 dark:bg-slate-100 border-slate-900 dark:border-slate-100 text-white dark:text-slate-900'
+                        : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                   >
                     <Pentagon className="w-3.5 h-3.5" />
@@ -853,7 +859,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                       disabled={isDrawing}
                       onClick={() => onExpandBoundaryMeters(25)}
                       title="Rozszerz granice o 25 m na zewnątrz"
-                      className="min-h-[40px] py-1.5 px-2.5 text-xs font-semibold rounded-xl border bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100 inline-flex items-center justify-center gap-1 transition-colors whitespace-nowrap"
+                      className="min-h-[40px] py-1.5 px-2.5 text-xs font-semibold rounded-xl border bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-950/60 inline-flex items-center justify-center gap-1 transition-colors whitespace-nowrap"
                     >
                       +25 m brzeg
                     </button>
@@ -862,7 +868,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                       type="button"
                       disabled={!parish}
                       onClick={onToggleDrawBoundary}
-                      className="min-h-[40px] py-1.5 px-2.5 text-xs font-medium rounded-xl border bg-white border-slate-200 text-slate-700 hover:bg-slate-100 inline-flex items-center justify-center gap-1.5 transition-colors"
+                      className="min-h-[40px] py-1.5 px-2.5 text-xs font-medium rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 inline-flex items-center justify-center gap-1.5 transition-colors"
                     >
                       Przerysuj
                     </button>
@@ -878,7 +884,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                     ? onOpenAreaScanner()
                     : setAreaScannerOpen(true)
                 }
-                className="w-full min-h-[44px] py-2.5 px-3 text-xs sm:text-sm font-semibold text-white bg-amber-700 hover:bg-amber-800 disabled:bg-slate-300 rounded-xl inline-flex items-center justify-center gap-2 transition-colors shadow-xs"
+                className="w-full min-h-[44px] py-2.5 px-3 text-xs sm:text-sm font-semibold text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 disabled:bg-slate-300 dark:disabled:bg-slate-700 rounded-xl inline-flex items-center justify-center gap-2 transition-colors shadow-xs"
               >
                 <ScanSearch className="w-4 h-4 shrink-0" />
                 <span>
@@ -889,8 +895,8 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
               </button>
 
               {outsideBoundaryCount > 0 && onDeleteOutsideBoundaryStops && (
-                <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between gap-2 text-xs">
-                  <span className="text-amber-950 font-medium">
+                <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex items-center justify-between gap-2 text-xs">
+                  <span className="text-amber-950 dark:text-amber-200 font-medium">
                     {outsideBoundaryCount}{' '}
                     {outsideBoundaryCount === 1 ? 'dom leży' : 'domów leży'}{' '}
                     poza granicą.
@@ -898,7 +904,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                   <button
                     type="button"
                     onClick={onDeleteOutsideBoundaryStops}
-                    className="px-2.5 py-1.5 text-[11px] font-semibold text-red-700 bg-white hover:bg-red-50 border border-red-200 rounded-lg whitespace-nowrap shrink-0"
+                    className="px-2.5 py-1.5 text-[11px] font-semibold text-red-700 dark:text-red-300 bg-white dark:bg-slate-900 hover:bg-red-50 dark:hover:bg-red-950/50 border border-red-200 dark:border-red-800/60 rounded-lg whitespace-nowrap shrink-0"
                   >
                     Usuń ({outsideBoundaryCount})
                   </button>
@@ -909,25 +915,25 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                 <button
                   type="button"
                   onClick={onViewMap}
-                  className="lg:hidden w-full min-h-[40px] py-2 px-3 text-xs font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors"
+                  className="lg:hidden w-full min-h-[40px] py-2 px-3 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors"
                 >
-                  <MapIcon className="w-3.5 h-3.5 text-amber-700" />
+                  <MapIcon className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                   Podgląd obszaru i domów na mapie
                 </button>
               )}
             </div>
 
             {/* Karta B: Kartoteka parafialna (FARA / Excel / CSV) — na pierwszym planie */}
-            <div className="p-3.5 rounded-xl bg-white border border-slate-200 space-y-2">
+            <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <h3 className="text-xs sm:text-sm font-semibold text-slate-900">
+                <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">
                   Kartoteka (FARA / Excel / CSV)
                 </h3>
-                <span className="text-[11px] font-medium text-emerald-700">
+                <span className="text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
                   Bez nazwisk
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
                 Wgraj eksport z FARY — aplikacja automatycznie odrzuci nazwiska,
                 policzy mieszkańców i rozbije mieszkania w blokach.
               </p>
@@ -935,31 +941,31 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                 type="button"
                 disabled={!parish}
                 onClick={openCsvModal}
-                className="w-full min-h-[42px] py-2 px-3 text-xs font-semibold text-slate-900 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 rounded-xl inline-flex items-center justify-center gap-2 transition-colors"
+                className="w-full min-h-[42px] py-2 px-3 text-xs font-semibold text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 rounded-xl inline-flex items-center justify-center gap-2 transition-colors"
               >
-                <FileSpreadsheet className="w-4 h-4 text-amber-700 shrink-0" />
+                <FileSpreadsheet className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
                 <span>Importuj z kartoteki (FARA / CSV)</span>
               </button>
             </div>
 
             {/* Karta C: Zwijane narzędzia ręczne i korekta granic */}
-            <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
+            <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900">
               <button
                 type="button"
                 onClick={() => setShowManualTools((v) => !v)}
                 aria-expanded={manualToolsOpen}
-                className="w-full min-h-[44px] px-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-100/80 flex items-center justify-between gap-2 text-xs font-semibold text-slate-700 transition-colors"
+                className="w-full min-h-[44px] px-3.5 py-2.5 bg-slate-50/70 dark:bg-slate-800/60 hover:bg-slate-100/80 dark:hover:bg-slate-800 flex items-center justify-between gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors"
               >
                 <span>Dodawanie ręczne i precyzyjne granice</span>
                 {manualToolsOpen ? (
-                  <ChevronDown className="w-4 h-4 text-slate-500 shrink-0" />
+                  <ChevronDown className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
                 ) : (
-                  <ChevronRight className="w-4 h-4 text-slate-500 shrink-0" />
+                  <ChevronRight className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
                 )}
               </button>
 
               {manualToolsOpen && (
-                <div className="p-3.5 space-y-3 border-t border-slate-200">
+                <div className="p-3.5 space-y-3 border-t border-slate-200 dark:border-slate-800">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                     <button
                       type="button"
@@ -967,8 +973,8 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                       onClick={onTogglePickStreetMode}
                       className={`min-h-[40px] py-2 px-3 text-xs font-semibold rounded-xl border inline-flex items-center justify-center gap-1.5 transition-colors ${
                         isPickingStreet
-                          ? 'bg-amber-700 border-amber-700 text-white shadow-sm'
-                          : 'bg-amber-50 border-amber-200 text-amber-950 hover:bg-amber-100 disabled:opacity-50'
+                          ? 'bg-amber-700 dark:bg-amber-600 border-amber-700 dark:border-amber-600 text-white shadow-sm'
+                          : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60 text-amber-950 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-950/60 disabled:opacity-50'
                       }`}
                     >
                       <Route className="w-3.5 h-3.5 shrink-0" />
@@ -985,11 +991,11 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                       onClick={onToggleMapAddMode}
                       className={`min-h-[40px] py-2 px-3 text-xs font-medium rounded-xl border inline-flex items-center justify-center gap-1.5 transition-colors ${
                         isAddingHouse
-                          ? 'bg-slate-900 border-slate-900 text-white'
-                          : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50 disabled:opacity-50'
+                          ? 'bg-slate-900 dark:bg-slate-100 border-slate-900 dark:border-slate-100 text-white dark:text-slate-900'
+                          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50'
                       }`}
                     >
-                      <MapPinPlus className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                      <MapPinPlus className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
                       <span>
                         {isAddingHouse
                           ? 'Kliknij dom na mapie'
@@ -999,7 +1005,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                   </div>
 
                   <div>
-                    <div className="text-[11px] font-medium text-slate-500 mb-1">
+                    <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
                       Wpisz pojedynczy adres ręcznie:
                     </div>
                     <PlaceSearchInput
@@ -1014,8 +1020,8 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                     />
                   </div>
 
-                  <div className="pt-2.5 border-t border-slate-100 space-y-2">
-                    <div className="text-[11px] font-semibold text-slate-500">
+                  <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                    <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
                       Szybkie granice wokół kościoła
                     </div>
 
@@ -1030,7 +1036,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                           type="button"
                           disabled={!parish || isDrawing}
                           onClick={() => onCreatePresetBoundary(opt.radius)}
-                          className="min-h-[38px] py-1 px-2 text-xs font-medium rounded-xl border bg-amber-50/70 border-amber-200 text-amber-900 hover:bg-amber-100/70 disabled:opacity-50 transition-colors tabular-nums"
+                          className="min-h-[38px] py-1 px-2 text-xs font-medium rounded-xl border bg-amber-50/70 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-300 hover:bg-amber-100/70 dark:hover:bg-amber-950/60 disabled:opacity-50 transition-colors tabular-nums"
                         >
                           {opt.label}
                         </button>
@@ -1043,27 +1049,27 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                           type="button"
                           disabled={isDrawing}
                           onClick={() => onScaleBoundary(0.86)}
-                          className="min-h-[38px] py-1 px-2 text-xs font-medium rounded-xl border bg-white border-slate-200 text-slate-800 hover:bg-slate-100 inline-flex items-center justify-center gap-1 transition-colors"
+                          className="min-h-[38px] py-1 px-2 text-xs font-medium rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 inline-flex items-center justify-center gap-1 transition-colors"
                         >
-                          <Minimize2 className="w-3.5 h-3.5 text-amber-700" />
+                          <Minimize2 className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                           Zmniejsz
                         </button>
                         <button
                           type="button"
                           disabled={isDrawing}
                           onClick={() => onScaleBoundary(1.16)}
-                          className="min-h-[38px] py-1 px-2 text-xs font-medium rounded-xl border bg-white border-slate-200 text-slate-800 hover:bg-slate-100 inline-flex items-center justify-center gap-1 transition-colors"
+                          className="min-h-[38px] py-1 px-2 text-xs font-medium rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 inline-flex items-center justify-center gap-1 transition-colors"
                         >
-                          <Maximize2 className="w-3.5 h-3.5 text-amber-700" />
+                          <Maximize2 className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                           Powiększ
                         </button>
                         <button
                           type="button"
                           disabled={!parish}
                           onClick={onToggleDrawBoundary}
-                          className="min-h-[38px] py-1 px-2 text-xs font-medium rounded-xl border bg-white border-slate-200 text-slate-700 hover:bg-slate-100 inline-flex items-center justify-center gap-1 transition-colors"
+                          className="min-h-[38px] py-1 px-2 text-xs font-medium rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 inline-flex items-center justify-center gap-1 transition-colors"
                         >
-                          <Pentagon className="w-3.5 h-3.5 text-amber-700" />
+                          <Pentagon className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                           Przerysuj
                         </button>
                       </div>
@@ -1074,9 +1080,9 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                         type="button"
                         disabled={!parish || isDrawing}
                         onClick={onWrapStopsBoundary}
-                        className="w-full min-h-[38px] py-1.5 px-3 text-xs font-medium rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 inline-flex items-center justify-center gap-1.5 transition-colors"
+                        className="w-full min-h-[38px] py-1.5 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 inline-flex items-center justify-center gap-1.5 transition-colors"
                       >
-                        <Layers className="w-3.5 h-3.5 text-amber-700" />
+                        <Layers className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                         <span>Otocz dodane ulice ({stops.length} pkt)</span>
                       </button>
                     )}
@@ -1084,7 +1090,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                     <div className="space-y-1.5">
                       <label
                         htmlFor="locality-boundary-input"
-                        className="block text-[11px] font-medium text-slate-600"
+                        className="block text-[11px] font-medium text-slate-600 dark:text-slate-400"
                       >
                         Pobierz granice miejscowości / sołectwa:
                       </label>
@@ -1105,7 +1111,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                           }}
                           placeholder={localityHint || 'np. Reta, Mikołów'}
                           disabled={!parish || localityLoading}
-                          className="flex-1 min-w-0 min-h-[40px] px-3 py-1.5 text-base sm:text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
+                          className="flex-1 min-w-0 min-h-[40px] px-3 py-1.5 text-base sm:text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-600/30 focus:border-amber-600"
                         />
                         <button
                           type="button"
@@ -1115,16 +1121,16 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                             !(localityQuery || localityHint).trim()
                           }
                           onClick={() => void handleFetchLocalityBoundary()}
-                          className="min-h-[40px] px-3 py-1.5 text-xs font-medium text-slate-800 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 rounded-xl inline-flex items-center gap-1.5 whitespace-nowrap shrink-0"
+                          className="min-h-[40px] px-3 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 rounded-xl inline-flex items-center gap-1.5 whitespace-nowrap shrink-0"
                         >
                           {localityLoading && (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-700" />
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-700 dark:text-amber-400" />
                           )}
                           <span>Pobierz</span>
                         </button>
                       </div>
                       {localityError && (
-                        <p className="text-[11px] text-red-600 leading-snug">
+                        <p className="text-[11px] text-red-600 dark:text-red-400 leading-snug">
                           {localityError}
                         </p>
                       )}
@@ -1141,31 +1147,31 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
           <div className="p-4 sm:p-5 space-y-3">
             <div>
               <div className="flex items-center justify-between gap-2">
-                <h2 className="text-xs sm:text-sm font-semibold text-slate-900">
+                <h2 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">
                   Ulice, domy i bloki ({savedStreets.length})
                 </h2>
-                <span className="text-xs font-mono tabular-nums text-slate-600">
+                <span className="text-xs font-mono tabular-nums text-slate-600 dark:text-slate-400">
                   {parishBuildingStats.houses} domów
                   {parishBuildingStats.blocks > 0
                     ? ` · ${parishBuildingStats.blocks} bl. (${parishBuildingStats.units} lok.)`
                     : ''}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
                 Tutaj oznaczysz bloki (klatki, mieszkania), stałe odmowy i czas
                 wizyty — podczas planowania dnia zostaną wykryte automatycznie.
               </p>
             </div>
 
             {stops.length > 0 && (
-              <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-xl">
+              <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
                 <button
                   type="button"
                   onClick={() => setStreetsTypeFilter('all')}
                   className={`min-h-[34px] px-2 py-1 text-[11px] font-semibold rounded-lg transition-colors tabular-nums ${
                     streetsTypeFilter === 'all'
-                      ? 'bg-white text-slate-900 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                   }`}
                 >
                   Wszystkie ({stops.length})
@@ -1175,8 +1181,8 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                   onClick={() => setStreetsTypeFilter('blocks')}
                   className={`min-h-[34px] px-2 py-1 text-[11px] font-semibold rounded-lg transition-colors tabular-nums ${
                     streetsTypeFilter === 'blocks'
-                      ? 'bg-white text-amber-900 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-white dark:bg-slate-700 text-amber-900 dark:text-amber-300 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                   }`}
                 >
                   Bloki ({parishBuildingStats.blocks})
@@ -1186,8 +1192,8 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                   onClick={() => setStreetsTypeFilter('declined')}
                   className={`min-h-[34px] px-2 py-1 text-[11px] font-semibold rounded-lg transition-colors tabular-nums ${
                     streetsTypeFilter === 'declined'
-                      ? 'bg-white text-red-700 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-white dark:bg-slate-700 text-red-700 dark:text-red-300 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                   }`}
                 >
                   Pominięte ({parishBuildingStats.declined})
@@ -1197,39 +1203,39 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
 
             {savedStreets.length > 3 && (
               <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="search"
                   value={streetFilter}
                   onChange={(e) => setStreetFilter(e.target.value)}
                   placeholder="Szukaj ulicy lub numeru (np. Astrów 12)..."
                   aria-label="Szukaj ulicy lub domu na liście"
-                  className="w-full min-h-[42px] pl-9 pr-3 py-2 text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-amber-600"
+                  className="w-full min-h-[42px] pl-9 pr-3 py-2 text-base sm:text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-amber-600"
                 />
               </div>
             )}
 
             {savedStreets.length === 0 ? (
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-3">
-                <p className="text-xs text-slate-600 leading-relaxed">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-center space-y-3">
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                   Brak zapisanych ulic dla tej parafii. Wykryj domy z obszaru
                   mapy albo wgraj kartotekę z FARY.
                 </p>
                 <button
                   type="button"
                   onClick={() => setSetupTab('area')}
-                  className="min-h-[40px] px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl inline-flex items-center gap-1.5"
+                  className="min-h-[40px] px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 rounded-xl inline-flex items-center gap-1.5"
                 >
                   <ScanSearch className="w-3.5 h-3.5" />
                   <span>Przejdź do terenu i importu</span>
                 </button>
               </div>
             ) : filteredStreets.length === 0 ? (
-              <p className="py-6 text-center text-xs text-slate-500">
+              <p className="py-6 text-center text-xs text-slate-500 dark:text-slate-400">
                 Brak ulic ani budynków pasujących do wybranego filtra.
               </p>
             ) : (
-              <ul className="border border-slate-200 rounded-xl bg-white divide-y divide-slate-100 overflow-hidden">
+              <ul className="border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden">
                 {filteredStreets.map(([streetName, streetStops]) => {
                   const isExpanded = expandedStreet === streetName;
                   const streetBlocks = streetStops.filter(isBlockStop);
@@ -1248,9 +1254,9 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                     <li
                       key={streetName}
                       data-street-row={streetName}
-                      className="bg-white"
+                      className="bg-white dark:bg-slate-900"
                     >
-                      <div className="px-3 py-2.5 flex items-center justify-between gap-2 hover:bg-slate-50/70">
+                      <div className="px-3 py-2.5 flex items-center justify-between gap-2 hover:bg-slate-50/70 dark:hover:bg-slate-800/60">
                         <button
                           type="button"
                           onClick={() =>
@@ -1259,15 +1265,15 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                           className="flex-1 min-w-0 text-left flex items-center gap-2 min-h-[40px]"
                         >
                           {isExpanded ? (
-                            <ChevronDown className="w-4 h-4 text-amber-700 shrink-0" />
+                            <ChevronDown className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
                           ) : (
-                            <ChevronRight className="w-4 h-4 text-slate-400 shrink-0" />
+                            <ChevronRight className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
                           )}
                           <div className="min-w-0">
-                            <div className="text-xs font-semibold text-slate-900 truncate">
+                            <div className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
                               {streetName}
                             </div>
-                            <div className="text-[11px] text-slate-500 tabular-nums flex flex-wrap items-center gap-x-1.5">
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400 tabular-nums flex flex-wrap items-center gap-x-1.5">
                               <span>
                                 {streetStops.length - streetBlocks.length}{' '}
                                 {streetStops.length - streetBlocks.length === 1
@@ -1275,7 +1281,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                                   : 'domów'}
                               </span>
                               {streetBlocks.length > 0 && (
-                                <span className="text-amber-800 font-semibold">
+                                <span className="text-amber-800 dark:text-amber-400 font-semibold">
                                   · {streetBlocks.length}{' '}
                                   {streetBlocks.length === 1
                                     ? 'blok'
@@ -1284,7 +1290,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                                 </span>
                               )}
                               {rangeStr && (
-                                <span className="text-slate-400">
+                                <span className="text-slate-400 dark:text-slate-500">
                                   · {rangeStr}
                                 </span>
                               )}
@@ -1298,7 +1304,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                           }
                           title={`Usuń ulicę ${streetName} z bazy parafii`}
                           aria-label={`Usuń ulicę ${streetName}`}
-                          className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center text-slate-400 hover:text-red-600 rounded-lg transition-colors shrink-0"
+                          className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors shrink-0"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -1308,16 +1314,16 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                         const missingGaps =
                           findMissingHouseNumberGaps(streetStops);
                         return (
-                          <div className="px-3 pb-3 pt-2 bg-slate-50/90 border-t border-slate-100 space-y-2">
+                          <div className="px-3 pb-3 pt-2 bg-slate-50/90 dark:bg-slate-950/50 border-t border-slate-100 dark:border-slate-800 space-y-2">
                             {onFocusStreetOnMap && (
                               <div className="flex items-center justify-between gap-2">
-                                <span className="text-[11px] text-slate-500">
+                                <span className="text-[11px] text-slate-500 dark:text-slate-400">
                                   Oznacz bloki lub wyklucz stałe odmowy:
                                 </span>
                                 <button
                                   type="button"
                                   onClick={() => onFocusStreetOnMap(streetName)}
-                                  className="min-h-[32px] px-2.5 py-1 text-[11px] font-medium text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg inline-flex items-center gap-1 shrink-0"
+                                  className="min-h-[32px] px-2.5 py-1 text-[11px] font-medium text-amber-900 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-950/60 border border-amber-200 dark:border-amber-800/60 rounded-lg inline-flex items-center gap-1 shrink-0"
                                 >
                                   <MapIcon className="w-3 h-3" />
                                   <span>Na mapie</span>
@@ -1325,7 +1331,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                               </div>
                             )}
 
-                            <div className="divide-y divide-slate-200/70 rounded-xl border border-slate-200 bg-white overflow-hidden">
+                            <div className="divide-y divide-slate-200/70 dark:divide-slate-800 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
                               {streetStops.map((st) => {
                                 const numLabel =
                                   extractHouseNumberLabel(st) ||
@@ -1343,7 +1349,9 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                                   <div
                                     key={st.id}
                                     className={`transition-colors ${
-                                      isDeclined ? 'bg-slate-50/80 opacity-75' : 'bg-white'
+                                      isDeclined
+                                        ? 'bg-slate-50/80 dark:bg-slate-950/60 opacity-75'
+                                        : 'bg-white dark:bg-slate-900'
                                     }`}
                                   >
                                     <div className="px-2.5 py-2 flex items-center gap-1.5">
@@ -1354,25 +1362,25 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                                         className="flex-1 min-w-0 min-h-[36px] text-left flex items-center gap-1.5"
                                       >
                                         {isBlock ? (
-                                          <Building2 className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                                          <Building2 className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
                                         ) : (
-                                          <Home className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                          <Home className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
                                         )}
-                                        <span className="text-xs font-mono font-semibold text-slate-900 truncate tabular-nums">
+                                        <span className="text-xs font-mono font-semibold text-slate-900 dark:text-slate-100 truncate tabular-nums">
                                           {numLabel}
                                         </span>
                                         {isBlock && (
-                                          <span className="text-[10px] font-semibold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded tabular-nums shrink-0">
+                                          <span className="text-[11px] font-semibold text-amber-900 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 px-1.5 py-0.5 rounded tabular-nums shrink-0">
                                             Blok{unitCount > 0 ? ` · ${unitCount}` : ''}
                                           </span>
                                         )}
                                         {isDeclined && (
-                                          <span className="text-[10px] font-semibold text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded shrink-0">
+                                          <span className="text-[11px] font-semibold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/60 px-1.5 py-0.5 rounded shrink-0">
                                             Odmowa
                                           </span>
                                         )}
                                         {st.inBoundary === false && (
-                                          <span className="text-[10px] font-medium text-amber-800 shrink-0">
+                                          <span className="text-[11px] font-medium text-amber-800 dark:text-amber-400 shrink-0">
                                             · poza
                                           </span>
                                         )}
@@ -1389,8 +1397,8 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                                           }
                                           className={`min-h-[34px] px-2 py-1 text-[11px] font-semibold rounded-lg border inline-flex items-center gap-1 shrink-0 transition-colors ${
                                             isBlock
-                                              ? 'bg-amber-50 border-amber-300 text-amber-950 hover:bg-amber-100'
-                                              : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                                              ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-700/70 text-amber-950 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-950/70'
+                                              : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'
                                           }`}
                                         >
                                           <Building2 className="w-3 h-3" />
@@ -1410,8 +1418,8 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                                           title="Czas wizyty, uwagi i stała odmowa"
                                           className={`min-h-[34px] min-w-[34px] px-1.5 py-1 rounded-lg border inline-flex items-center justify-center shrink-0 transition-colors ${
                                             isDetailsOpen
-                                              ? 'bg-slate-900 border-slate-900 text-white'
-                                              : 'bg-white border-slate-200 text-slate-500 hover:text-slate-900'
+                                              ? 'bg-slate-900 dark:bg-slate-100 border-slate-900 dark:border-slate-100 text-white dark:text-slate-900'
+                                              : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                                           }`}
                                         >
                                           <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -1424,7 +1432,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                                           onClick={() => onDeleteStop(st.id)}
                                           aria-label={`Usuń ${st.address || numLabel}`}
                                           title={`Usuń ${st.address || numLabel}`}
-                                          className="min-h-[34px] min-w-[32px] inline-flex items-center justify-center text-slate-400 hover:text-red-600 rounded-lg shrink-0"
+                                          className="min-h-[34px] min-w-[32px] inline-flex items-center justify-center text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg shrink-0"
                                         >
                                           <Trash2 className="w-3.5 h-3.5" />
                                         </button>
@@ -1432,10 +1440,10 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                                     </div>
 
                                     {isDetailsOpen && onUpdateStop && (
-                                      <div className="px-2.5 pb-2.5 pt-2 bg-slate-50 border-t border-slate-100 space-y-2">
+                                      <div className="px-2.5 pb-2.5 pt-2 bg-slate-50 dark:bg-slate-800/70 border-t border-slate-100 dark:border-slate-700/70 space-y-2">
                                         <div className="flex flex-wrap items-center gap-2">
                                           <div className="flex items-center gap-1">
-                                            <label className="text-[11px] text-slate-600">
+                                            <label className="text-[11px] text-slate-600 dark:text-slate-300">
                                               Czas:
                                             </label>
                                             <input
@@ -1457,9 +1465,9 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                                                   ),
                                                 })
                                               }
-                                              className="w-16 px-2 py-1 text-base sm:text-xs font-mono tabular-nums bg-white border border-slate-200 rounded-lg text-slate-900 text-right focus:outline-none focus:border-amber-600"
+                                              className="w-16 px-2 py-1 text-base sm:text-xs font-mono tabular-nums bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 text-right focus:outline-none focus:border-amber-600"
                                             />
-                                            <span className="text-[11px] text-slate-500">
+                                            <span className="text-[11px] text-slate-500 dark:text-slate-400">
                                               min
                                             </span>
                                           </div>
@@ -1474,8 +1482,8 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                                             }
                                             className={`min-h-[32px] px-2.5 py-1 rounded-lg border text-[11px] font-semibold inline-flex items-center gap-1 transition-colors ml-auto ${
                                               isDeclined
-                                                ? 'bg-red-50 border-red-300 text-red-800 hover:bg-red-100'
-                                                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                                                ? 'bg-red-50 dark:bg-red-950/50 border-red-300 dark:border-red-800/70 text-red-800 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-950/70'
+                                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
                                             }`}
                                           >
                                             <Ban className="w-3 h-3" />
@@ -1500,7 +1508,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                                               ? 'Uwagi do bloku (klatki, kod domofonu)'
                                               : 'Uwagi / liczba rodzin'
                                           }
-                                          className="w-full px-2.5 py-1.5 text-base sm:text-xs bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-amber-600"
+                                          className="w-full px-2.5 py-1.5 text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-amber-600"
                                         />
                                       </div>
                                     )}
@@ -1510,7 +1518,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                             </div>
 
                             {missingGaps.length > 0 && (
-                              <div className="p-2 rounded-lg bg-amber-50/90 border border-amber-200 flex flex-wrap items-center justify-between gap-2 text-[11px] text-amber-950">
+                              <div className="p-2 rounded-lg bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex flex-wrap items-center justify-between gap-2 text-[11px] text-amber-950 dark:text-amber-200">
                                 <span>
                                   Możliwe braki numeracji:{' '}
                                   <strong className="font-mono">
@@ -1523,7 +1531,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                                     onClick={() =>
                                       onAddMissingOnStreet(streetName)
                                     }
-                                    className="min-h-[32px] px-2.5 py-1 font-semibold text-amber-900 bg-white hover:bg-amber-100 border border-amber-300 rounded-md inline-flex items-center gap-1 shrink-0"
+                                    className="min-h-[32px] px-2.5 py-1 font-semibold text-amber-900 dark:text-amber-300 bg-white dark:bg-slate-900 hover:bg-amber-100 dark:hover:bg-amber-950/60 border border-amber-300 dark:border-amber-700/70 rounded-md inline-flex items-center gap-1 shrink-0"
                                   >
                                     <MapPinPlus className="w-3 h-3" />
                                     <span>Dodaj na mapie</span>
@@ -1545,7 +1553,7 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
                 <button
                   type="button"
                   onClick={onClearStops}
-                  className="min-h-[36px] px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                  className="min-h-[36px] px-3 py-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors"
                 >
                   Usuń całą bazę domów ({stops.length})
                 </button>
@@ -1557,11 +1565,11 @@ export const SidebarSetup: React.FC<SidebarSetupProps> = ({
 
       {/* Sticky Bottom Action Bar (Always within thumb reach!) */}
       {parish && stops.length > 0 && (
-        <div className="sticky bottom-0 z-10 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2.5 shrink-0">
+        <div className="sticky bottom-0 z-10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-3 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] shrink-0">
           <button
             type="button"
             onClick={onNextStep}
-            className="w-full min-h-[44px] py-2.5 px-4 text-xs sm:text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-xl inline-flex items-center justify-center gap-2 transition-colors shadow-xs"
+            className="w-full min-h-[44px] py-2.5 px-4 text-xs sm:text-sm font-semibold text-white dark:text-slate-900 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-white rounded-xl inline-flex items-center justify-center gap-2 transition-colors shadow-xs"
           >
             <span>Układaj plan kolędy ({stops.length} domów)</span>
             <ArrowRight className="w-4 h-4" />

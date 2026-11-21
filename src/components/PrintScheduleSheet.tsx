@@ -317,13 +317,13 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
     if (dayRoutes.length === 0) return null;
 
     return (
-      <div className="no-print bg-slate-50/80 border border-slate-200 rounded-xl p-3.5 sm:p-4 space-y-4">
-        <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-200">
+      <div className="no-print bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 space-y-4">
+        <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-200 dark:border-slate-800">
           <div>
-            <div className="text-xs font-semibold text-slate-900">
+            <div className="text-xs font-semibold text-slate-900 dark:text-slate-100">
               Rozpiska przejścia tego dnia
             </div>
-            <div className="text-[11px] text-slate-500 tabular-nums">
+            <div className="text-[11px] text-slate-500 dark:text-slate-400 tabular-nums">
               {isExact
                 ? 'Dokładna trasa drogowa'
                 : 'Szacowana kolejność trasy'}{' '}
@@ -336,7 +336,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
               e.stopPropagation();
               setExpandedDayDate(null);
             }}
-            className="min-h-[34px] px-2.5 py-1 text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg inline-flex items-center gap-1 shrink-0"
+            className="min-h-[34px] px-2.5 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg inline-flex items-center gap-1 shrink-0"
           >
             <ChevronUp className="w-3.5 h-3.5" />
             <span>Zwiń</span>
@@ -357,18 +357,18 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
             return (
               <div
                 key={route.priestId}
-                className="space-y-3 pt-1 first:pt-0 border-t border-slate-200 first:border-t-0"
+                className="space-y-3 pt-1 first:pt-0 border-t border-slate-200 dark:border-slate-800 first:border-t-0"
               >
                 {dayRoutes.length > 1 && (
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-900">
+                    <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-900 dark:text-slate-100">
                       <span
                         className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: route.color }}
                       />
                       <span>{route.priestName}</span>
                     </div>
-                    <div className="text-[11px] font-mono text-slate-600 tabular-nums">
+                    <div className="text-[11px] font-mono text-slate-600 dark:text-slate-400 tabular-nums">
                       {startClock}–{route.endTime} · {route.orderedStops.length} pkt ·{' '}
                       {formatDistance(route.totalDistanceMeters)}
                     </div>
@@ -378,19 +378,19 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                 {/* Gdzie i jak zaczynam -> Gdzie kończę */}
                 {firstItem && lastItem && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div className="bg-white border border-emerald-200 rounded-lg p-3 space-y-1">
+                    <div className="bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-800/70 rounded-lg p-3 space-y-1">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-700 text-white text-[10px] font-bold tracking-wide">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-700 text-white text-[11px] font-bold tracking-wide">
                           START
                         </span>
-                        <span className="text-xs font-mono font-semibold text-emerald-900 tabular-nums">
+                        <span className="text-xs font-mono font-semibold text-emerald-900 dark:text-emerald-300 tabular-nums">
                           godz. {firstItem.arrivalTime}
                         </span>
                       </div>
-                      <div className="text-xs font-semibold text-slate-900">
+                      <div className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                         {firstItem.stop.address || firstItem.stop.label}
                         {isBlockStop(firstItem.stop) && (
-                          <span className="ml-1.5 text-[11px] font-normal text-amber-800">
+                          <span className="ml-1.5 text-[11px] font-normal text-amber-800 dark:text-amber-400">
                             (Blok
                             {getStopUnitCount(firstItem.stop) > 0
                               ? ` · ${getStopUnitCount(firstItem.stop)} lok.`
@@ -400,26 +400,26 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                         )}
                       </div>
                       {firstStage && (
-                        <div className="text-[11px] text-slate-600 leading-snug">
+                        <div className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
                           Jak zaczynasz: ul. {firstStage.streetName} —{' '}
                           {firstStage.directionHint}
                         </div>
                       )}
                     </div>
 
-                    <div className="bg-white border border-slate-200 rounded-lg p-3 space-y-1">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 space-y-1">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-slate-900 text-white text-[10px] font-bold tracking-wide">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-slate-900 dark:bg-slate-700 text-white text-[11px] font-bold tracking-wide">
                           META
                         </span>
-                        <span className="text-xs font-mono font-semibold text-slate-800 tabular-nums">
+                        <span className="text-xs font-mono font-semibold text-slate-800 dark:text-slate-200 tabular-nums">
                           ok. {route.endTime}
                         </span>
                       </div>
-                      <div className="text-xs font-semibold text-slate-900">
+                      <div className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                         {lastItem.stop.address || lastItem.stop.label}
                         {isBlockStop(lastItem.stop) && (
-                          <span className="ml-1.5 text-[11px] font-normal text-amber-800">
+                          <span className="ml-1.5 text-[11px] font-normal text-amber-800 dark:text-amber-400">
                             (Blok
                             {getStopUnitCount(lastItem.stop) > 0
                               ? ` · ${getStopUnitCount(lastItem.stop)} lok.`
@@ -429,7 +429,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                         )}
                       </div>
                       {lastStage && (
-                        <div className="text-[11px] text-slate-600 leading-snug">
+                        <div className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
                           Zakończenie: ul. {lastStage.streetName} (ostatnie wejście{' '}
                           <span className="font-mono tabular-nums">
                             {lastItem.arrivalTime}
@@ -443,7 +443,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
 
                 {/* Ulice po kolei — etapy przejścia */}
                 <div className="space-y-1.5">
-                  <div className="text-[11px] font-semibold text-slate-700">
+                  <div className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                     Kolejność ulic i numerów ({stages.length}{' '}
                     {stages.length === 1
                       ? 'odcinek'
@@ -453,7 +453,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                     ):
                   </div>
 
-                  <div className="bg-white border border-slate-200 rounded-lg divide-y divide-slate-100">
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg divide-y divide-slate-100 dark:divide-slate-800">
                     {stages.map((st, sIdx) => {
                       const numberTokens = st.items.map((item) => {
                         const nr =
@@ -474,16 +474,16 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                           className="p-2.5 sm:px-3 space-y-1"
                         >
                           <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
-                            <div className="text-xs font-semibold text-slate-900">
-                              <span className="font-mono text-amber-800 mr-1.5 tabular-nums">
+                            <div className="text-xs font-semibold text-slate-900 dark:text-slate-100">
+                              <span className="font-mono text-amber-800 dark:text-amber-400 mr-1.5 tabular-nums">
                                 {sIdx + 1}.
                               </span>
                               ul. {st.streetName}
                             </div>
-                            <div className="text-[11px] font-mono text-slate-600 tabular-nums shrink-0">
+                            <div className="text-[11px] font-mono text-slate-600 dark:text-slate-400 tabular-nums shrink-0">
                               {st.startTime}–{st.endTime} · {st.items.length} pkt
                               {st.blockCount > 0 && (
-                                <span className="text-amber-800">
+                                <span className="text-amber-800 dark:text-amber-400">
                                   {' '}
                                   ({st.blockCount} bl.
                                   {st.unitsTotal > 0 ? ` / ${st.unitsTotal} lok.` : ''})
@@ -492,12 +492,12 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                             </div>
                           </div>
 
-                          <div className="text-[11px] font-medium text-slate-700 tabular-nums">
+                          <div className="text-[11px] font-medium text-slate-700 dark:text-slate-300 tabular-nums">
                             {st.directionHint}
                           </div>
 
-                          <div className="text-[11px] font-mono text-slate-600 leading-relaxed break-words tabular-nums">
-                            <span className="font-sans text-slate-400 mr-1">
+                          <div className="text-[11px] font-mono text-slate-600 dark:text-slate-400 leading-relaxed break-words tabular-nums">
+                            <span className="font-sans text-slate-400 dark:text-slate-500 mr-1">
                               Kolejność:
                             </span>
                             {numberTokens.join(' → ')}
@@ -520,7 +520,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                           [listKey]: !prev[listKey],
                         }));
                       }}
-                      className="min-h-[36px] px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg inline-flex items-center gap-1.5"
+                      className="min-h-[36px] px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg inline-flex items-center gap-1.5"
                     >
                       {showFullList ? (
                         <ChevronUp className="w-3.5 h-3.5" />
@@ -535,7 +535,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                     </button>
 
                     {showFullList && (
-                      <div className="mt-2 bg-white border border-slate-200 rounded-lg divide-y divide-slate-100 max-h-72 overflow-y-auto">
+                      <div className="mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg divide-y divide-slate-100 dark:divide-slate-800 max-h-72 overflow-y-auto">
                         {route.orderedStops.map((item, idx) => {
                           const isStart = idx === 0;
                           const isEnd = idx === route.orderedStops.length - 1;
@@ -547,29 +547,29 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                               className="px-3 py-2 flex items-center justify-between gap-2 text-xs"
                             >
                               <div className="flex items-center gap-2 min-w-0">
-                                <span className="font-mono text-[11px] font-semibold text-slate-500 w-6 shrink-0 tabular-nums">
+                                <span className="font-mono text-[11px] font-semibold text-slate-500 dark:text-slate-400 w-6 shrink-0 tabular-nums">
                                   {item.orderIndex}.
                                 </span>
-                                <span className="font-mono text-[11px] font-semibold text-slate-900 shrink-0 tabular-nums">
+                                <span className="font-mono text-[11px] font-semibold text-slate-900 dark:text-slate-100 shrink-0 tabular-nums">
                                   {item.arrivalTime}
                                 </span>
-                                <span className="text-slate-900 font-medium truncate">
+                                <span className="text-slate-900 dark:text-slate-100 font-medium truncate">
                                   {item.stop.address || item.stop.label}
                                 </span>
                               </div>
-                              <div className="shrink-0 flex items-center gap-1.5 text-[10px]">
+                              <div className="shrink-0 flex items-center gap-1.5 text-[11px]">
                                 {isStart && (
                                   <span className="px-1.5 py-0.5 rounded bg-emerald-700 text-white font-bold">
                                     START
                                   </span>
                                 )}
                                 {isEnd && !isStart && (
-                                  <span className="px-1.5 py-0.5 rounded bg-slate-900 text-white font-bold">
+                                  <span className="px-1.5 py-0.5 rounded bg-slate-900 dark:bg-slate-700 text-white font-bold">
                                     META
                                   </span>
                                 )}
                                 {blk && (
-                                  <span className="text-amber-800 font-semibold tabular-nums">
+                                  <span className="text-amber-800 dark:text-amber-400 font-semibold tabular-nums">
                                     Blok{uCnt > 0 ? ` (${uCnt})` : ''}
                                   </span>
                                 )}
@@ -622,16 +622,16 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
   };
 
   return (
-    <div className="print-sheet max-w-5xl mx-auto p-4 sm:p-6 md:p-8 print:max-w-none space-y-6 print:space-y-3">
+    <div className="print-sheet max-w-5xl mx-auto p-4 sm:p-6 md:p-8 print:max-w-none print:bg-white print:text-slate-900 space-y-6 print:space-y-3">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 print:border-slate-300 pb-5 print:pb-2.5 print-break-avoid">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 print:border-slate-300 pb-5 print:pb-2.5 print-break-avoid">
         <div className="min-w-0">
-          <h1 className="text-lg sm:text-xl print:text-base font-bold text-slate-900 leading-tight">
+          <h1 className="text-lg sm:text-xl print:text-base font-bold text-slate-900 dark:text-slate-100 print:text-slate-900 leading-tight">
             {effectiveViewMode === 'day'
               ? 'Plan dnia kolędy'
               : 'Harmonogram odwiedzin duszpasterskich'}
           </h1>
-          <p className="text-xs sm:text-sm print:text-[11px] text-slate-600 mt-1 tabular-nums">
+          <p className="text-xs sm:text-sm print:text-[11px] text-slate-600 dark:text-slate-400 print:text-slate-600 mt-1 tabular-nums">
             {parish ? parish.name : 'Parafia'} · Tryb:{' '}
             {config.travelMode === 'WALKING' ? 'Pieszo' : 'Samochodem'} ·{' '}
             {config.priestCount}{' '}
@@ -643,7 +643,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
           <button
             type="button"
             onClick={onBackToMap}
-            className="min-h-[40px] px-3.5 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl"
+            className="min-h-[40px] px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl transition-colors"
           >
             Wróć do mapy
           </button>
@@ -652,7 +652,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
             <button
               type="button"
               onClick={() => exportFullSeasonToCsv(parish, plannedDays)}
-              className="min-h-[40px] px-3.5 py-2 text-xs font-medium text-slate-800 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl inline-flex items-center gap-1.5"
+              className="min-h-[40px] px-3.5 py-2 text-xs font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl inline-flex items-center gap-1.5 transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
               CSV całego okresu
@@ -663,7 +663,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
             <button
               type="button"
               onClick={() => exportScheduleToCsv(parish, routes)}
-              className="min-h-[40px] px-3.5 py-2 text-xs font-medium text-slate-800 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl inline-flex items-center gap-1.5"
+              className="min-h-[40px] px-3.5 py-2 text-xs font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl inline-flex items-center gap-1.5 transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
               Eksportuj CSV dnia
@@ -676,8 +676,8 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
               onClick={() => void handleCopyAnnouncements()}
               className={`min-h-[40px] px-3.5 py-2 text-xs font-semibold rounded-xl inline-flex items-center gap-1.5 border transition-colors ${
                 copiedAnnouncements
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                  : 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300'
+                  : 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800/70 text-amber-900 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50'
               }`}
             >
               {copiedAnnouncements ? (
@@ -695,7 +695,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
             <button
               type="button"
               onClick={handlePrintNow}
-              className="min-h-[40px] px-3.5 py-2 text-xs font-medium text-white bg-slate-900 hover:bg-slate-800 rounded-xl inline-flex items-center gap-1.5"
+              className="min-h-[40px] px-3.5 py-2 text-xs font-medium text-white bg-slate-900 dark:bg-amber-600 hover:bg-slate-800 dark:hover:bg-amber-500 rounded-xl inline-flex items-center gap-1.5 transition-colors"
             >
               <Printer className="w-3.5 h-3.5" />
               Drukuj
@@ -706,17 +706,17 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
 
       {/* View Mode Switcher (Season vs Selected Day vs Announcements) */}
       <div className="no-print flex flex-wrap items-center justify-between gap-3">
-        <div className="inline-grid grid-cols-3 p-1 bg-slate-200/70 rounded-xl w-full sm:w-auto">
+        <div className="inline-grid grid-cols-3 p-1 bg-slate-200/70 dark:bg-slate-800 rounded-xl w-full sm:w-auto">
           <button
             type="button"
             onClick={() => setViewMode('season')}
             className={`min-h-[38px] px-3 py-1.5 text-xs font-semibold rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors ${
               viewMode === 'season'
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
-            <CalendarDays className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+            <CalendarDays className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
             <span className="truncate">Cały okres ({plannedDays.length})</span>
           </button>
           <button
@@ -724,11 +724,11 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
             onClick={() => setViewMode('day')}
             className={`min-h-[38px] px-3 py-1.5 text-xs font-semibold rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors ${
               viewMode === 'day'
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
-            <Calendar className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+            <Calendar className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300 shrink-0" />
             <span className="truncate">Wydruk dnia</span>
           </button>
           <button
@@ -736,11 +736,11 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
             onClick={() => setViewMode('announcements')}
             className={`min-h-[38px] px-3 py-1.5 text-xs font-semibold rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors ${
               viewMode === 'announcements'
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
-            <Megaphone className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+            <Megaphone className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
             <span className="truncate">Ogłoszenia</span>
           </button>
         </div>
@@ -754,8 +754,8 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                 onClick={() => onSelectDate(d.date)}
                 className={`min-h-[34px] px-2.5 py-1 text-xs font-medium rounded-lg whitespace-nowrap shrink-0 tabular-nums transition-colors ${
                   selectedDate === d.date
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                    ? 'bg-slate-900 dark:bg-amber-600 text-white'
+                    : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700'
                 }`}
               >
                 {formatPolishDateChip(d.date)}
@@ -770,14 +770,14 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
         <div className="space-y-5">
           {/* Season Planning Action Bar */}
           {(onGoToDayPlanner || (seasonConfig && onAutoScheduleSeason)) && (
-            <div className="no-print bg-white border border-slate-200 rounded-xl p-4 space-y-3">
+            <div className="no-print bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2.5">
                 <div className="flex flex-wrap items-center gap-2">
                   {onGoToDayPlanner && (
                     <button
                       type="button"
                       onClick={onGoToDayPlanner}
-                      className="min-h-[40px] px-3.5 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl inline-flex items-center gap-1.5 transition-colors"
+                      className="min-h-[40px] px-3.5 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 rounded-xl inline-flex items-center gap-1.5 transition-colors"
                     >
                       <CalendarPlus className="w-4 h-4" />
                       <span>Zaplanuj konkretny dzień</span>
@@ -788,14 +788,14 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                     <button
                       type="button"
                       onClick={() => setShowAutoScheduler((v) => !v)}
-                      className="min-h-[40px] px-3.5 py-2 text-xs font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl inline-flex items-center gap-1.5 transition-colors"
+                      className="min-h-[40px] px-3.5 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl inline-flex items-center gap-1.5 transition-colors"
                     >
-                      <Sparkles className="w-4 h-4 text-amber-700" />
+                      <Sparkles className="w-4 h-4 text-amber-700 dark:text-amber-400" />
                       <span>Rozpisz automatycznie cały okres</span>
                       {showAutoScheduler ? (
-                        <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                       ) : (
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                       )}
                     </button>
                   )}
@@ -805,7 +805,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                   <button
                     type="button"
                     onClick={onClearAllDates}
-                    className="min-h-[38px] px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl inline-flex items-center gap-1.5 transition-colors"
+                    className="min-h-[38px] px-3 py-1.5 text-xs font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/50 hover:bg-red-100 dark:hover:bg-red-950 border border-red-200 dark:border-red-900/70 rounded-xl inline-flex items-center gap-1.5 transition-colors"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Usuń wszystkie trasy</span>
@@ -867,14 +867,14 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
 
           {/* Return Visits Card */}
           {returnCandidates.length > 0 && onScheduleReturnVisits && (
-            <div className="no-print bg-amber-50/80 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="no-print bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/70 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-start gap-2.5">
-                <RotateCcw className="w-4 h-4 text-amber-800 shrink-0 mt-0.5" />
+                <RotateCcw className="w-4 h-4 text-amber-800 dark:text-amber-400 shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="text-xs font-semibold text-amber-950">
+                  <h3 className="text-xs font-semibold text-amber-950 dark:text-amber-200">
                     Powroty i kolęda na zaproszenie ({returnCandidates.length})
                   </h3>
-                  <p className="text-[11px] text-amber-800 mt-0.5">
+                  <p className="text-[11px] text-amber-800 dark:text-amber-300/80 mt-0.5">
                     Domy/lokale oznaczone jako „Nieobecni” lub „Zaproszenie” —
                     wyznacz dla nich osobny dzień dodatkowy.
                   </p>
@@ -886,13 +886,13 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                   value={effectiveReturnDate}
                   onChange={(e) => setReturnVisitDate(e.target.value)}
                   aria-label="Data dnia powrotów"
-                  className="min-h-[38px] px-2.5 py-1 text-base sm:text-xs font-mono tabular-nums bg-white border border-amber-200 rounded-xl text-slate-900 focus:outline-none focus:border-amber-600"
+                  className="min-h-[38px] px-2.5 py-1 text-base sm:text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-amber-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-600"
                 />
                 <button
                   type="button"
                   disabled={!effectiveReturnDate}
                   onClick={() => onScheduleReturnVisits(effectiveReturnDate)}
-                  className="min-h-[38px] px-3 py-1.5 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 disabled:bg-slate-300 rounded-xl inline-flex items-center gap-1.5 whitespace-nowrap"
+                  className="min-h-[38px] px-3 py-1.5 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 disabled:bg-slate-300 dark:disabled:bg-slate-700 rounded-xl inline-flex items-center gap-1.5 whitespace-nowrap"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Zaplanuj powroty</span>
@@ -918,14 +918,14 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
               (s) => s.visitStatus === 'accepted'
             ).length;
             return (
-              <div className="no-print bg-white border border-slate-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div className="no-print bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div className="flex items-start gap-2.5 min-w-0">
-                  <History className="w-4 h-4 text-slate-700 shrink-0 mt-0.5" />
+                  <History className="w-4 h-4 text-slate-700 dark:text-slate-300 shrink-0 mt-0.5" />
                   <div className="space-y-1 min-w-0">
-                    <h3 className="text-xs font-semibold text-slate-900">
+                    <h3 className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                       Pamięć z poprzedniego roku — rozpocznij nowy sezon kolędowy
                     </h3>
-                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
                       Zapisuje wyniki tegorocznych wizyt (
                       <span className="font-mono tabular-nums">
                         {acceptedCount} przyjętych, {declinedCount} odmów
@@ -933,14 +933,14 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                       ) jako historię „Rok temu”, zeruje terminy i kolejność na
                       nowy rok, zachowując wszystkie ulice, bloki i nazwiska rodzin.
                     </p>
-                    <label className="inline-flex items-center gap-2 text-[11px] font-medium text-slate-800 cursor-pointer pt-0.5">
+                    <label className="inline-flex items-center gap-2 text-[11px] font-medium text-slate-800 dark:text-slate-200 cursor-pointer pt-0.5">
                       <input
                         type="checkbox"
                         checked={excludeDeclinedRollover}
                         onChange={(e) =>
                           setExcludeDeclinedRollover(e.target.checked)
                         }
-                        className="w-4 h-4 rounded border-slate-300 text-amber-700 focus:ring-amber-600"
+                        className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-amber-700 focus:ring-amber-600"
                       />
                       <span>
                         Oznacz domy z „Odmową” jako stałą odmowę (pomiń je domyślnie w planie nowego roku)
@@ -951,9 +951,9 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                 <button
                   type="button"
                   onClick={() => onStartNewSeason(excludeDeclinedRollover)}
-                  className="min-h-[40px] px-3.5 py-2 text-xs font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 transition-colors"
+                  className="min-h-[40px] px-3.5 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 transition-colors"
                 >
-                  <History className="w-3.5 h-3.5 text-amber-700" />
+                  <History className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                   <span>Rozpocznij nowy sezon</span>
                 </button>
               </div>
@@ -961,11 +961,11 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
           })()}
 
           {plannedDays.length === 0 ? (
-            <div className="bg-white border border-slate-200 rounded-xl p-8 sm:p-10 text-center space-y-2">
-              <p className="text-sm font-medium text-slate-800">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-8 sm:p-10 text-center space-y-2">
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
                 Brak zaplanowanych dni kolędy
               </p>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
+              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
                 Kliknij „Zaplanuj konkretny dzień” powyżej, aby wybrać pojedynczą
                 datę i ulice, albo użyj automatycznego rozpisania całego okresu.
               </p>
@@ -974,7 +974,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
             <div className="space-y-6">
               {/* Unscheduled houses quick info */}
               {unscheduledCount > 0 && (
-                <div className="no-print bg-amber-50/70 border border-amber-200 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-950">
+                <div className="no-print bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/70 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-950 dark:text-amber-200">
                   <span className="tabular-nums">
                     Pozostało <strong>{unscheduledCount}</strong>{' '}
                     {unscheduledCount === 1
@@ -986,7 +986,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                     <button
                       type="button"
                       onClick={onGoToDayPlanner}
-                      className="font-semibold text-amber-800 hover:underline whitespace-nowrap"
+                      className="font-semibold text-amber-800 dark:text-amber-400 hover:underline whitespace-nowrap"
                     >
                       + Zaplanuj kolejny dzień →
                     </button>
@@ -996,65 +996,65 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
 
               {/* Season KPI strip */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3.5 bg-white border border-slate-200 rounded-xl">
-                  <div className="text-[11px] text-slate-500">
+                <div className="p-3.5 bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 rounded-xl">
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 print:text-slate-500">
                     Liczba dni kolędy
                   </div>
-                  <div className="mt-1 text-lg font-bold text-slate-900 tabular-nums">
+                  <div className="mt-1 text-lg font-bold text-slate-900 dark:text-slate-100 print:text-slate-900 tabular-nums">
                     {plannedDays.length}
                   </div>
                   {seasonTotals.firstDate && seasonTotals.lastDate && (
-                    <div className="text-[11px] text-slate-500 tabular-nums mt-0.5">
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 print:text-slate-500 tabular-nums mt-0.5">
                       {formatPolishDateChip(seasonTotals.firstDate)} –{' '}
                       {formatPolishDateChip(seasonTotals.lastDate)}
                     </div>
                   )}
                 </div>
 
-                <div className="p-3.5 bg-white border border-slate-200 rounded-xl">
-                  <div className="text-[11px] text-slate-500">
+                <div className="p-3.5 bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 rounded-xl">
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 print:text-slate-500">
                     Zaplanowane domy
                   </div>
-                  <div className="mt-1 text-lg font-bold text-slate-900 tabular-nums">
+                  <div className="mt-1 text-lg font-bold text-slate-900 dark:text-slate-100 print:text-slate-900 tabular-nums">
                     {seasonTotals.totalHouses}
                   </div>
-                  <div className="text-[11px] text-slate-500 tabular-nums mt-0.5">
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 print:text-slate-500 tabular-nums mt-0.5">
                     {unscheduledCount > 0
                       ? `Bez terminu: ${unscheduledCount}`
                       : 'Wszystkie przypisane'}
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-white border border-slate-200 rounded-xl">
-                  <div className="text-[11px] text-slate-500">
+                <div className="p-3.5 bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 rounded-xl">
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 print:text-slate-500">
                     Szacowany dystans
                   </div>
-                  <div className="mt-1 text-lg font-bold text-slate-900 tabular-nums">
+                  <div className="mt-1 text-lg font-bold text-slate-900 dark:text-slate-100 print:text-slate-900 tabular-nums">
                     {formatDistance(seasonTotals.totalMeters)}
                   </div>
-                  <div className="text-[11px] text-slate-500 mt-0.5">
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 print:text-slate-500 mt-0.5">
                     Łącznie dla zespołu
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-white border border-slate-200 rounded-xl">
-                  <div className="text-[11px] text-slate-500">
+                <div className="p-3.5 bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 rounded-xl">
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 print:text-slate-500">
                     Czas samych wizyt
                   </div>
-                  <div className="mt-1 text-lg font-bold text-slate-900 tabular-nums">
+                  <div className="mt-1 text-lg font-bold text-slate-900 dark:text-slate-100 print:text-slate-900 tabular-nums">
                     {formatMinutesLabel(seasonTotals.totalVisitMins)}
                   </div>
-                  <div className="text-[11px] text-slate-500 tabular-nums mt-0.5">
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 print:text-slate-500 tabular-nums mt-0.5">
                     Śr. {config.defaultVisitMinutes} min/dom
                   </div>
                 </div>
               </div>
 
               {/* Desktop Full-Season Table */}
-              <div className="hidden md:block print:block bg-white border border-slate-200 rounded-xl overflow-hidden print:overflow-visible print:rounded-none print:border-0">
+              <div className="hidden md:block print:block bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden print:overflow-visible print:rounded-none print:border-0">
                 <table className="w-full text-left border-collapse text-sm print:text-[10.5px] print:table-fixed print:border print:border-slate-300">
                   <thead>
-                    <tr className="border-b border-slate-200 print:border-slate-300 bg-slate-50/70 print:bg-slate-100 text-xs print:text-[10px] font-semibold text-slate-700">
+                    <tr className="border-b border-slate-200 dark:border-slate-800 print:border-slate-300 bg-slate-50/70 dark:bg-slate-800/70 print:bg-slate-100 text-xs print:text-[10px] font-semibold text-slate-700 dark:text-slate-200 print:text-slate-700">
                       <th className="py-3 px-4 print:py-2 print:px-2 w-[108px] print:w-[15%]">
                         Data
                       </th>
@@ -1075,7 +1075,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 print:divide-slate-200">
                     {plannedDays.map((day) => {
                       const isExact = Boolean(exactDayKeys[day.date]);
                       const isEditingHours = editingHoursDate === day.date;
@@ -1091,33 +1091,33 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                             aria-expanded={isExpanded}
                             className={`cursor-pointer transition-colors ${
                               isExpanded
-                                ? 'bg-amber-50/40'
-                                : 'hover:bg-slate-50/60'
+                                ? 'bg-amber-50/40 dark:bg-amber-950/30 print:bg-white'
+                                : 'hover:bg-slate-50/60 dark:hover:bg-slate-800/50'
                             }`}
                           >
                             <td className="py-3 px-4 print:py-1.5 print:px-2 whitespace-nowrap print:whitespace-normal align-top">
                               <div className="flex items-center gap-1.5">
                                 <ChevronRight
                                   className={`no-print w-3.5 h-3.5 text-slate-400 transition-transform shrink-0 ${
-                                    isExpanded ? 'rotate-90 text-amber-700' : ''
+                                    isExpanded ? 'rotate-90 text-amber-700 dark:text-amber-400' : ''
                                   }`}
                                 />
                                 <div>
-                                  <div className="text-xs font-semibold text-slate-900 tabular-nums">
+                                  <div className="text-xs font-semibold text-slate-900 dark:text-slate-100 print:text-slate-900 tabular-nums">
                                     {day.date}
                                   </div>
-                                  <div className="text-[11px] text-slate-500">
+                                  <div className="text-[11px] text-slate-500 dark:text-slate-400 print:text-slate-500">
                                     {formatPolishWeekdayFull(day.date)}
                                   </div>
                                 </div>
                               </div>
                             </td>
-                            <td className="py-3 px-4 print:py-1.5 print:px-2 font-mono text-xs font-semibold text-slate-900 tabular-nums whitespace-nowrap print:whitespace-normal align-top">
+                            <td className="py-3 px-4 print:py-1.5 print:px-2 font-mono text-xs font-semibold text-slate-900 dark:text-slate-100 print:text-slate-900 tabular-nums whitespace-nowrap print:whitespace-normal align-top">
                               <div>
                                 {day.startTime} – {day.estimatedEndTime}
                               </div>
                               {(day.activeBreaks?.length ?? 0) > 0 && (
-                                <div className="text-[10px] font-sans font-normal text-slate-500 mt-0.5">
+                                <div className="text-[11px] font-sans font-normal text-slate-500 dark:text-slate-400 print:text-slate-500 mt-0.5">
                                   Przerwa:{' '}
                                   {day.activeBreaks!
                                     .map((b) => `${b.startTime}–${b.endTime}`)
@@ -1144,29 +1144,29 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                       setEditingHoursDate(day.date);
                                     }
                                   }}
-                                  className="no-print mt-0.5 text-[11px] font-sans font-medium text-amber-800 hover:underline inline-flex items-center gap-1"
+                                  className="no-print mt-0.5 text-[11px] font-sans font-medium text-amber-800 dark:text-amber-400 hover:underline inline-flex items-center gap-1"
                                 >
                                   <Clock className="w-3 h-3" />
                                   Zmień
                                 </button>
                               )}
                             </td>
-                            <td className="py-3 px-4 text-xs text-slate-700 max-w-xs print:max-w-none print:py-1.5 print:px-2 align-top break-words">
-                              <div className="font-medium text-slate-900">
+                            <td className="py-3 px-4 text-xs text-slate-700 dark:text-slate-300 print:text-slate-700 max-w-xs print:max-w-none print:py-1.5 print:px-2 align-top break-words">
+                              <div className="font-medium text-slate-900 dark:text-slate-100 print:text-slate-900">
                                 {day.streetNames.join(', ')}
                               </div>
-                              <div className="no-print text-[11px] text-amber-800 font-medium mt-0.5">
+                              <div className="no-print text-[11px] text-amber-800 dark:text-amber-400 font-medium mt-0.5">
                                 {isExpanded
                                   ? 'Ukryj rozpiskę przejścia'
                                   : 'Kliknij wiersz, aby zobaczyć start, ulice i koniec'}
                               </div>
                               {isExact && (
-                                <span className="text-[11px] text-emerald-700 font-medium">
+                                <span className="text-[11px] text-emerald-700 dark:text-emerald-400 print:text-emerald-700 font-medium">
                                   Dokładna trasa drogowa
                                 </span>
                               )}
                             </td>
-                            <td className="py-3 px-4 text-xs text-slate-600 tabular-nums print:py-1.5 print:px-2 align-top">
+                            <td className="py-3 px-4 text-xs text-slate-600 dark:text-slate-300 print:text-slate-600 tabular-nums print:py-1.5 print:px-2 align-top">
                               {day.estimatedRoutes.map((r) => (
                                 <div
                                   key={r.priestId}
@@ -1183,11 +1183,11 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                 </div>
                               ))}
                             </td>
-                            <td className="py-3 px-4 print:py-1.5 print:px-2 text-right font-mono text-xs text-slate-700 tabular-nums whitespace-nowrap print:whitespace-normal align-top">
-                              <div className="font-semibold text-slate-900">
+                            <td className="py-3 px-4 print:py-1.5 print:px-2 text-right font-mono text-xs text-slate-700 dark:text-slate-300 print:text-slate-700 tabular-nums whitespace-nowrap print:whitespace-normal align-top">
+                              <div className="font-semibold text-slate-900 dark:text-slate-100 print:text-slate-900">
                                 {day.stops.length} domów
                               </div>
-                              <div className="text-[11px] text-slate-500">
+                              <div className="text-[11px] text-slate-500 dark:text-slate-400 print:text-slate-500">
                                 {formatDistance(day.totalDistanceMeters)}
                               </div>
                             </td>
@@ -1200,9 +1200,9 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                       e.stopPropagation();
                                       onEditDayInPlanner(day.date);
                                     }}
-                                    className="px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg inline-flex items-center gap-1"
+                                    className="px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg inline-flex items-center gap-1"
                                   >
-                                    <Pencil className="w-3 h-3 text-slate-500" />
+                                    <Pencil className="w-3 h-3 text-slate-500 dark:text-slate-400" />
                                     Edytuj
                                   </button>
                                 )}
@@ -1212,9 +1212,9 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                     e.stopPropagation();
                                     onViewDayOnMap(day.date);
                                   }}
-                                  className="px-2.5 py-1.5 text-xs font-medium text-slate-800 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg inline-flex items-center gap-1"
+                                  className="px-2.5 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg inline-flex items-center gap-1"
                                 >
-                                  <MapIcon className="w-3.5 h-3.5 text-amber-700" />
+                                  <MapIcon className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                                   Mapa
                                 </button>
                                 <button
@@ -1224,7 +1224,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                     onInspectDay(day.date);
                                     setViewMode('day');
                                   }}
-                                  className="px-2.5 py-1.5 text-xs font-semibold text-amber-900 bg-amber-50 border border-amber-200 hover:bg-amber-100 rounded-lg inline-flex items-center gap-1"
+                                  className="px-2.5 py-1.5 text-xs font-semibold text-amber-900 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/70 hover:bg-amber-100 dark:hover:bg-amber-900/50 rounded-lg inline-flex items-center gap-1"
                                 >
                                   <Printer className="w-3.5 h-3.5" />
                                   Wydruk
@@ -1238,7 +1238,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                     }}
                                     title="Usuń trasę tego dnia"
                                     aria-label={`Usuń trasę z dnia ${day.date}`}
-                                    className="px-2 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 rounded-lg inline-flex items-center gap-1"
+                                    className="px-2 py-1.5 text-xs font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/70 hover:bg-red-100 dark:hover:bg-red-950 rounded-lg inline-flex items-center gap-1"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
@@ -1247,39 +1247,39 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                             </td>
                           </tr>
                           {isExpanded && (
-                            <tr className="no-print bg-slate-50/40">
+                            <tr className="no-print bg-slate-50/40 dark:bg-slate-950/40">
                               <td colSpan={6} className="p-3 sm:p-4">
                                 {renderDayItineraryBreakdown(day)}
                               </td>
                             </tr>
                           )}
                           {isEditingHours && onUpdateDayTimeWindow && (
-                            <tr className="no-print bg-slate-50">
+                            <tr className="no-print bg-slate-50 dark:bg-slate-800/60">
                               <td colSpan={6} className="px-4 py-3 space-y-2">
                                 <div className="flex flex-wrap items-center gap-2.5 text-xs">
-                                  <span className="font-semibold text-slate-700">
+                                  <span className="font-semibold text-slate-700 dark:text-slate-200">
                                     Godziny dla {day.date}:
                                   </span>
                                   <label className="inline-flex items-center gap-1.5">
-                                    <span className="text-slate-500">Od</span>
+                                    <span className="text-slate-500 dark:text-slate-400">Od</span>
                                     <input
                                       type="time"
                                       value={editingHoursStart}
                                       onChange={(e) =>
                                         setEditingHoursStart(e.target.value)
                                       }
-                                      className="min-h-[34px] px-2 py-1 text-xs font-mono bg-white border border-slate-200 rounded-lg"
+                                      className="min-h-[34px] px-2 py-1 text-base sm:text-xs font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg"
                                     />
                                   </label>
                                   <label className="inline-flex items-center gap-1.5">
-                                    <span className="text-slate-500">Do</span>
+                                    <span className="text-slate-500 dark:text-slate-400">Do</span>
                                     <input
                                       type="time"
                                       value={editingHoursEnd}
                                       onChange={(e) =>
                                         setEditingHoursEnd(e.target.value)
                                       }
-                                      className="min-h-[34px] px-2 py-1 text-xs font-mono bg-white border border-slate-200 rounded-lg"
+                                      className="min-h-[34px] px-2 py-1 text-base sm:text-xs font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg"
                                     />
                                   </label>
                                   <button
@@ -1295,7 +1295,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                         },
                                       ])
                                     }
-                                    className="min-h-[34px] px-2.5 py-1 text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg"
+                                    className="min-h-[34px] px-2.5 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"
                                   >
                                     + Przerwa
                                   </button>
@@ -1310,14 +1310,14 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                       );
                                       setEditingHoursDate(null);
                                     }}
-                                    className="min-h-[34px] px-3 py-1 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-lg"
+                                    className="min-h-[34px] px-3 py-1 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 rounded-lg"
                                   >
                                     Zapisz
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => setEditingHoursDate(null)}
-                                    className="min-h-[34px] px-2.5 py-1 text-xs text-slate-500 hover:text-slate-800"
+                                    className="min-h-[34px] px-2.5 py-1 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                                   >
                                     Anuluj
                                   </button>
@@ -1327,7 +1327,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                     {editingDayBreaks.map((bw, bIdx) => (
                                       <div
                                         key={bw.id}
-                                        className="inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-2 py-1"
+                                        className="inline-flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg px-2 py-1"
                                       >
                                         <input
                                           type="text"
@@ -1342,7 +1342,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                               )
                                             )
                                           }
-                                          className="w-20 text-xs border-b border-slate-200 focus:outline-none"
+                                          className="w-20 text-base sm:text-xs bg-transparent border-b border-slate-200 dark:border-slate-700 focus:outline-none"
                                         />
                                         <input
                                           type="time"
@@ -1356,7 +1356,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                               )
                                             )
                                           }
-                                          className="text-xs font-mono"
+                                          className="text-base sm:text-xs font-mono bg-transparent"
                                         />
                                         <span>–</span>
                                         <input
@@ -1371,7 +1371,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                               )
                                             )
                                           }
-                                          className="text-xs font-mono"
+                                          className="text-base sm:text-xs font-mono bg-transparent"
                                         />
                                         <button
                                           type="button"
@@ -1380,7 +1380,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                               prev.filter((_, i) => i !== bIdx)
                                             )
                                           }
-                                          className="text-red-600 hover:text-red-800 px-1"
+                                          className="text-red-600 dark:text-red-400 hover:text-red-800 px-1"
                                         >
                                           ×
                                         </button>
@@ -1406,7 +1406,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                   return (
                     <div
                       key={day.date}
-                      className="bg-white border border-slate-200 rounded-xl p-4 space-y-3"
+                      className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3"
                     >
                       <button
                         type="button"
@@ -1416,37 +1416,37 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                           )
                         }
                         aria-expanded={isExpanded}
-                        className="w-full text-left space-y-2.5 rounded-lg -m-1 p-1 hover:bg-slate-50/70 transition-colors"
+                        className="w-full text-left space-y-2.5 rounded-lg -m-1 p-1 hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <div className="text-[11px] font-mono font-semibold text-amber-800 tabular-nums">
+                            <div className="text-[11px] font-mono font-semibold text-amber-800 dark:text-amber-400 tabular-nums">
                               Dzień {idx + 1} · {day.date}
                             </div>
-                            <div className="text-sm font-semibold text-slate-900 mt-0.5">
+                            <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 mt-0.5">
                               {formatPolishWeekdayFull(day.date)}
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-xs font-mono font-semibold text-slate-900 tabular-nums">
+                            <div className="text-xs font-mono font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
                               {day.startTime}–{day.estimatedEndTime}
                             </div>
-                            <div className="text-[11px] text-slate-500 tabular-nums">
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400 tabular-nums">
                               {day.stops.length} domów ·{' '}
                               {formatDistance(day.totalDistanceMeters)}
                             </div>
                           </div>
                         </div>
 
-                        <div className="text-xs text-slate-700 leading-relaxed space-y-1">
+                        <div className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed space-y-1">
                           <div>
-                            <span className="text-slate-500">Ulice: </span>
-                            <span className="font-medium text-slate-900">
+                            <span className="text-slate-500 dark:text-slate-400">Ulice: </span>
+                            <span className="font-medium text-slate-900 dark:text-slate-100">
                               {day.streetNames.join(', ')}
                             </span>
                           </div>
                           {(day.activeBreaks?.length ?? 0) > 0 && (
-                            <div className="text-[11px] text-slate-500">
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400">
                               Przerwy:{' '}
                               {day.activeBreaks!
                                 .map(
@@ -1456,7 +1456,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                 .join(', ')}
                             </div>
                           )}
-                          <div className="pt-0.5 inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800">
+                          <div className="pt-0.5 inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 dark:text-amber-400">
                             {isExpanded ? (
                               <>
                                 <ChevronUp className="w-3.5 h-3.5" />
@@ -1475,10 +1475,10 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                       {isExpanded && renderDayItineraryBreakdown(day)}
 
                       {isEditingHours && onUpdateDayTimeWindow && (
-                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                        <div className="p-3 bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-xl space-y-2">
                           <div className="grid grid-cols-2 gap-2">
                             <div>
-                              <label className="block text-[10px] font-medium text-slate-500 mb-0.5">
+                              <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-0.5">
                                 Od
                               </label>
                               <input
@@ -1487,11 +1487,11 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                 onChange={(e) =>
                                   setEditingHoursStart(e.target.value)
                                 }
-                                className="w-full min-h-[38px] px-2 py-1 text-base font-mono bg-white border border-slate-200 rounded-lg"
+                                className="w-full min-h-[38px] px-2 py-1 text-base font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg"
                               />
                             </div>
                             <div>
-                              <label className="block text-[10px] font-medium text-slate-500 mb-0.5">
+                              <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-0.5">
                                 Do
                               </label>
                               <input
@@ -1500,7 +1500,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                 onChange={(e) =>
                                   setEditingHoursEnd(e.target.value)
                                 }
-                                className="w-full min-h-[38px] px-2 py-1 text-base font-mono bg-white border border-slate-200 rounded-lg"
+                                className="w-full min-h-[38px] px-2 py-1 text-base font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg"
                               />
                             </div>
                           </div>
@@ -1509,7 +1509,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                               {editingDayBreaks.map((bw, bIdx) => (
                                 <div
                                   key={bw.id}
-                                  className="flex items-center justify-between gap-1.5 bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs"
+                                  className="flex items-center justify-between gap-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg px-2 py-1 text-xs"
                                 >
                                   <input
                                     type="time"
@@ -1523,7 +1523,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                         )
                                       )
                                     }
-                                    className="font-mono text-xs"
+                                    className="font-mono text-base sm:text-xs bg-transparent"
                                   />
                                   <span>–</span>
                                   <input
@@ -1538,7 +1538,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                         )
                                       )
                                     }
-                                    className="font-mono text-xs"
+                                    className="font-mono text-base sm:text-xs bg-transparent"
                                   />
                                   <button
                                     type="button"
@@ -1547,7 +1547,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                         prev.filter((_, i) => i !== bIdx)
                                       )
                                     }
-                                    className="text-red-600 px-1 font-bold"
+                                    className="text-red-600 dark:text-red-400 px-1 font-bold"
                                   >
                                     ×
                                   </button>
@@ -1569,7 +1569,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                   },
                                 ])
                               }
-                              className="min-h-[36px] px-2.5 py-1 text-xs font-medium bg-white border border-slate-200 rounded-lg"
+                              className="min-h-[36px] px-2.5 py-1 text-xs font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg"
                             >
                               + Przerwa
                             </button>
@@ -1584,14 +1584,14 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                 );
                                 setEditingHoursDate(null);
                               }}
-                              className="flex-1 min-h-[36px] px-3 py-1 text-xs font-semibold text-white bg-amber-700 rounded-lg"
+                              className="flex-1 min-h-[36px] px-3 py-1 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 rounded-lg"
                             >
                               Zapisz
                             </button>
                             <button
                               type="button"
                               onClick={() => setEditingHoursDate(null)}
-                              className="min-h-[36px] px-2 py-1 text-xs text-slate-600"
+                              className="min-h-[36px] px-2 py-1 text-xs text-slate-600 dark:text-slate-300"
                             >
                               Anuluj
                             </button>
@@ -1604,9 +1604,9 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                           <button
                             type="button"
                             onClick={() => onEditDayInPlanner(day.date)}
-                            className="min-h-[40px] px-2.5 py-2 text-xs font-medium text-slate-800 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg inline-flex items-center justify-center gap-1"
+                            className="min-h-[40px] px-2.5 py-2 text-xs font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg inline-flex items-center justify-center gap-1"
                           >
-                            <Pencil className="w-3.5 h-3.5 text-slate-500" />
+                            <Pencil className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                             Edytuj ulice
                           </button>
                         )}
@@ -1629,18 +1629,18 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                 setEditingHoursDate(day.date);
                               }
                             }}
-                            className="min-h-[40px] px-2.5 py-2 text-xs font-medium text-slate-800 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg inline-flex items-center justify-center gap-1"
+                            className="min-h-[40px] px-2.5 py-2 text-xs font-medium text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg inline-flex items-center justify-center gap-1"
                           >
-                            <Clock className="w-3.5 h-3.5 text-slate-500" />
+                            <Clock className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                             Godziny
                           </button>
                         )}
                         <button
                           type="button"
                           onClick={() => onViewDayOnMap(day.date)}
-                          className="min-h-[40px] px-2.5 py-2 text-xs font-medium text-slate-800 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-lg inline-flex items-center justify-center gap-1"
+                          className="min-h-[40px] px-2.5 py-2 text-xs font-medium text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg inline-flex items-center justify-center gap-1"
                         >
-                          <MapIcon className="w-3.5 h-3.5 text-amber-700" />
+                          <MapIcon className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                           Mapa
                         </button>
                         <button
@@ -1649,7 +1649,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                             onInspectDay(day.date);
                             setViewMode('day');
                           }}
-                          className="min-h-[40px] px-2.5 py-2 text-xs font-semibold text-amber-900 bg-amber-50 border border-amber-200 hover:bg-amber-100 rounded-lg inline-flex items-center justify-center gap-1"
+                          className="min-h-[40px] px-2.5 py-2 text-xs font-semibold text-amber-900 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/70 hover:bg-amber-100 dark:hover:bg-amber-900/50 rounded-lg inline-flex items-center justify-center gap-1"
                         >
                           <Route className="w-3.5 h-3.5" />
                           Wydruk
@@ -1659,7 +1659,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                         <button
                           type="button"
                           onClick={() => onDeleteDayRoute(day.date)}
-                          className="w-full min-h-[38px] px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50/70 hover:bg-red-100 border border-red-200 rounded-lg inline-flex items-center justify-center gap-1.5"
+                          className="w-full min-h-[38px] px-3 py-1.5 text-xs font-medium text-red-700 dark:text-red-300 bg-red-50/70 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-950 border border-red-200 dark:border-red-900/60 rounded-lg inline-flex items-center justify-center gap-1.5"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           Usuń trasę tego dnia
@@ -1675,23 +1675,23 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
       ) : effectiveViewMode === 'announcements' ? (
         /* PARISH BULLETIN ANNOUNCEMENTS VIEW (RODO-SAFE) */
         announcementDays.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-xl p-10 text-center space-y-2">
-            <p className="text-sm font-medium text-slate-800">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-10 text-center space-y-2">
+            <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
               Brak rozpisanych dni kolędy do ogłoszeń
             </p>
-            <p className="text-xs text-slate-500 max-w-md mx-auto">
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
               Najpierw rozpisz okres kolędowy na dni, aby wygenerować gotowe
               ogłoszenia duszpasterskie do gabloty i na stronę parafii.
             </p>
           </div>
         ) : (
-          <div className="bg-white border border-slate-200 rounded-xl p-5 sm:p-7 space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
+          <div className="bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 rounded-xl p-5 sm:p-7 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 print:border-slate-300 pb-4">
               <div>
-                <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 print:text-slate-900">
                   Plan odwiedzin duszpasterskich — ogłoszenia parafialne
                 </h2>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-slate-500 dark:text-slate-400 print:text-slate-500 mt-1">
                   Zestawienie zgodne z RODO — zawiera wyłącznie daty, godziny
                   rozpoczęcia, nazwy ulic oraz przedziały numerów budynków (bez
                   nazwisk).
@@ -1700,10 +1700,10 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
               <button
                 type="button"
                 onClick={() => void handleCopyAnnouncements()}
-                className="no-print min-h-[38px] px-3.5 py-2 text-xs font-semibold text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl inline-flex items-center gap-1.5 shrink-0"
+                className="no-print min-h-[38px] px-3.5 py-2 text-xs font-semibold text-amber-900 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-200 dark:border-amber-800/70 rounded-xl inline-flex items-center gap-1.5 shrink-0"
               >
                 {copiedAnnouncements ? (
-                  <Check className="w-3.5 h-3.5 text-emerald-700" />
+                  <Check className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
                 ) : (
                   <Copy className="w-3.5 h-3.5" />
                 )}
@@ -1715,18 +1715,18 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
               </button>
             </div>
 
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-100 dark:divide-slate-800 print:divide-slate-200">
               {announcementDays.map((item) => (
                 <div key={item.date} className="py-3.5 space-y-1">
                   <div className="flex flex-wrap items-baseline gap-2">
-                    <span className="text-sm font-bold text-slate-900">
+                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100 print:text-slate-900">
                       {item.fullDateLabel}
                     </span>
-                    <span className="text-xs font-mono font-semibold text-amber-800 tabular-nums">
+                    <span className="text-xs font-mono font-semibold text-amber-800 dark:text-amber-400 print:text-amber-800 tabular-nums">
                       od godz. {item.startTime}
                     </span>
                   </div>
-                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 print:text-slate-700 leading-relaxed">
                     {item.streets
                       .map((s) =>
                         s.rangeLabel
@@ -1742,27 +1742,27 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
         )
       ) : /* SELECTED DAY VIEW */
       routes.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-xl p-10 text-center">
-          <p className="text-sm font-medium text-slate-800">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-10 text-center">
+          <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
             Brak punktów dla wybranego dnia
           </p>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Wybierz dzień kolędy powyżej lub zaznacz ulice i kliknij „Wyznacz
             trasy”.
           </p>
         </div>
       ) : (
         <div className="space-y-6 print:space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3 print:px-3 print:py-2 print:border-slate-300 print-break-avoid">
-            <div className="text-xs sm:text-sm text-slate-700 tabular-nums space-y-0.5">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 print:px-3 print:py-2 print:border-slate-300 print-break-avoid">
+            <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 print:text-slate-700 tabular-nums space-y-0.5">
               <div>
-                <strong className="text-slate-900">
+                <strong className="text-slate-900 dark:text-slate-100 print:text-slate-900">
                   {selectedDate
                     ? formatPolishDateFull(selectedDate)
                     : 'Bieżący wybór ulic'}
                 </strong>{' '}
                 · Godziny:{' '}
-                <strong className="font-mono text-slate-900">
+                <strong className="font-mono text-slate-900 dark:text-slate-100 print:text-slate-900">
                   {effectiveStartTime}
                   {effectiveEndTime ? `–${effectiveEndTime}` : ''}
                 </strong>
@@ -1770,7 +1770,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                   <>
                     {' '}
                     · Przerwa:{' '}
-                    <strong className="text-slate-900">
+                    <strong className="text-slate-900 dark:text-slate-100 print:text-slate-900">
                       {selectedDayBreaks
                         .map(
                           (b) =>
@@ -1781,9 +1781,9 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                   </>
                 )}
               </div>
-              <div className="text-xs text-slate-500">
+              <div className="text-xs text-slate-500 dark:text-slate-400 print:text-slate-500">
                 Ulice:{' '}
-                <strong className="text-slate-800">
+                <strong className="text-slate-800 dark:text-slate-200 print:text-slate-800">
                   {Array.from(
                     new Set(
                       routes.flatMap((r) =>
@@ -1796,8 +1796,8 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                 <span
                   className={
                     isExactRoute
-                      ? 'text-emerald-700 font-medium'
-                      : 'text-amber-700 font-medium'
+                      ? 'text-emerald-700 dark:text-emerald-400 print:text-emerald-700 font-medium'
+                      : 'text-amber-700 dark:text-amber-400 print:text-amber-700 font-medium'
                   }
                 >
                   {isExactRoute ? 'Dokładna trasa drogowa' : 'Trasa kolędowa'}
@@ -1809,16 +1809,16 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
               <button
                 type="button"
                 onClick={() => onViewDayOnMap(selectedDate)}
-                className="min-h-[36px] px-3 py-1.5 text-xs font-medium text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-lg inline-flex items-center gap-1.5"
+                className="min-h-[36px] px-3 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg inline-flex items-center gap-1.5"
               >
-                <MapIcon className="w-3.5 h-3.5 text-amber-700" />
+                <MapIcon className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                 Pokaż na mapie
               </button>
               {!isExactRoute && (
                 <button
                   type="button"
                   onClick={() => onComputeDayRoute(selectedDate)}
-                  className="min-h-[36px] px-3 py-1.5 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-lg"
+                  className="min-h-[36px] px-3 py-1.5 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 rounded-lg"
                 >
                   Wyznacz po ulicach
                 </button>
@@ -1826,7 +1826,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
               <button
                 type="button"
                 onClick={handlePrintNow}
-                className="min-h-[36px] px-3 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg inline-flex items-center gap-1.5"
+                className="min-h-[36px] px-3 py-1.5 text-xs font-semibold text-white bg-slate-900 dark:bg-slate-100 dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 rounded-lg inline-flex items-center gap-1.5"
               >
                 <Printer className="w-3.5 h-3.5" />
                 Drukuj / PDF
@@ -1862,57 +1862,61 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
               return (
                 <div
                   key={`summary-${route.priestId}`}
-                  className="bg-white border border-slate-200 print:border-slate-300 rounded-xl print:rounded-lg px-3.5 py-2.5 text-xs space-y-1.5"
+                  className="bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 print:border-slate-300 rounded-xl print:rounded-lg px-3.5 py-2.5 text-xs space-y-1.5"
                 >
-                  <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-1.5">
-                    <span className="inline-flex items-center gap-1.5 font-bold text-slate-900">
+                  <div className="flex items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 print:border-slate-200 pb-1.5">
+                    <span className="inline-flex items-center gap-1.5 font-bold text-slate-900 dark:text-slate-100 print:text-slate-900">
                       <span
                         className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: route.color }}
                       />
                       <span>{route.priestName}</span>
                     </span>
-                    <span className="font-mono font-semibold text-slate-800 tabular-nums">
+                    <span className="font-mono font-semibold text-slate-800 dark:text-slate-200 print:text-slate-800 tabular-nums">
                       {route.orderedStops.length} domów · koniec ok.{' '}
                       {route.endTime}
                     </span>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 text-[11px] text-slate-600 tabular-nums">
+                  <div className="grid grid-cols-3 gap-2 text-[11px] text-slate-600 dark:text-slate-400 print:text-slate-600 tabular-nums">
                     <div>
-                      <span className="text-slate-400 block text-[10px]">
+                      <span className="text-slate-400 dark:text-slate-500 print:text-slate-500 block text-[10px]">
                         Dystans
                       </span>
-                      <strong className="font-mono text-slate-900">
+                      <strong className="font-mono text-slate-900 dark:text-slate-100 print:text-slate-900">
                         {formatDistance(route.totalDistanceMeters)}
                       </strong>
                     </div>
                     <div>
-                      <span className="text-slate-400 block text-[10px]">
+                      <span className="text-slate-400 dark:text-slate-500 print:text-slate-500 block text-[10px]">
                         {config.travelMode === 'WALKING'
                           ? 'Przejście'
                           : 'Przejazd'}
                       </span>
-                      <strong className="font-mono text-slate-900">
+                      <strong className="font-mono text-slate-900 dark:text-slate-100 print:text-slate-900">
                         {formatDurationMillis(route.totalTravelDurationMillis)}
                       </strong>
                     </div>
                     <div>
-                      <span className="text-slate-400 block text-[10px]">
+                      <span className="text-slate-400 dark:text-slate-500 print:text-slate-500 block text-[10px]">
                         Wizyty
                       </span>
-                      <strong className="font-mono text-slate-900">
+                      <strong className="font-mono text-slate-900 dark:text-slate-100 print:text-slate-900">
                         {formatMinutesLabel(route.totalVisitMinutes)}
                       </strong>
                     </div>
                   </div>
                   {firstStop && (
-                    <div className="text-[11px] text-slate-600 pt-0.5 truncate">
-                      <strong className="text-emerald-800">START:</strong>{' '}
+                    <div className="text-[11px] text-slate-600 dark:text-slate-300 print:text-slate-600 pt-0.5 truncate">
+                      <strong className="text-emerald-800 dark:text-emerald-400 print:text-emerald-800">
+                        START:
+                      </strong>{' '}
                       {firstStop.address || firstStop.label}
                       {lastStop && route.orderedStops.length > 1 && (
                         <>
                           {' · '}
-                          <strong className="text-slate-900">KONIEC:</strong>{' '}
+                          <strong className="text-slate-900 dark:text-slate-100 print:text-slate-900">
+                            KONIEC:
+                          </strong>{' '}
                           {lastStop.address || lastStop.label}
                         </>
                       )}
@@ -1942,22 +1946,22 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
             return (
               <section
                 key={route.priestId}
-                className="print-break-before-page bg-white border border-slate-200 rounded-xl overflow-hidden print:overflow-visible print:rounded-none print:border-0"
+                className="print-break-before-page bg-white dark:bg-slate-900 print:bg-white border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden print:overflow-visible print:rounded-none print:border-0"
               >
-                <div className="px-4 sm:px-5 py-3.5 print:px-3 print:py-2.5 border-b border-slate-200 print:border print:border-b-0 print:border-slate-300 flex flex-wrap items-center justify-between gap-3 bg-slate-50/70 print:bg-slate-100 print-break-after-avoid">
+                <div className="px-4 sm:px-5 py-3.5 print:px-3 print:py-2.5 border-b border-slate-200 dark:border-slate-800 print:border print:border-b-0 print:border-slate-300 flex flex-wrap items-center justify-between gap-3 bg-slate-50/70 dark:bg-slate-800/60 print:bg-slate-100 print-break-after-avoid">
                   <div className="space-y-0.5 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span
                         className="w-3 h-3 rounded-full shrink-0"
                         style={{ backgroundColor: route.color }}
                       />
-                      <h2 className="text-base print:text-[13px] font-bold text-slate-900 leading-snug">
+                      <h2 className="text-base print:text-[13px] font-bold text-slate-900 dark:text-slate-100 print:text-slate-900 leading-snug">
                         Lista domów — {route.priestName}
                         {selectedDate
                           ? ` · ${formatPolishDateFull(selectedDate)}`
                           : ''}
                       </h2>
-                      <span className="text-xs print:text-[11px] font-mono text-slate-600 tabular-nums">
+                      <span className="text-xs print:text-[11px] font-mono text-slate-600 dark:text-slate-400 print:text-slate-600 tabular-nums">
                         ({route.orderedStops.length}{' '}
                         {route.orderedStops.length === 1
                           ? 'punkt'
@@ -1967,10 +1971,10 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                         )
                       </span>
                     </div>
-                    <p className="text-xs print:text-[10.5px] text-slate-600 tabular-nums leading-snug">
+                    <p className="text-xs print:text-[10.5px] text-slate-600 dark:text-slate-300 print:text-slate-600 tabular-nums leading-snug">
                       {firstItem && (
                         <>
-                          <span className="font-semibold text-emerald-800">
+                          <span className="font-semibold text-emerald-800 dark:text-emerald-400 print:text-emerald-800">
                             START: {firstItem.stop.address || firstItem.stop.label}
                           </span>{' '}
                           ·{' '}
@@ -1992,7 +1996,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                           href={gmapsStages[0].url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-2.5 py-1.5 text-xs font-medium text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg inline-flex items-center gap-1"
+                          className="px-2.5 py-1.5 text-xs font-medium text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-950/60 border border-amber-200 dark:border-amber-800/60 rounded-lg inline-flex items-center gap-1"
                         >
                           <Navigation className="w-3 h-3" />
                           <span>Nawiguj w Google Maps</span>
@@ -2004,7 +2008,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                           onClick={() =>
                             setOpenGmapsMenuPriest(gmapsOpen ? null : route.priestId)
                           }
-                          className="px-2.5 py-1.5 text-xs font-medium text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg inline-flex items-center gap-1"
+                          className="px-2.5 py-1.5 text-xs font-medium text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-950/60 border border-amber-200 dark:border-amber-800/60 rounded-lg inline-flex items-center gap-1"
                         >
                           <Navigation className="w-3 h-3" />
                           <span>Nawiguj w Google Maps</span>
@@ -2015,10 +2019,10 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                 </div>
 
                 {gmapsOpen && gmapsStages.length > 1 && (
-                  <div className="no-print px-4 sm:px-5 py-2.5 bg-amber-50/70 border-b border-amber-200 space-y-1.5">
-                    <p className="text-[11px] text-amber-900">
+                  <div className="no-print px-4 sm:px-5 py-2.5 bg-amber-50/70 dark:bg-amber-950/35 border-b border-amber-200 dark:border-amber-800/60 space-y-1.5">
+                    <p className="text-[11px] text-amber-900 dark:text-amber-200">
                       Zewnętrzna aplikacja Google Maps przyjmuje maksymalnie 10
-                      punktów na jeden link nawigacji (tutaj na mapie i liście masz
+                      punktów na jeden link (tutaj na mapie i liście masz
                       jedną pełną trasę bez podziału):
                     </p>
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -2028,7 +2032,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                           href={st.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-2.5 py-1 text-xs font-medium text-amber-900 bg-white hover:bg-amber-100 border border-amber-200 rounded-lg inline-flex items-center gap-1"
+                          className="px-2.5 py-1 text-xs font-medium text-amber-900 dark:text-amber-200 bg-white dark:bg-slate-900 hover:bg-amber-100 dark:hover:bg-amber-950/60 border border-amber-200 dark:border-amber-800/60 rounded-lg inline-flex items-center gap-1"
                         >
                           <span>
                             {st.isReturnLeg
@@ -2045,7 +2049,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                 <div className="overflow-x-auto print:overflow-visible">
                   <table className="w-full text-left border-collapse text-sm print:text-[10.5px] print:table-fixed print:border print:border-slate-300">
                     <thead>
-                      <tr className="border-b border-slate-200 print:border-slate-300 bg-slate-50/70 print:bg-slate-100 text-xs print:text-[10px] font-semibold text-slate-700">
+                      <tr className="border-b border-slate-200 dark:border-slate-800 print:border-slate-300 bg-slate-50/70 dark:bg-slate-800/60 print:bg-slate-100 text-xs print:text-[10px] font-semibold text-slate-700 dark:text-slate-300 print:text-slate-700">
                         <th className="py-2.5 print:py-2 px-2 print:px-1.5 text-center whitespace-nowrap w-[34px] print:w-[5%]">
                           ✓
                         </th>
@@ -2066,7 +2070,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 print:divide-slate-200">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 print:divide-slate-200">
                       {route.orderedStops.map((item, idx) => {
                         const houseAddress = item.stop.address || item.stop.label;
                         const isStart = idx === 0;
@@ -2111,16 +2115,16 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                             key={item.stop.id}
                             className={
                               isStart
-                                ? 'bg-emerald-50/50 print:bg-emerald-50/40'
+                                ? 'bg-emerald-50/50 dark:bg-emerald-950/30 print:bg-emerald-50/40'
                                 : idx % 2 === 1
-                                  ? 'hover:bg-slate-50/60 print:bg-slate-50/40'
-                                  : 'hover:bg-slate-50/60'
+                                  ? 'hover:bg-slate-50/60 dark:hover:bg-slate-800/50 print:bg-slate-50/40'
+                                  : 'hover:bg-slate-50/60 dark:hover:bg-slate-800/50'
                             }
                           >
                             <td className="py-2 print:py-1.5 px-2 print:px-1.5 text-center align-middle whitespace-nowrap">
                               <span
                                 aria-hidden="true"
-                                className="inline-block w-3.5 h-3.5 rounded-[3px] border-[1.25px] border-slate-500 bg-white align-middle"
+                                className="inline-block w-3.5 h-3.5 rounded-[3px] border-[1.25px] border-slate-500 dark:border-slate-500 print:border-slate-500 bg-white dark:bg-slate-800 print:bg-white align-middle"
                               />
                             </td>
                             <td className="py-2 print:py-1.5 px-2 print:px-1 text-center align-middle whitespace-nowrap">
@@ -2137,10 +2141,10 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                 {item.orderIndex}
                               </span>
                             </td>
-                            <td className="py-2 print:py-1.5 px-2 print:px-1.5 font-mono text-xs print:text-[10.5px] font-semibold text-slate-900 tabular-nums whitespace-nowrap align-middle">
+                            <td className="py-2 print:py-1.5 px-2 print:px-1.5 font-mono text-xs print:text-[10.5px] font-semibold text-slate-900 dark:text-slate-100 print:text-slate-900 tabular-nums whitespace-nowrap align-middle">
                               {item.arrivalTime}
                             </td>
-                            <td className="py-2 print:py-1.5 px-2.5 print:px-2 text-xs sm:text-sm print:text-[10.5px] font-semibold text-slate-900 align-middle leading-snug">
+                            <td className="py-2 print:py-1.5 px-2.5 print:px-2 text-xs sm:text-sm print:text-[10.5px] font-semibold text-slate-900 dark:text-slate-100 print:text-slate-900 align-middle leading-snug">
                               <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
                                 {isStart && (
                                   <span className="px-1 py-0.5 rounded bg-emerald-700 text-white text-[8.5px] font-extrabold uppercase tracking-wide whitespace-nowrap">
@@ -2149,33 +2153,33 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                 )}
                                 <span>{houseAddress}</span>
                                 {isBlock && (
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[9.5px] font-semibold tabular-nums whitespace-nowrap">
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 print:bg-amber-100 text-amber-900 dark:text-amber-300 print:text-amber-900 text-[9.5px] font-semibold tabular-nums whitespace-nowrap">
                                     {blockLabel}
                                   </span>
                                 )}
                               </div>
                               {unitsSummary && (
-                                <div className="text-[10px] font-normal text-slate-600 mt-0.5 leading-snug">
+                                <div className="text-[10px] font-normal text-slate-600 dark:text-slate-400 print:text-slate-600 mt-0.5 leading-snug">
                                   Lokale: {unitsSummary}
                                 </div>
                               )}
                               {secondaryParts.length > 0 && (
-                                <div className="sm:hidden print:hidden text-[11px] font-normal text-slate-500 mt-0.5">
+                                <div className="sm:hidden print:hidden text-[11px] font-normal text-slate-500 dark:text-slate-400 mt-0.5">
                                   {secondaryParts.join(' · ')}
                                 </div>
                               )}
                             </td>
-                            <td className="py-2 print:py-1.5 px-2.5 print:px-2 text-xs print:text-[10px] text-slate-700 hidden sm:table-cell print:table-cell align-middle leading-snug">
+                            <td className="py-2 print:py-1.5 px-2.5 print:px-2 text-xs print:text-[10px] text-slate-700 dark:text-slate-300 print:text-slate-700 hidden sm:table-cell print:table-cell align-middle leading-snug">
                               {secondaryParts.length > 0 ? (
                                 <span>{secondaryParts.join(' · ')}</span>
                               ) : (
                                 <div
                                   aria-hidden="true"
-                                  className="h-3.5 border-b border-dotted border-slate-400 w-full"
+                                  className="h-3.5 border-b border-dotted border-slate-400 dark:border-slate-600 print:border-slate-400 w-full"
                                 />
                               )}
                             </td>
-                            <td className="py-2 print:py-1.5 px-2.5 print:px-2 text-right font-mono text-xs print:text-[10px] text-slate-700 tabular-nums whitespace-nowrap align-middle">
+                            <td className="py-2 print:py-1.5 px-2.5 print:px-2 text-right font-mono text-xs print:text-[10px] text-slate-700 dark:text-slate-300 print:text-slate-700 tabular-nums whitespace-nowrap align-middle">
                               {item.stop.durationMinutes} min
                             </td>
                           </tr>

@@ -161,13 +161,13 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
       className={`no-print absolute bottom-3 left-2.5 right-2.5 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[440px] sm:max-w-[calc(100%-24px)] z-[490] rounded-2xl border shadow-2xl backdrop-blur-md transition-colors ${
         nightMode
           ? 'bg-slate-950/95 border-slate-700 text-slate-100'
-          : 'bg-white/95 border-amber-300 text-slate-900'
+          : 'bg-white/95 dark:bg-slate-950/95 border-amber-300 dark:border-slate-700 text-slate-900 dark:text-slate-100'
       }`}
     >
       {/* Top strip: Priest tabs + progress + Night toggle + Close */}
       <div
         className={`px-3 py-2 border-b flex items-center justify-between gap-2 ${
-          nightMode ? 'border-slate-800' : 'border-slate-200'
+          nightMode ? 'border-slate-800' : 'border-slate-200 dark:border-slate-800'
         }`}
       >
         <div className="flex items-center gap-1.5 min-w-0 overflow-x-auto">
@@ -179,14 +179,14 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
                   key={r.priestId}
                   type="button"
                   onClick={() => onChangePriest(r.priestId)}
-                  className={`min-h-[28px] px-2 py-0.5 rounded-lg text-[11px] font-semibold inline-flex items-center gap-1 whitespace-nowrap shrink-0 transition-colors ${
+                  className={`min-h-[30px] px-2.5 py-0.5 rounded-lg text-[11px] font-semibold inline-flex items-center gap-1 whitespace-nowrap shrink-0 transition-colors ${
                     active
                       ? nightMode
                         ? 'bg-amber-600 text-white'
-                        : 'bg-slate-900 text-white'
+                        : 'bg-slate-900 dark:bg-amber-600 text-white'
                       : nightMode
                         ? 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   <span
@@ -200,7 +200,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
           ) : (
             <span
               className={`text-[11px] font-semibold uppercase tracking-wide ${
-                nightMode ? 'text-amber-400' : 'text-amber-800'
+                nightMode ? 'text-amber-400' : 'text-amber-800 dark:text-amber-400'
               }`}
             >
               Kolęda w terenie
@@ -208,7 +208,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
           )}
           <span
             className={`text-[11px] font-mono tabular-nums whitespace-nowrap ${
-              nightMode ? 'text-slate-400' : 'text-slate-500'
+              nightMode ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'
             }`}
           >
             {completedCount}/{totalStops}
@@ -221,10 +221,10 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
             onClick={onToggleNightMode}
             title={nightMode ? 'Tryb dzienny' : 'Tryb wieczorny (ciemny)'}
             aria-label={nightMode ? 'Tryb dzienny' : 'Tryb wieczorny'}
-            className={`min-w-[30px] min-h-[30px] inline-flex items-center justify-center rounded-lg transition-colors ${
+            className={`min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg transition-colors ${
               nightMode
                 ? 'bg-slate-800 text-amber-300 hover:bg-slate-700'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-amber-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
             {nightMode ? (
@@ -237,10 +237,10 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Zamknij kartę terenową"
-            className={`min-w-[30px] min-h-[30px] inline-flex items-center justify-center rounded-lg transition-colors ${
+            className={`min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg transition-colors ${
               nightMode
                 ? 'text-slate-400 hover:text-white hover:bg-slate-800'
-                : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
+                : 'text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <X className="w-4 h-4" />
@@ -269,13 +269,15 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span
                   className={`text-[11px] font-mono tabular-nums ${
-                    nightMode ? 'text-amber-300' : 'text-amber-800 font-semibold'
+                    nightMode
+                      ? 'text-amber-300'
+                      : 'text-amber-800 dark:text-amber-300 font-semibold'
                   }`}
                 >
                   ~{activeItem.arrivalTime}
                 </span>
                 {activeItem.stop.permanentDecline && (
-                  <span className="px-1.5 py-0.5 rounded bg-red-600 text-white text-[10px] font-semibold">
+                  <span className="px-1.5 py-0.5 rounded bg-red-600 text-white text-[11px] font-semibold">
                     Stała odmowa
                   </span>
                 )}
@@ -283,7 +285,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
                   activeItem.stop.lastYearStatus &&
                   activeItem.stop.lastYearStatus !== 'pending' && (
                     <span
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-medium border ${
+                      className={`px-1.5 py-0.5 rounded text-[11px] font-medium border ${
                         UNIT_STATUS_META[activeItem.stop.lastYearStatus]
                           .badgeClass
                       }`}
@@ -299,7 +301,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               {activeItem.stop.notes && (
                 <div
                   className={`text-xs truncate mt-0.5 ${
-                    nightMode ? 'text-slate-300' : 'text-slate-600'
+                    nightMode ? 'text-slate-300' : 'text-slate-600 dark:text-slate-300'
                   }`}
                 >
                   {activeItem.stop.notes}
@@ -314,10 +316,10 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               onClick={() => onCenterOnStop(activeItem.stop.id)}
               title="Pokaż dom na środku mapy"
               aria-label="Wycentruj na mapie"
-              className={`min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-lg border ${
+              className={`min-w-[36px] min-h-[36px] inline-flex items-center justify-center rounded-lg border ${
                 nightMode
                   ? 'border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800'
-                  : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                  : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               <Crosshair className="w-4 h-4" />
@@ -327,14 +329,14 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               onClick={() => setNoteOpen((v) => !v)}
               title="Notatka lub stała odmowa"
               aria-label="Notatka lub stała odmowa"
-              className={`min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-lg border ${
+              className={`min-w-[36px] min-h-[36px] inline-flex items-center justify-center rounded-lg border ${
                 noteOpen || activeItem.stop.notes || activeItem.stop.permanentDecline
                   ? nightMode
                     ? 'border-amber-500 bg-amber-950/60 text-amber-300'
-                    : 'border-amber-300 bg-amber-50 text-amber-800'
+                    : 'border-amber-300 dark:border-amber-500 bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300'
                   : nightMode
                     ? 'border-slate-700 bg-slate-900 text-slate-300 hover:bg-slate-800'
-                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               <StickyNote className="w-4 h-4" />
@@ -348,7 +350,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
             className={`p-2.5 rounded-xl border space-y-2 ${
               nightMode
                 ? 'bg-slate-900 border-slate-700'
-                : 'bg-slate-50 border-slate-200'
+                : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700'
             }`}
           >
             <div className="flex items-center gap-1.5">
@@ -363,16 +365,16 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
                   }
                 }}
                 placeholder="Notatka (np. rodzina, chory, po 18:00)..."
-                className={`flex-1 min-w-0 min-h-[36px] px-2.5 py-1 text-base sm:text-xs rounded-lg border focus:outline-none ${
+                className={`flex-1 min-w-0 min-h-[38px] px-2.5 py-1 text-base sm:text-xs rounded-lg border focus:outline-none ${
                   nightMode
                     ? 'bg-slate-950 border-slate-700 text-white placeholder:text-slate-500 focus:border-amber-500'
-                    : 'bg-white border-slate-200 text-slate-900 focus:border-amber-600'
+                    : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-amber-600'
                 }`}
               />
               <button
                 type="button"
                 onClick={handleSaveNote}
-                className="min-h-[36px] px-3 py-1 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-600 rounded-lg shrink-0"
+                className="min-h-[38px] px-3 py-1 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-600 rounded-lg shrink-0"
               >
                 Zapisz
               </button>
@@ -389,9 +391,15 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
                       : {}),
                   })
                 }
-                className="w-4 h-4 rounded border-slate-300 text-red-600"
+                className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-red-600"
               />
-              <span className={nightMode ? 'text-red-300' : 'text-red-800 font-medium'}>
+              <span
+                className={
+                  nightMode
+                    ? 'text-red-300'
+                    : 'text-red-800 dark:text-red-300 font-medium'
+                }
+              >
                 Stała odmowa (pomiń w planach w kolejnych latach)
               </span>
             </label>
@@ -413,12 +421,12 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
             <button
               type="button"
               onClick={() => handleMark('accepted')}
-              className={`min-h-[44px] px-1.5 py-1.5 text-[11px] font-semibold rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-colors ${
+              className={`min-h-[46px] px-1.5 py-1.5 text-[11px] font-semibold rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-colors ${
                 currentStatus === 'accepted'
                   ? 'bg-emerald-600 border-emerald-500 text-white'
                   : nightMode
                     ? 'bg-emerald-950/70 border-emerald-800 text-emerald-200 hover:bg-emerald-900'
-                    : 'bg-emerald-50 border-emerald-200 text-emerald-900 hover:bg-emerald-100'
+                    : 'bg-emerald-50 dark:bg-emerald-950/70 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-emerald-900'
               }`}
             >
               <CheckCircle2 className="w-4 h-4" />
@@ -427,12 +435,12 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
             <button
               type="button"
               onClick={() => handleMark('absent')}
-              className={`min-h-[44px] px-1.5 py-1.5 text-[11px] font-semibold rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-colors ${
+              className={`min-h-[46px] px-1.5 py-1.5 text-[11px] font-semibold rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-colors ${
                 currentStatus === 'absent'
                   ? 'bg-amber-600 border-amber-500 text-white'
                   : nightMode
                     ? 'bg-amber-950/70 border-amber-800 text-amber-200 hover:bg-amber-900'
-                    : 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100'
+                    : 'bg-amber-50 dark:bg-amber-950/70 border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900'
               }`}
             >
               <UserX className="w-4 h-4" />
@@ -441,12 +449,12 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
             <button
               type="button"
               onClick={() => handleMark('declined')}
-              className={`min-h-[44px] px-1.5 py-1.5 text-[11px] font-semibold rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-colors ${
+              className={`min-h-[46px] px-1.5 py-1.5 text-[11px] font-semibold rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-colors ${
                 currentStatus === 'declined'
                   ? 'bg-red-600 border-red-500 text-white'
                   : nightMode
                     ? 'bg-red-950/70 border-red-800 text-red-200 hover:bg-red-900'
-                    : 'bg-red-50 border-red-200 text-red-900 hover:bg-red-100'
+                    : 'bg-red-50 dark:bg-red-950/70 border-red-200 dark:border-red-800 text-red-900 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-900'
               }`}
             >
               <Ban className="w-4 h-4" />
@@ -455,12 +463,12 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
             <button
               type="button"
               onClick={() => handleMark('invited')}
-              className={`min-h-[44px] px-1.5 py-1.5 text-[11px] font-semibold rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-colors ${
+              className={`min-h-[46px] px-1.5 py-1.5 text-[11px] font-semibold rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-colors ${
                 currentStatus === 'invited'
                   ? 'bg-sky-600 border-sky-500 text-white'
                   : nightMode
                     ? 'bg-sky-950/70 border-sky-800 text-sky-200 hover:bg-sky-900'
-                    : 'bg-sky-50 border-sky-200 text-sky-900 hover:bg-sky-100'
+                    : 'bg-sky-50 dark:bg-sky-950/70 border-sky-200 dark:border-sky-800 text-sky-900 dark:text-sky-200 hover:bg-sky-100 dark:hover:bg-sky-900'
               }`}
             >
               <BellRing className="w-4 h-4" />
@@ -479,10 +487,10 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               onSelectActiveStop(prevItem.stop.id);
               onCenterOnStop(prevItem.stop.id);
             }}
-            className={`min-h-[34px] px-2.5 py-1 rounded-lg font-medium inline-flex items-center gap-1 disabled:opacity-35 ${
+            className={`min-h-[36px] px-2.5 py-1 rounded-lg font-medium inline-flex items-center gap-1 disabled:opacity-35 ${
               nightMode
                 ? 'bg-slate-900 text-slate-200 hover:bg-slate-800 border border-slate-700'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                : 'bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 dark:border dark:border-slate-700'
             }`}
           >
             <ArrowLeft className="w-3.5 h-3.5" />
@@ -494,13 +502,13 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               type="button"
               onClick={() => onUpdateStopStatus(activeItem.stop.id, 'pending')}
               title="Przywróć status Oczekuje"
-              className={`min-h-[34px] px-2 py-1 rounded-lg font-medium inline-flex items-center gap-1 ${
+              className={`min-h-[36px] px-2.5 py-1 rounded-lg font-medium inline-flex items-center gap-1 ${
                 nightMode
                   ? 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-700'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 dark:border dark:border-slate-700'
               }`}
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-3.5 h-3.5" />
             </button>
           )}
 
@@ -509,10 +517,10 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               href={navUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className={`min-h-[34px] px-2.5 py-1 rounded-lg font-medium inline-flex items-center gap-1 border ${
+              className={`min-h-[36px] px-2.5 py-1 rounded-lg font-medium inline-flex items-center gap-1 border ${
                 nightMode
                   ? 'bg-amber-950/60 border-amber-700 text-amber-200 hover:bg-amber-900/70'
-                  : 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100'
+                  : 'bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-700 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/70'
               }`}
             >
               <span>Nawiguj</span>
@@ -528,10 +536,10 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               onSelectActiveStop(nextItem.stop.id);
               onCenterOnStop(nextItem.stop.id);
             }}
-            className={`min-h-[34px] px-2.5 py-1 rounded-lg font-semibold inline-flex items-center gap-1 disabled:opacity-35 ml-auto ${
+            className={`min-h-[36px] px-2.5 py-1 rounded-lg font-semibold inline-flex items-center gap-1 disabled:opacity-35 ml-auto ${
               nightMode
                 ? 'bg-slate-800 text-white hover:bg-slate-700 border border-slate-600'
-                : 'bg-slate-900 text-white hover:bg-slate-800'
+                : 'bg-slate-900 dark:bg-amber-700 text-white hover:bg-slate-800 dark:hover:bg-amber-600'
             }`}
           >
             <span>

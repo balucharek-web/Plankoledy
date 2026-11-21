@@ -129,6 +129,19 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
     cancelRef.current = false;
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        cancelRef.current = true;
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   const handleFileSelected = async (
@@ -288,17 +301,17 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
       aria-labelledby="csv-import-title"
       className="fixed inset-0 z-[1250] bg-slate-950/55 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4"
     >
-      <div className="bg-white border border-slate-200 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92dvh] flex flex-col overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92dvh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-4 py-3.5 sm:px-6 sm:py-4 border-b border-slate-200 flex items-start justify-between gap-3 shrink-0">
+        <div className="px-4 py-3.5 sm:px-6 sm:py-4 border-b border-slate-200 dark:border-slate-800 flex items-start justify-between gap-3 shrink-0">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-800 uppercase tracking-wide">
+            <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-800 dark:text-amber-400 uppercase tracking-wide">
               <FileSpreadsheet className="w-3.5 h-3.5" />
               Kartoteka (FARA / Excel / CSV) — tryb bez nazwisk
             </div>
             <h2
               id="csv-import-title"
-              className="text-sm sm:text-base font-bold text-slate-900 mt-0.5"
+              className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-0.5"
             >
               Nanieś adresy, mieszkania i liczbę mieszkańców
             </h2>
@@ -310,28 +323,28 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
               onClose();
             }}
             aria-label="Zamknij"
-            className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl shrink-0"
+            className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/50">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/50 dark:bg-slate-950/50">
           {/* RODO Privacy Guarantee Banner */}
-          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-xs text-emerald-950">
-            <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+          <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-start gap-2.5 text-xs text-emerald-950 dark:text-emerald-200">
+            <ShieldCheck className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
             <div className="space-y-0.5 leading-relaxed">
               <div className="font-semibold">
                 Ochrona danych osobowych (RODO) działa lokalnie przed wysłaniem
               </div>
-              <p className="text-[11px] text-emerald-900">
+              <p className="text-[11px] text-emerald-900 dark:text-emerald-300/90">
                 Możesz wgrać eksport prosto z programu <strong>FARA</strong> lub Excela. Kolumny z
                 nazwiskami, imionami, PESEL-em czy telefonem są odrzucane w przeglądarce — na mapę
                 trafiają tylko adresy, lokale w blokach oraz liczba mieszkańców.
               </p>
               {parsed.ignoredPiiColumns.length > 0 && (
-                <div className="pt-1 text-[11px] font-semibold text-emerald-800">
+                <div className="pt-1 text-[11px] font-semibold text-emerald-800 dark:text-emerald-300">
                   Automatycznie pominięto kolumny osobowe:{' '}
                   {parsed.ignoredPiiColumns.join(', ')}
                 </div>
@@ -340,7 +353,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
           </div>
 
           {/* File Upload & Paste Box */}
-          <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-4 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-2">
                 <input
@@ -362,34 +375,34 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                 <button
                   type="button"
                   onClick={handleDownloadTemplate}
-                  className="min-h-[42px] px-3 py-2 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl inline-flex items-center gap-1.5 transition-colors"
+                  className="min-h-[42px] px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl inline-flex items-center gap-1.5 transition-colors"
                 >
-                  <Download className="w-3.5 h-3.5 text-slate-600" />
+                  <Download className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
                   <span>Wzór z FARY (CSV)</span>
                 </button>
               </div>
               {parsed.buildings.length > 0 && (
-                <span className="text-xs font-semibold text-emerald-800 tabular-nums">
+                <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-400 tabular-nums">
                   {parsed.validRows} wierszy → {parsed.buildings.length}{' '}
                   {parsed.buildings.length === 1 ? 'budynek' : 'budynków'}
                 </span>
               )}
             </div>
 
-            <p className="text-[11px] text-slate-500 leading-relaxed">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
               Obsługiwane formaty z FARY i Excela (UTF-8 / Windows-1250): osobne kolumny (
-              <code className="text-slate-700">Ulica;Nr domu;Nr lokalu;Liczba osób</code>) lub jeden
-              adres (np. <code className="text-slate-700">Słoneczna 12/5</code>,{' '}
-              <code className="text-slate-700">Słoneczna 12 m. 5</code>).
+              <code className="text-slate-700 dark:text-slate-300">Ulica;Nr domu;Nr lokalu;Liczba osób</code>) lub jeden
+              adres (np. <code className="text-slate-700 dark:text-slate-300">Słoneczna 12/5</code>,{' '}
+              <code className="text-slate-700 dark:text-slate-300">Słoneczna 12 m. 5</code>).
             </p>
 
             {uploadedFile ? (
-              <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200 flex items-center justify-between gap-2">
+              <div className="p-3 rounded-xl bg-amber-50/70 dark:bg-amber-950/35 border border-amber-200 dark:border-amber-800 flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <div className="text-xs font-semibold text-slate-900 truncate">
+                  <div className="text-xs font-semibold text-slate-900 dark:text-white truncate">
                     {uploadedFile.name}
                   </div>
-                  <div className="text-[11px] text-slate-600 tabular-nums">
+                  <div className="text-[11px] text-slate-600 dark:text-slate-300 tabular-nums">
                     Wczytano plik lokalnie ({uploadedFile.lineCount} wierszy)
                   </div>
                 </div>
@@ -400,7 +413,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                     setUploadedFile(null);
                     setSummary(null);
                   }}
-                  className="min-h-[36px] px-2.5 py-1 text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg shrink-0"
+                  className="min-h-[36px] px-2.5 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg shrink-0"
                 >
                   Usuń plik
                 </button>
@@ -418,17 +431,17 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                 placeholder={
                   'ulica;nr_domu;nr_lokalu;miejscowosc;liczba_osob\nSkalna;1;;Mikołów;4\nSkalna;3A;;Mikołów;3\nZielona;12;1;Mikołów;2'
                 }
-                className="w-full p-3 text-base sm:text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-amber-600"
+                className="w-full p-3 text-base sm:text-xs font-mono bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-amber-600"
               />
             )}
           </div>
 
           {/* FARA Grouping & Privacy Options */}
-          <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-4 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <label
                 htmlFor="fara-granularity"
-                className="text-xs font-semibold text-slate-800"
+                className="text-xs font-semibold text-slate-800 dark:text-slate-100"
               >
                 Co oznacza 1 wiersz w Twoim pliku z FARY?
               </label>
@@ -439,7 +452,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                 onChange={(e) =>
                   setGranularity(e.target.value as KartotekaRowGranularity)
                 }
-                className="w-full sm:w-auto min-h-[40px] sm:min-h-[36px] px-2.5 py-1.5 text-base sm:text-xs font-medium bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-amber-600"
+                className="w-full sm:w-auto min-h-[40px] sm:min-h-[36px] px-2.5 py-1.5 text-base sm:text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-600"
               >
                 <option value="auto">Auto (rozpoznaj z nagłówków)</option>
                 <option value="person">Osobę / mieszkańca (sumuj na adres)</option>
@@ -449,24 +462,24 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
             </div>
 
             {parsed.validRows > 0 && (
-              <div className="text-[11px] text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+              <div className="text-[11px] text-amber-900 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg px-2.5 py-1.5 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
                 <span>{parsed.detectedReason}</span>
               </div>
             )}
 
-            <div className="space-y-1.5 pt-0.5 text-xs text-slate-700">
+            <div className="space-y-1.5 pt-0.5 text-xs text-slate-700 dark:text-slate-300">
               <label className="flex items-start gap-2.5 py-1 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={splitSlashUnits}
                   disabled={isImporting}
                   onChange={(e) => setSplitSlashUnits(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 rounded border-slate-300 text-amber-700 focus:ring-amber-600 shrink-0"
+                  className="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-amber-700 focus:ring-amber-600 shrink-0"
                 />
                 <span>
-                  Rozdzielaj zapis <code className="text-slate-900">12/5</code> i{' '}
-                  <code className="text-slate-900">12 m. 5</code> na budynek + numer mieszkania (dla bloków i kamienic)
+                  Rozdzielaj zapis <code className="text-slate-900 dark:text-white">12/5</code> i{' '}
+                  <code className="text-slate-900 dark:text-white">12 m. 5</code> na budynek + numer mieszkania (dla bloków i kamienic)
                 </span>
               </label>
 
@@ -478,7 +491,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                   onChange={(e) =>
                     setMarkMultiFamilyAsMultiUnit(e.target.checked)
                   }
-                  className="mt-0.5 w-4 h-4 rounded border-slate-300 text-amber-700 focus:ring-amber-600 shrink-0"
+                  className="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-amber-700 focus:ring-amber-600 shrink-0"
                 />
                 <span>
                   Wiele rodzin pod jednym numerem (dom wielorodzinny bez numerów lokali) oznacz jako obiekt wielorodzinny
@@ -491,7 +504,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                   checked={privacyStripNotes}
                   disabled={isImporting}
                   onChange={(e) => setPrivacyStripNotes(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 rounded border-slate-300 text-amber-700 focus:ring-amber-600 shrink-0"
+                  className="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-amber-700 focus:ring-amber-600 shrink-0"
                 />
                 <span>
                   Tylko statystyka mieszkańców i mieszkań (ignoruj kolumnę „Uwagi”, na wypadek gdyby zawierała nazwiska)
@@ -505,7 +518,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                     checked={alsoGeocodeMissing}
                     disabled={isImporting}
                     onChange={(e) => setAlsoGeocodeMissing(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 rounded border-slate-300 text-amber-700 focus:ring-amber-600 shrink-0"
+                    className="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-amber-700 focus:ring-amber-600 shrink-0"
                   />
                   <span>
                     Dograj na mapę także brakujące budynki spoza aktualnej mapy ({mapMatch.unmatched.length})
@@ -517,21 +530,21 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
 
           {/* Live Map Match & Aggregated Building Preview */}
           {parsed.buildings.length > 0 && (
-            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-              <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 space-y-2">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+              <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                  <span className="font-semibold text-slate-900">
+                  <span className="font-semibold text-slate-900 dark:text-white">
                     Podsumowanie przed wgraniem ({parsed.buildings.length} budynków)
                   </span>
                   <div className="flex flex-wrap items-center gap-2 text-[11px] tabular-nums">
                     {parsed.totalResidents > 0 && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-200/70 text-slate-800 font-semibold">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-200/70 dark:bg-slate-700 text-slate-800 dark:text-slate-100 font-semibold">
                         <Users className="w-3 h-3" />
                         {parsed.totalResidents} mieszk.
                       </span>
                     )}
                     {parsed.multiUnitBuildingsCount > 0 && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 font-semibold">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 font-semibold">
                         <Building2 className="w-3 h-3" />
                         {parsed.multiUnitBuildingsCount} bloków / wielorodz.
                       </span>
@@ -541,20 +554,20 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
 
                 {existingStops.length > 0 && (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] tabular-nums">
-                    <div className="px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900">
+                    <div className="px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200">
                       <span className="font-bold">{mapMatch.matched.length}</span> dopasowano do mapy (natychmiastowo)
                     </div>
-                    <div className="px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900">
+                    <div className="px-2.5 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200">
                       <span className="font-bold">{mapMatch.unmatched.length}</span> nowych budynków do odnalezienia
                     </div>
-                    <div className="px-2.5 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-700">
+                    <div className="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
                       <span className="font-bold">{mapMatch.mapOnlyStopsCount}</span> domów na mapie spoza pliku
                     </div>
                   </div>
                 )}
               </div>
 
-              <div className="divide-y divide-slate-100 text-xs">
+              <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
                 {parsed.buildings.slice(0, 8).map((b) => {
                   const isMatched = matchedKeySet.has(b.key);
                   return (
@@ -564,36 +577,36 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                     >
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-semibold text-slate-900">
+                          <span className="font-semibold text-slate-900 dark:text-white">
                             {[b.street, b.buildingNumber].filter(Boolean).join(' ')}
                           </span>
                           {b.city && (
-                            <span className="text-slate-500">· {b.city}</span>
+                            <span className="text-slate-500 dark:text-slate-400">· {b.city}</span>
                           )}
                           {isMatched ? (
-                            <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-semibold">
+                            <span className="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[11px] font-semibold">
                               Na mapie ✓
                             </span>
                           ) : (
-                            <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-medium">
+                            <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-medium">
                               Nowy pin
                             </span>
                           )}
                         </div>
                         {b.summaryNote && (
-                          <div className="text-[11px] text-slate-600 truncate">
+                          <div className="text-[11px] text-slate-600 dark:text-slate-400 truncate">
                             {b.summaryNote}
                           </div>
                         )}
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
                         {b.totalResidents > 0 && (
-                          <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 text-[10px] font-semibold tabular-nums">
+                          <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-[11px] font-semibold tabular-nums">
                             {b.totalResidents} os.
                           </span>
                         )}
                         {b.isMultiUnit && (
-                          <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px] font-semibold tabular-nums">
+                          <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 text-[11px] font-semibold tabular-nums">
                             {b.units.length > 0
                               ? `${b.units.length} lok.`
                               : `Wielorodz. (${b.unitsCount})`}
@@ -604,7 +617,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                   );
                 })}
                 {parsed.buildings.length > 8 && (
-                  <div className="px-4 py-2 text-[11px] text-slate-500 text-center">
+                  <div className="px-4 py-2 text-[11px] text-slate-500 dark:text-slate-400 text-center">
                     …oraz {parsed.buildings.length - 8} kolejnych budynków
                   </div>
                 )}
@@ -613,19 +626,19 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
           )}
 
           {isImporting && progress.total > 0 && (
-            <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 space-y-2">
-              <div className="flex items-center justify-between text-xs font-semibold text-amber-950 tabular-nums">
+            <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 space-y-2">
+              <div className="flex items-center justify-between text-xs font-semibold text-amber-950 dark:text-amber-200 tabular-nums">
                 <span className="inline-flex items-center gap-1.5">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-700" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-700 dark:text-amber-400" />
                   Wyszukiwanie nowych budynków na mapie...
                 </span>
                 <span>
                   {progress.done} / {progress.total}
                 </span>
               </div>
-              <div className="w-full h-2 bg-amber-200/70 rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-amber-200/70 dark:bg-amber-900/50 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-amber-700 transition-all duration-200"
+                  className="h-full bg-amber-700 dark:bg-amber-500 transition-all duration-200"
                   style={{
                     width: `${
                       progress.total > 0
@@ -639,14 +652,14 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
           )}
 
           {summary && (
-            <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2 text-xs">
-              <div className="flex items-start gap-2 font-semibold text-emerald-800">
-                <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+            <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+              <div className="flex items-start gap-2 font-semibold text-emerald-800 dark:text-emerald-400">
+                <CheckCircle2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <div>
                     Zapisano dane z kartoteki (bez nazwisk):
                   </div>
-                  <div className="text-[11px] font-medium text-slate-700 space-y-0.5">
+                  <div className="text-[11px] font-medium text-slate-700 dark:text-slate-300 space-y-0.5">
                     {summary.enriched > 0 && (
                       <div>
                         • Zaktualizowano domy już stojące na mapie:{' '}
@@ -669,7 +682,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
                 </div>
               </div>
               {summary.failedLines.length > 0 && (
-                <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 space-y-1">
+                <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 space-y-1">
                   <div className="font-semibold inline-flex items-center gap-1.5">
                     <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                     Nie odnaleziono współrzędnych ({summary.failedLines.length}):
@@ -687,14 +700,14 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-4 border-t border-slate-200 bg-white flex items-center justify-end gap-2 shrink-0">
+        <div className="px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-end gap-2 shrink-0">
           <button
             type="button"
             onClick={() => {
               cancelRef.current = true;
               onClose();
             }}
-            className="min-h-[40px] px-3.5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900"
+            className="min-h-[40px] px-3.5 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
           >
             {summary && !isImporting ? 'Zamknij' : 'Anuluj'}
           </button>
@@ -707,7 +720,7 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
               isImporting
             }
             onClick={() => void handleRunImport()}
-            className="min-h-[40px] px-4 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed rounded-xl inline-flex items-center gap-1.5"
+            className="min-h-[40px] px-4 py-2 text-xs font-semibold text-white bg-slate-900 dark:bg-amber-700 hover:bg-slate-800 dark:hover:bg-amber-600 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed rounded-xl inline-flex items-center gap-1.5"
           >
             {isImporting ? (
               <>

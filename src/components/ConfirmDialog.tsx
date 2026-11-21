@@ -48,15 +48,15 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         onClick={onCancel}
         aria-hidden="true"
       />
-      <div className="relative z-10 bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div className="relative z-10 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
         <div className="p-4 sm:p-5 flex items-start gap-3.5">
           <div
             className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
               variant === 'danger'
-                ? 'bg-red-50 text-red-600 border border-red-200'
+                ? 'bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800'
                 : variant === 'warning'
-                  ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                  : 'bg-slate-100 text-slate-700 border border-slate-200'
+                  ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
             }`}
           >
             <AlertTriangle className="w-5 h-5" />
@@ -64,11 +64,11 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <div className="min-w-0 flex-1">
             <h2
               id="confirm-dialog-title"
-              className="text-sm sm:text-base font-semibold text-slate-900"
+              className="text-sm sm:text-base font-semibold text-slate-900 dark:text-white"
             >
               {title}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed">
               {description}
             </p>
           </div>
@@ -76,17 +76,17 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             type="button"
             onClick={onCancel}
             aria-label="Zamknij okno"
-            className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg shrink-0"
+            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="px-4 py-3 sm:px-5 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
+        <div className="px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-5 sm:py-3 bg-slate-50 dark:bg-slate-800/70 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={onCancel}
-            className="min-h-[40px] px-4 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 rounded-xl transition-colors"
+            className="min-h-[40px] px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
           >
             {cancelLabel}
           </button>

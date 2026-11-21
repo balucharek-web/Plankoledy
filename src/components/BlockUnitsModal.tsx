@@ -34,27 +34,32 @@ export const UNIT_STATUS_META: Record<
   pending: {
     label: 'Oczekuje',
     shortLabel: 'Oczekuje',
-    badgeClass: 'bg-slate-100 text-slate-700 border-slate-200',
+    badgeClass:
+      'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700',
   },
   accepted: {
     label: 'Przyjęto',
     shortLabel: 'Przyjęto',
-    badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+    badgeClass:
+      'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800',
   },
   absent: {
     label: 'Nieobecni',
     shortLabel: 'Nieobecni',
-    badgeClass: 'bg-amber-50 text-amber-800 border-amber-200',
+    badgeClass:
+      'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800',
   },
   declined: {
     label: 'Nie przyjmuje',
     shortLabel: 'Odmowa',
-    badgeClass: 'bg-red-50 text-red-700 border-red-200',
+    badgeClass:
+      'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/60 dark:text-red-300 dark:border-red-800',
   },
   invited: {
     label: 'Na zaproszenie',
     shortLabel: 'Zaproszenie',
-    badgeClass: 'bg-sky-50 text-sky-800 border-sky-200',
+    badgeClass:
+      'bg-sky-50 text-sky-800 border-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800',
   },
 };
 
@@ -455,19 +460,22 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="block-units-modal-title"
-      className="fixed inset-0 z-[1250] bg-slate-950/55 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-[1250] bg-slate-950/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4"
     >
-      <div className="bg-white border border-slate-200 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-3xl max-h-[94dvh] sm:max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-3xl max-h-[94dvh] sm:max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-4 py-3.5 sm:px-6 sm:py-4 border-b border-slate-200 flex items-start justify-between gap-3 bg-white shrink-0">
+        <div className="px-4 py-3.5 sm:px-6 sm:py-4 border-b border-slate-200 dark:border-slate-800 flex items-start justify-between gap-3 bg-white dark:bg-slate-900 shrink-0">
           <div className="min-w-0">
-            <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-800 uppercase tracking-wide">
+            <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-800 dark:text-amber-400 uppercase tracking-wide">
               <Building2 className="w-3.5 h-3.5" />
               Rozpiska lokali i adresów w budynku
             </div>
             <h2
               id="block-units-modal-title"
-              className="text-sm sm:text-base font-bold text-slate-900 truncate mt-0.5"
+              className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 truncate mt-0.5"
             >
               {stop.address || stop.label}
             </h2>
@@ -476,16 +484,16 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Zamknij"
-            className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl shrink-0"
+            className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl shrink-0 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Scrollable Body */}
-        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-5 bg-slate-50/50">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-5 bg-slate-50/50 dark:bg-slate-950/60">
           {/* Top building type + time configuration */}
-          <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <label className="inline-flex items-center gap-2.5 cursor-pointer select-none">
                 <input
@@ -498,15 +506,15 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                       setManualDurationMinutes(defaultVisitMinutes);
                     }
                   }}
-                  className="w-4 h-4 rounded border-slate-300 text-amber-700 focus:ring-amber-600"
+                  className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-amber-700 focus:ring-amber-600"
                 />
-                <span className="text-xs sm:text-sm font-semibold text-slate-900">
+                <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">
                   Budynek wielorodzinny / Blok (1 punkt na mapie, wiele lokali)
                 </span>
               </label>
 
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-xs font-semibold text-amber-900 tabular-nums">
-                <Clock className="w-3.5 h-3.5 text-amber-700" />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/70 text-xs font-semibold text-amber-900 dark:text-amber-300 tabular-nums">
+                <Clock className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                 Łączny postój: {totalHoursLabel}
               </span>
             </div>
@@ -516,7 +524,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                 <div>
                   <label
                     htmlFor="block-units-count"
-                    className="block text-[11px] font-medium text-slate-600 mb-1"
+                    className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1"
                   >
                     {units.length > 0
                       ? 'Lokali w rozpisce'
@@ -537,14 +545,14 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                         )
                       )
                     }
-                    className="w-full min-h-[40px] px-3 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-slate-50 border border-slate-200 rounded-xl text-slate-900 disabled:text-slate-600 focus:bg-white focus:outline-none focus:border-amber-600"
+                    className="w-full min-h-[40px] px-3 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 disabled:text-slate-600 dark:disabled:text-slate-400 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-amber-600"
                   />
                 </div>
 
                 <div>
                   <label
                     htmlFor="block-min-per-unit"
-                    className="block text-[11px] font-medium text-slate-600 mb-1"
+                    className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1"
                   >
                     Śr. czas na 1 lokal (min)
                   </label>
@@ -562,7 +570,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                         )
                       )
                     }
-                    className="w-full min-h-[40px] px-3 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-amber-600"
+                    className="w-full min-h-[40px] px-3 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-600"
                   />
                 </div>
 
@@ -570,14 +578,14 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                   <div className="flex items-center justify-between mb-1">
                     <label
                       htmlFor="block-total-duration"
-                      className="block text-[11px] font-medium text-slate-600"
+                      className="block text-[11px] font-medium text-slate-600 dark:text-slate-400"
                     >
                       Czas bloku w trasie (min)
                     </label>
                     <button
                       type="button"
                       onClick={() => setAutoCalcDuration((v) => !v)}
-                      className="text-[11px] font-medium text-amber-800 hover:underline"
+                      className="text-[11px] font-medium text-amber-800 dark:text-amber-400 hover:underline"
                     >
                       {autoCalcDuration ? 'Ręcznie' : 'Auto'}
                     </button>
@@ -601,7 +609,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                         )
                       );
                     }}
-                    className="w-full min-h-[40px] px-3 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-slate-50 border border-slate-200 rounded-xl text-slate-900 disabled:text-slate-600 focus:bg-white focus:outline-none focus:border-amber-600"
+                    className="w-full min-h-[40px] px-3 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 disabled:text-slate-600 dark:disabled:text-slate-400 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-amber-600"
                   />
                 </div>
               </div>
@@ -609,7 +617,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
               <div className="max-w-xs">
                 <label
                   htmlFor="single-house-duration"
-                  className="block text-[11px] font-medium text-slate-600 mb-1"
+                  className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1"
                 >
                   Czas wizyty w domu (min)
                 </label>
@@ -630,16 +638,19 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                       )
                     )
                   }
-                  className="w-full min-h-[40px] px-3 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-amber-600"
+                  className="w-full min-h-[40px] px-3 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-600"
                 />
               </div>
             )}
 
             {isMultiUnit && (
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Na mapie blok zajmuje tylko <strong>1 bezpłatny punkt nawigacji</strong>,
-                ale planer rezerwuje pełny czas potrzebny na przejście przez wszystkie
-                mieszkania w budynku.
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                Na mapie blok zajmuje tylko{' '}
+                <strong className="text-slate-700 dark:text-slate-200">
+                  1 bezpłatny punkt nawigacji
+                </strong>
+                , ale planer rezerwuje pełny czas potrzebny na przejście przez
+                wszystkie mieszkania w budynku.
               </p>
             )}
           </div>
@@ -647,15 +658,15 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
           {isMultiUnit && (
             <>
               {/* Quick Range Generator */}
-              <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-700 shrink-0" />
-                    <h3 className="text-xs sm:text-sm font-semibold text-slate-900">
+                    <Sparkles className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
+                    <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">
                       Szybki generator lokali i klatek
                     </h3>
                   </div>
-                  <span className="text-[11px] text-slate-500 tabular-nums">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 tabular-nums">
                     {units.length} / {MAX_UNITS_LIST} pozycji
                   </span>
                 </div>
@@ -665,7 +676,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                     <div>
                       <label
                         htmlFor="gen-stair-count"
-                        className="block text-[11px] font-medium text-slate-600 mb-1"
+                        className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1"
                       >
                         Liczba klatek
                       </label>
@@ -677,7 +688,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                             Number.parseInt(e.target.value, 10) || 1
                           )
                         }
-                        className="w-full min-h-[38px] px-2.5 py-1.5 text-base sm:text-xs bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-amber-600"
+                        className="w-full min-h-[38px] px-2.5 py-1.5 text-base sm:text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-600"
                       >
                         <option value={1}>1 klatka (lub bez podziału)</option>
                         {[2, 3, 4, 5, 6, 7, 8, 9, 10].map((c) => (
@@ -693,7 +704,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                         <div>
                           <label
                             htmlFor="gen-stair-style"
-                            className="block text-[11px] font-medium text-slate-600 mb-1"
+                            className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1"
                           >
                             Oznaczenie klatek
                           </label>
@@ -705,7 +716,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                                 e.target.value as 'letters' | 'roman' | 'numbers'
                               )
                             }
-                            className="w-full min-h-[38px] px-2.5 py-1.5 text-base sm:text-xs bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-amber-600"
+                            className="w-full min-h-[38px] px-2.5 py-1.5 text-base sm:text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-600"
                           >
                             <option value="letters">Litery: A, B, C...</option>
                             <option value="roman">Rzymskie: I, II, III...</option>
@@ -716,7 +727,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                         <div>
                           <label
                             htmlFor="gen-num-mode"
-                            className="block text-[11px] font-medium text-slate-600 mb-1"
+                            className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1"
                           >
                             Numeracja lokali
                           </label>
@@ -728,7 +739,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                                 e.target.value as 'continuous' | 'per_staircase'
                               )
                             }
-                            className="w-full min-h-[38px] px-2.5 py-1.5 text-base sm:text-xs bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-amber-600"
+                            className="w-full min-h-[38px] px-2.5 py-1.5 text-base sm:text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-600"
                           >
                             <option value="continuous">
                               Ciągła (np. kl. A 1–12, kl. B 13–24)
@@ -747,7 +758,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                       <div>
                         <label
                           htmlFor="gen-staircase"
-                          className="block text-[11px] font-medium text-slate-600 mb-1"
+                          className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1"
                         >
                           Klatka (opcjonalnie)
                         </label>
@@ -757,13 +768,13 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                           value={genStaircase}
                           onChange={(e) => setGenStaircase(e.target.value)}
                           placeholder="np. A lub I"
-                          className="w-full min-h-[38px] px-2.5 py-1.5 text-base sm:text-xs bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-amber-600"
+                          className="w-full min-h-[38px] px-2.5 py-1.5 text-base sm:text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-amber-600"
                         />
                       </div>
                       <div>
                         <label
                           htmlFor="gen-from"
-                          className="block text-[11px] font-medium text-slate-600 mb-1"
+                          className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1"
                         >
                           Od numeru
                         </label>
@@ -774,13 +785,13 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                           max={999}
                           value={genFrom}
                           onChange={(e) => setGenFrom(e.target.value)}
-                          className="w-full min-h-[38px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-amber-600"
+                          className="w-full min-h-[38px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-600"
                         />
                       </div>
                       <div>
                         <label
                           htmlFor="gen-to"
-                          className="block text-[11px] font-medium text-slate-600 mb-1"
+                          className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1"
                         >
                           Do numeru
                         </label>
@@ -791,14 +802,14 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                           max={999}
                           value={genTo}
                           onChange={(e) => setGenTo(e.target.value)}
-                          className="w-full min-h-[38px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-amber-600"
+                          className="w-full min-h-[38px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-600"
                         />
                       </div>
                       <div className="flex items-end">
                         <button
                           type="button"
                           onClick={handleGenerateRange}
-                          className="w-full min-h-[38px] px-3 py-1.5 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors"
+                          className="w-full min-h-[38px] px-3 py-1.5 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors"
                         >
                           <Layers className="w-3.5 h-3.5" />
                           <span>Generuj lokale</span>
@@ -810,7 +821,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                       <div>
                         <label
                           htmlFor="gen-multi-from"
-                          className="block text-[11px] font-medium text-slate-600 mb-1"
+                          className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1"
                         >
                           Start od numeru
                         </label>
@@ -821,13 +832,13 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                           max={999}
                           value={genFrom}
                           onChange={(e) => setGenFrom(e.target.value)}
-                          className="w-full min-h-[38px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-amber-600"
+                          className="w-full min-h-[38px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-600"
                         />
                       </div>
                       <div>
                         <label
                           htmlFor="gen-per-stair"
-                          className="block text-[11px] font-medium text-slate-600 mb-1"
+                          className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1"
                         >
                           Lokali w każdej klatce
                         </label>
@@ -838,14 +849,14 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                           max={60}
                           value={genPerStaircaseCount}
                           onChange={(e) => setGenPerStaircaseCount(e.target.value)}
-                          className="w-full min-h-[38px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-amber-600"
+                          className="w-full min-h-[38px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-600"
                         />
                       </div>
                       <div className="col-span-2 sm:col-span-1 flex items-end">
                         <button
                           type="button"
                           onClick={handleGenerateRange}
-                          className="w-full min-h-[38px] px-3 py-1.5 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors tabular-nums"
+                          className="w-full min-h-[38px] px-3 py-1.5 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors tabular-nums"
                         >
                           <Layers className="w-3.5 h-3.5" />
                           <span>
@@ -869,7 +880,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                 {/* Add single unit */}
                 <form
                   onSubmit={handleAddSingleUnit}
-                  className="pt-2 border-t border-slate-100 flex flex-wrap items-center gap-2"
+                  className="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-2"
                 >
                   <input
                     type="text"
@@ -877,7 +888,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                     onChange={(e) => setAddStaircase(e.target.value)}
                     placeholder="Klatka"
                     aria-label="Klatka"
-                    className="w-20 min-h-[36px] px-2.5 py-1 text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-none focus:border-amber-600"
+                    className="w-20 min-h-[36px] px-2.5 py-1 text-base sm:text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-amber-600"
                   />
                   <input
                     type="text"
@@ -885,7 +896,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                     onChange={(e) => setAddNumber(e.target.value)}
                     placeholder="Nr lokalu (np. 12A)"
                     aria-label="Numer lokalu"
-                    className="w-32 min-h-[36px] px-2.5 py-1 text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-none focus:border-amber-600"
+                    className="w-32 min-h-[36px] px-2.5 py-1 text-base sm:text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-amber-600"
                   />
                   <input
                     type="text"
@@ -893,12 +904,12 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                     onChange={(e) => setAddFamily(e.target.value)}
                     placeholder="Nazwisko rodziny (opcjonalnie)"
                     aria-label="Nazwisko rodziny"
-                    className="flex-1 min-w-[140px] min-h-[36px] px-2.5 py-1 text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-none focus:border-amber-600"
+                    className="flex-1 min-w-[140px] min-h-[36px] px-2.5 py-1 text-base sm:text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-amber-600"
                   />
                   <button
                     type="submit"
                     disabled={!addNumber.trim()}
-                    className="min-h-[36px] px-3 py-1 text-xs font-medium text-slate-800 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 rounded-lg inline-flex items-center gap-1"
+                    className="min-h-[36px] px-3 py-1 text-xs font-medium text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 rounded-lg inline-flex items-center gap-1 transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     Dodaj lokal
@@ -906,18 +917,18 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                 </form>
 
                 {limitNotice && (
-                  <p className="text-xs text-amber-800 font-medium">
+                  <p className="text-xs text-amber-800 dark:text-amber-300 font-medium">
                     {limitNotice}
                   </p>
                 )}
               </div>
 
               {/* Units List & Fara-style batch statuses */}
-              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-                <div className="p-3.5 sm:p-4 border-b border-slate-200 space-y-3">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+                <div className="p-3.5 sm:p-4 border-b border-slate-200 dark:border-slate-800 space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h3 className="text-xs sm:text-sm font-semibold text-slate-900 inline-flex items-center gap-1.5">
-                      <Users className="w-4 h-4 text-amber-700" />
+                    <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 inline-flex items-center gap-1.5">
+                      <Users className="w-4 h-4 text-amber-700 dark:text-amber-400" />
                       <span>
                         Adresy w bloku {shortBuildingAddr} ({units.length})
                       </span>
@@ -926,7 +937,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                       <button
                         type="button"
                         onClick={() => setUnits([])}
-                        className="text-xs text-slate-500 hover:text-red-600"
+                        className="text-xs text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400"
                       >
                         Wyczyść listę lokali
                       </button>
@@ -942,8 +953,8 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                           onClick={() => setStatusFilter('all')}
                           className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors tabular-nums ${
                             statusFilter === 'all'
-                              ? 'bg-slate-900 text-white'
-                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              ? 'bg-slate-900 dark:bg-amber-600 text-white'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                           }`}
                         >
                           Wszystkie ({units.length})
@@ -956,8 +967,8 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                               onClick={() => setStatusFilter(st)}
                               className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors tabular-nums ${
                                 statusFilter === st
-                                  ? 'bg-slate-900 text-white'
-                                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                  ? 'bg-slate-900 dark:bg-amber-600 text-white'
+                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                               }`}
                             >
                               {UNIT_STATUS_META[st].shortLabel} (
@@ -975,33 +986,33 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Szukaj lokalu, klatki lub rodziny..."
-                            className="w-full pl-8 pr-3 py-1.5 text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:bg-white focus:outline-none focus:border-amber-600"
+                            className="w-full pl-8 pr-3 py-1.5 text-base sm:text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-amber-600"
                           />
                         </div>
 
                         {filteredUnits.length > 0 && (
                           <div className="flex flex-wrap items-center gap-1 text-[11px]">
-                            <span className="text-slate-500 mr-0.5">
+                            <span className="text-slate-500 dark:text-slate-400 mr-0.5">
                               Seryjnie:
                             </span>
                             <button
                               type="button"
                               onClick={() => handleBatchStatus('accepted')}
-                              className="px-2 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 font-medium"
+                              className="px-2 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 font-medium"
                             >
                               Przyjęto
                             </button>
                             <button
                               type="button"
                               onClick={() => handleBatchStatus('absent')}
-                              className="px-2 py-1 rounded-md bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 font-medium"
+                              className="px-2 py-1 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/60 font-medium"
                             >
                               Nieobecni
                             </button>
                             <button
                               type="button"
                               onClick={() => handleBatchStatus('pending')}
-                              className="px-2 py-1 rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200 font-medium"
+                              className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-medium"
                             >
                               Resetuj
                             </button>
@@ -1010,7 +1021,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                       </div>
 
                       {lastYearDeclinedPendingCount > 0 && (
-                        <div className="p-2 rounded-lg bg-red-50/70 border border-red-200 flex flex-wrap items-center justify-between gap-2 text-[11px] text-red-900">
+                        <div className="p-2 rounded-lg bg-red-50/70 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 flex flex-wrap items-center justify-between gap-2 text-[11px] text-red-900 dark:text-red-200">
                           <span>
                             Wykryto <strong>{lastYearDeclinedPendingCount}</strong>{' '}
                             {lastYearDeclinedPendingCount === 1
@@ -1029,7 +1040,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                                 )
                               )
                             }
-                            className="px-2.5 py-1 rounded-md bg-white hover:bg-red-100 border border-red-300 text-red-800 font-semibold shrink-0"
+                            className="px-2.5 py-1 rounded-md bg-white dark:bg-slate-900 hover:bg-red-100 dark:hover:bg-red-950 border border-red-300 dark:border-red-800 text-red-800 dark:text-red-300 font-semibold shrink-0"
                           >
                             Oznacz zeszłoroczne odmowy ({lastYearDeclinedPendingCount})
                           </button>
@@ -1041,10 +1052,10 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
 
                 {units.length === 0 ? (
                   <div className="p-6 text-center space-y-2">
-                    <p className="text-xs font-medium text-slate-700">
+                    <p className="text-xs font-medium text-slate-700 dark:text-slate-200">
                       Brak indywidualnej rozpiski mieszkań w tym bloku
                     </p>
-                    <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
                       Możesz zostawić szacunkową liczbę lokali ({estimatedCount}{' '}
                       lok.) albo wygenerować numery mieszkań powyżej (np. od 1 do
                       20), aby mieć dokładną listę adresów w bloku i notować
@@ -1052,11 +1063,11 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                     </p>
                   </div>
                 ) : filteredUnits.length === 0 ? (
-                  <div className="p-6 text-center text-xs text-slate-500">
+                  <div className="p-6 text-center text-xs text-slate-500 dark:text-slate-400">
                     Brak lokali pasujących do wybranego filtra.
                   </div>
                 ) : (
-                  <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto">
+                  <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-72 overflow-y-auto">
                     {filteredUnits.map((unit) => {
                       const status = unit.status ?? 'pending';
                       const exactUnitAddress = formatUnitAddressLine(
@@ -1066,17 +1077,17 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                       return (
                         <div
                           key={unit.id}
-                          className="px-3.5 py-2.5 hover:bg-slate-50/70 space-y-2 sm:space-y-0 sm:flex sm:items-center sm:gap-2"
+                          className="px-3.5 py-2.5 hover:bg-slate-50/70 dark:hover:bg-slate-800/50 space-y-2 sm:space-y-0 sm:flex sm:items-center sm:gap-2"
                         >
                           {/* Full apartment address */}
                           <div className="min-w-[145px] sm:w-[175px] shrink-0">
-                            <div className="text-xs font-semibold text-slate-900 tabular-nums truncate">
+                            <div className="text-xs font-semibold text-slate-900 dark:text-slate-100 tabular-nums truncate">
                               {exactUnitAddress}
                             </div>
                             {unit.lastYearStatus && unit.lastYearStatus !== 'pending' && (
                               <div className="mt-0.5">
                                 <span
-                                  className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium border ${
+                                  className={`inline-block px-1.5 py-0.5 rounded text-[11px] font-medium border ${
                                     UNIT_STATUS_META[unit.lastYearStatus]
                                       .badgeClass
                                   }`}
@@ -1100,7 +1111,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                                 }
                                 placeholder="klatka"
                                 aria-label="Klatka"
-                                className="w-14 px-1.5 py-0.5 text-[11px] bg-slate-50 border border-slate-200 rounded text-slate-700 focus:bg-white focus:outline-none focus:border-amber-600"
+                                className="w-16 sm:w-14 px-1.5 py-0.5 text-base sm:text-[11px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-200 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-amber-600"
                               />
                               <input
                                 type="text"
@@ -1112,7 +1123,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                                 }
                                 placeholder="nr"
                                 aria-label="Numer lokalu"
-                                className="w-14 px-1.5 py-0.5 text-[11px] font-mono bg-slate-50 border border-slate-200 rounded text-slate-800 focus:bg-white focus:outline-none focus:border-amber-600"
+                                className="w-16 sm:w-14 px-1.5 py-0.5 text-base sm:text-[11px] font-mono bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-800 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-amber-600"
                               />
                             </div>
                           </div>
@@ -1129,7 +1140,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                               }
                               placeholder="Rodzina / nazwisko"
                               aria-label={`Rodzina pod adresem ${exactUnitAddress}`}
-                              className="px-2 py-1 text-base sm:text-xs bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none focus:border-amber-600"
+                              className="px-2 py-1 text-base sm:text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-amber-600"
                             />
                             <input
                               type="text"
@@ -1141,7 +1152,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                               }
                               placeholder="Uwagi (np. po 18:00)"
                               aria-label={`Uwagi dla ${exactUnitAddress}`}
-                              className="px-2 py-1 text-base sm:text-xs bg-white border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:border-amber-600"
+                              className="px-2 py-1 text-base sm:text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:border-amber-600"
                             />
                           </div>
 
@@ -1155,7 +1166,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                                 })
                               }
                               aria-label={`Status dla ${exactUnitAddress}`}
-                              className={`px-2 py-1 text-xs font-medium rounded-lg border focus:outline-none focus:border-amber-600 ${
+                              className={`px-2 py-1 text-base sm:text-xs font-medium rounded-lg border focus:outline-none focus:border-amber-600 ${
                                 UNIT_STATUS_META[status].badgeClass
                               }`}
                             >
@@ -1173,7 +1184,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
                               type="button"
                               onClick={() => handleDeleteUnit(unit.id)}
                               aria-label={`Usuń lokal ${exactUnitAddress}`}
-                              className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg"
+                              className="min-w-[32px] min-h-[32px] inline-flex items-center justify-center text-slate-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -1189,20 +1200,22 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-3 sm:px-6 sm:py-4 border-t border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
-          <div className="text-xs text-slate-600 tabular-nums">
+        <div className="px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+          <div className="text-xs text-slate-600 dark:text-slate-400 tabular-nums">
             {isMultiUnit ? (
               <>
-                <strong className="text-slate-900">
+                <strong className="text-slate-900 dark:text-slate-100">
                   Blok ({effectiveUnitsCount} lok.)
                 </strong>{' '}
                 · Szacowany czas postoju:{' '}
-                <strong className="text-amber-800">{totalHoursLabel}</strong>
+                <strong className="text-amber-800 dark:text-amber-400">
+                  {totalHoursLabel}
+                </strong>
               </>
             ) : (
               <>
                 Pojedynczy dom ·{' '}
-                <strong className="text-slate-900">
+                <strong className="text-slate-900 dark:text-slate-100">
                   {finalDurationMinutes} min
                 </strong>
               </>
@@ -1213,17 +1226,17 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[40px] px-3.5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900"
+              className="min-h-[40px] px-3.5 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
             >
               Anuluj
             </button>
             <button
               type="button"
               onClick={handleSaveBlock}
-              className={`min-h-[40px] px-4 py-2 text-xs font-semibold rounded-xl inline-flex items-center gap-1.5 ${
+              className={`min-h-[40px] px-4 py-2 text-xs font-semibold rounded-xl inline-flex items-center gap-1.5 transition-colors ${
                 onSaveAndNext
-                  ? 'text-slate-800 bg-slate-100 hover:bg-slate-200'
-                  : 'text-white bg-slate-900 hover:bg-slate-800'
+                  ? 'text-slate-800 dark:text-slate-100 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  : 'text-white bg-slate-900 dark:bg-amber-600 hover:bg-slate-800 dark:hover:bg-amber-500'
               }`}
             >
               <Check className="w-3.5 h-3.5" />
@@ -1233,7 +1246,7 @@ export const BlockUnitsModal: React.FC<BlockUnitsModalProps> = ({
               <button
                 type="button"
                 onClick={handleSaveBlockAndNext}
-                className="min-h-[40px] px-4 py-2 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl inline-flex items-center gap-1.5"
+                className="min-h-[40px] px-4 py-2 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 rounded-xl inline-flex items-center gap-1.5 transition-colors"
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>Zapisz i następny dom →</span>

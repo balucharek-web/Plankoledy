@@ -280,19 +280,22 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="osm-modal-title"
-      className="fixed inset-0 z-[1200] bg-slate-950/50 flex items-end sm:items-center justify-center p-2 sm:p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-[1200] bg-slate-950/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-2 sm:p-4"
     >
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-xl max-w-2xl w-full max-h-[92dvh] sm:max-h-[88vh] flex flex-col overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl max-w-2xl w-full max-h-[92dvh] sm:max-h-[88vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-4 py-3.5 sm:px-6 sm:py-4 border-b border-slate-200 flex items-start justify-between gap-3">
+        <div className="px-4 py-3.5 sm:px-6 sm:py-4 border-b border-slate-200 dark:border-slate-800 flex items-start justify-between gap-3">
           <div>
             <h2
               id="osm-modal-title"
-              className="text-sm sm:text-base font-semibold text-slate-900"
+              className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100"
             >
               Wykryj ulice i adresy z terenu parafii
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Zaznacz ulice lub konkretne numery domów do zapamiętania dla tej
               parafii.
             </p>
@@ -301,26 +304,29 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Zamknij"
-            className="p-2 text-slate-400 hover:text-slate-700 rounded-lg shrink-0"
+            className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg shrink-0 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Fetch controls */}
-        <div className="px-4 py-3 sm:px-6 sm:py-3.5 bg-slate-50/80 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <div className="px-4 py-3 sm:px-6 sm:py-3.5 bg-slate-50/80 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
           {hasBoundary ? (
-            <div className="text-xs text-slate-700 flex items-center gap-2">
-              <MapIcon className="w-4 h-4 text-amber-700 shrink-0" />
+            <div className="text-xs text-slate-700 dark:text-slate-300 flex items-center gap-2">
+              <MapIcon className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
               <span>
-                Obszar: <strong>wyznaczony teren parafii</strong> (
-                {boundary.length} punktów)
+                Obszar:{' '}
+                <strong className="text-slate-900 dark:text-slate-100">
+                  wyznaczony teren parafii
+                </strong>{' '}
+                ({boundary.length} punktów)
               </span>
             </div>
           ) : (
-            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-700">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
               <span>Promień wokół kościoła:</span>
-              <div className="flex items-center gap-1 p-0.5 bg-slate-200/70 rounded-lg">
+              <div className="flex items-center gap-1 p-0.5 bg-slate-200/70 dark:bg-slate-800 rounded-lg">
                 {[400, 600, 1000].map((r) => (
                   <button
                     key={r}
@@ -328,8 +334,8 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
                     onClick={() => setRadiusMeters(r)}
                     className={`min-h-[34px] px-2.5 py-1 rounded-md font-mono tabular-nums transition-colors ${
                       radiusMeters === r
-                        ? 'bg-white text-slate-900 shadow-sm font-medium'
-                        : 'text-slate-600 hover:text-slate-900'
+                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm font-medium'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                     }`}
                   >
                     {r} m
@@ -343,7 +349,7 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
             type="button"
             onClick={() => void handleFetch()}
             disabled={loading}
-            className="w-full sm:w-auto min-h-[38px] px-4 py-2 text-xs font-medium text-white bg-amber-700 hover:bg-amber-800 disabled:bg-slate-400 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+            className="w-full sm:w-auto min-h-[38px] px-4 py-2 text-xs font-medium text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 disabled:bg-slate-400 dark:disabled:bg-slate-700 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
           >
             {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
             {loading
@@ -358,8 +364,8 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
         <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4">
           {loading && !streets && (
             <div className="py-12 text-center space-y-2">
-              <Loader2 className="w-6 h-6 animate-spin text-amber-700 mx-auto" />
-              <p className="text-xs text-slate-600 tabular-nums">
+              <Loader2 className="w-6 h-6 animate-spin text-amber-700 dark:text-amber-400 mx-auto" />
+              <p className="text-xs text-slate-600 dark:text-slate-400 tabular-nums">
                 {scanProgress && scanProgress.total > 0
                   ? `Skanowanie oficjalnych adresów w obszarze parafii (${scanProgress.completed} z ${scanProgress.total} sektorów)...`
                   : 'Wykrywanie ulic i oficjalnych adresów domów w obszarze...'}
@@ -368,17 +374,17 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
           )}
 
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-800">
+            <div className="p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/70 rounded-xl text-xs text-red-800 dark:text-red-300">
               {error}
             </div>
           )}
 
           {streets && streets.length === 0 && !loading && (
             <div className="py-10 text-center">
-              <p className="text-sm font-medium text-slate-800">
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
                 Nie znaleziono adresów w tym obszarze
               </p>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Spróbuj powiększyć wyznaczony obszar lub kliknij konkretną ulicę
                 na mapie.
               </p>
@@ -387,8 +393,8 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
 
           {streets && streets.length > 0 && (
             <>
-              <div className="p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                <div className="text-xs text-emerald-950">
+              <div className="p-3 bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="text-xs text-emerald-950 dark:text-emerald-200">
                   Wykryto <strong>{streets.length}</strong> ulic i{' '}
                   <strong>{totalDetectedHouses}</strong> adresów (PRG +
                   OpenStreetMap).
@@ -396,7 +402,7 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
                 <button
                   type="button"
                   onClick={handleAddAllAreaNow}
-                  className="min-h-[38px] px-3.5 py-2 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 shadow-xs transition-colors"
+                  className="min-h-[38px] px-3.5 py-2 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 rounded-xl inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 shadow-xs transition-colors"
                 >
                   <CheckSquare className="w-3.5 h-3.5" />
                   <span>
@@ -417,20 +423,20 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
                     value={filterText}
                     onChange={(e) => setFilterText(e.target.value)}
                     placeholder="Filtruj po nazwie ulicy..."
-                    className="w-full pl-9 pr-3 py-2 text-base sm:text-xs bg-white border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-amber-600"
+                    className="w-full pl-9 pr-3 py-2 text-base sm:text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-amber-600"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={handleSelectAllFilteredHouses}
-                  className="min-h-[38px] px-3 py-1.5 text-xs font-medium text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl inline-flex items-center gap-1.5 whitespace-nowrap"
+                  className="min-h-[38px] px-3 py-1.5 text-xs font-medium text-amber-900 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-200 dark:border-amber-800/70 rounded-xl inline-flex items-center gap-1.5 whitespace-nowrap transition-colors"
                 >
                   <CheckSquare className="w-3.5 h-3.5" />
                   Zaznacz wszystkie ({filteredStreets.length})
                 </button>
               </div>
 
-              <div className="border border-slate-200 rounded-xl divide-y divide-slate-100 overflow-hidden">
+              <div className="border border-slate-200 dark:border-slate-800 rounded-xl divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden">
                 {filteredStreets.map((street) => {
                   const isExpanded = expandedStreet === street.streetName;
                   const selectedHousesCount = street.houses.filter(
@@ -442,20 +448,23 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
                       : !!selectedStreetNames[street.streetName];
 
                   return (
-                    <div key={street.streetName} className="bg-white">
-                      <div className="px-3.5 py-2.5 flex items-center justify-between gap-3 hover:bg-slate-50/70">
+                    <div
+                      key={street.streetName}
+                      className="bg-white dark:bg-slate-900"
+                    >
+                      <div className="px-3.5 py-2.5 flex items-center justify-between gap-3 hover:bg-slate-50/70 dark:hover:bg-slate-800/60">
                         <label className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer">
                           <input
                             type="checkbox"
                             checked={streetChecked}
                             onChange={() => toggleStreetAllHouses(street)}
-                            className="w-4 h-4 rounded border-slate-300 text-amber-700 focus:ring-amber-600"
+                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-amber-700 focus:ring-amber-600"
                           />
                           <div className="min-w-0">
-                            <div className="text-sm font-medium text-slate-900 truncate">
+                            <div className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
                               {street.streetName}
                             </div>
-                            <div className="text-xs text-slate-500 tabular-nums">
+                            <div className="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
                               {street.houses.length > 0
                                 ? `${street.houses.length} wykrytych domów`
                                 : 'Brak pojedynczych numerów (dodaj punkt ulicy)'}
@@ -473,7 +482,7 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
                                 isExpanded ? null : street.streetName
                               )
                             }
-                            className="px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg inline-flex items-center gap-1 whitespace-nowrap shrink-0"
+                            className="px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg inline-flex items-center gap-1 whitespace-nowrap shrink-0 transition-colors"
                           >
                             {isExpanded ? (
                               <ChevronDown className="w-3.5 h-3.5" />
@@ -486,9 +495,9 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
                       </div>
 
                       {isExpanded && street.houses.length > 0 && (
-                        <div className="px-4 py-3 bg-slate-50 border-t border-slate-100 space-y-2.5">
+                        <div className="px-4 py-3 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-100 dark:border-slate-800 space-y-2.5">
                           <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                            <span className="text-slate-500 mr-1">
+                            <span className="text-slate-500 dark:text-slate-400 mr-1">
                               Zaznacz:
                             </span>
                             <button
@@ -496,7 +505,7 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
                               onClick={() =>
                                 selectHousesByParity(street, 'all')
                               }
-                              className="px-2.5 py-1 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg text-slate-700"
+                              className="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-700 dark:text-slate-200"
                             >
                               Wszystkie
                             </button>
@@ -505,7 +514,7 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
                               onClick={() =>
                                 selectHousesByParity(street, 'even')
                               }
-                              className="px-2.5 py-1 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg text-slate-700"
+                              className="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-700 dark:text-slate-200"
                             >
                               Parzyste
                             </button>
@@ -514,7 +523,7 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
                               onClick={() =>
                                 selectHousesByParity(street, 'odd')
                               }
-                              className="px-2.5 py-1 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg text-slate-700"
+                              className="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-700 dark:text-slate-200"
                             >
                               Nieparzyste
                             </button>
@@ -523,7 +532,7 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
                               onClick={() =>
                                 selectHousesByParity(street, 'none')
                               }
-                              className="px-2 py-1 text-slate-500 hover:text-slate-800"
+                              className="px-2 py-1 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
                             >
                               Odznacz
                             </button>
@@ -539,8 +548,8 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
                                   onClick={() => toggleHouse(house)}
                                   className={`px-2.5 py-1 text-xs font-mono tabular-nums rounded-lg border transition-colors ${
                                     active
-                                      ? 'bg-amber-700 border-amber-700 text-white font-medium'
-                                      : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                                      ? 'bg-amber-700 dark:bg-amber-600 border-amber-700 dark:border-amber-600 text-white font-medium'
+                                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600'
                                   }`}
                                 >
                                   {house.houseNumber}
@@ -559,15 +568,15 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-3 sm:px-6 sm:py-4 border-t border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="text-xs text-slate-500 tabular-nums">
+        <div className="px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
             Wybrane ulice i adresy zostaną zapamiętane dla tej parafii.
           </div>
           <div className="flex items-center justify-end gap-2 shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[40px] px-3.5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900"
+              className="min-h-[40px] px-3.5 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
             >
               Anuluj
             </button>
@@ -575,7 +584,7 @@ export const OsmStreetFetcherModal: React.FC<OsmStreetFetcherModalProps> = ({
               type="button"
               disabled={totalSelectedCount === 0}
               onClick={handleConfirmAdd}
-              className="min-h-[40px] px-4 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed rounded-xl tabular-nums"
+              className="min-h-[40px] px-4 py-2 text-xs font-semibold text-white bg-slate-900 dark:bg-amber-600 hover:bg-slate-800 dark:hover:bg-amber-500 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed rounded-xl tabular-nums transition-colors"
             >
               Zapisz do parafii ({totalSelectedCount})
             </button>

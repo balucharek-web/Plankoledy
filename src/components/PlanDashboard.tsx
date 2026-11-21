@@ -5,6 +5,7 @@ import {
   CalendarDays,
   CheckCircle2,
   Church,
+  ClipboardCheck,
   Clock,
   Cloud,
   Layers,
@@ -66,6 +67,7 @@ interface PlanDashboardProps {
   onSelectSavedParish: (parishId: string) => void;
   onNavigateSection: (section: WorkspaceSection) => void;
   onOpenDayRoute: (date: string) => void;
+  onStartFieldMode?: (date: string) => void;
   onViewDayOnMap: (date: string) => void;
   onViewWholeParish?: () => void;
   onEditDay: (date: string) => void;
@@ -92,6 +94,7 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
   onSelectSavedParish,
   onNavigateSection,
   onOpenDayRoute,
+  onStartFieldMode,
   onViewDayOnMap,
   onViewWholeParish,
   onEditDay,
@@ -206,10 +209,10 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
     return (
       <div className="p-4 sm:p-5 space-y-5">
         <div className="space-y-1.5">
-          <h2 className="text-lg font-semibold text-slate-900 tracking-tight">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white tracking-tight">
             Rozpocznij plan kolędy
           </h2>
-          <p className="text-xs text-slate-500 leading-relaxed">
+          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
             Wyszukaj parafię, pobierz ulice z mapy, a potem w 3 krokach
             zaplanuj dowolny dzień lub zobacz podsumowanie całego okresu.
           </p>
@@ -229,20 +232,22 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
             type="button"
             disabled={gpsLoading}
             onClick={() => void handleFindGps()}
-            className="w-full min-h-[42px] py-2 px-3 text-xs font-medium rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 inline-flex items-center justify-center gap-2 transition-colors"
+            className="w-full min-h-[42px] py-2 px-3 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 inline-flex items-center justify-center gap-2 transition-colors"
           >
             {gpsLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin text-amber-700" />
+              <Loader2 className="w-4 h-4 animate-spin text-amber-700 dark:text-amber-400" />
             ) : (
-              <LocateFixed className="w-4 h-4 text-amber-700" />
+              <LocateFixed className="w-4 h-4 text-amber-700 dark:text-amber-400" />
             )}
             <span>Znajdź parafie w pobliżu (GPS)</span>
           </button>
 
-          {gpsError && <p className="text-xs text-red-600">{gpsError}</p>}
+          {gpsError && (
+            <p className="text-xs text-red-600 dark:text-red-400">{gpsError}</p>
+          )}
 
           {nearbyList && nearbyList.length > 0 && (
-            <ul className="border border-slate-200 rounded-xl divide-y divide-slate-100 max-h-56 overflow-y-auto bg-white">
+            <ul className="border border-slate-200 dark:border-slate-700 rounded-xl divide-y divide-slate-100 dark:divide-slate-800 max-h-56 overflow-y-auto bg-white dark:bg-slate-900">
               {nearbyList.map((item) => (
                 <li key={item.id}>
                   <button
@@ -258,20 +263,20 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
                       setNearbyList(null);
                       setLastGpsLocation(null);
                     }}
-                    className="w-full min-h-[46px] px-3 py-2.5 text-left hover:bg-amber-50/60 flex items-start justify-between gap-2 transition-colors"
+                    className="w-full min-h-[46px] px-3 py-2.5 text-left hover:bg-amber-50/60 dark:hover:bg-amber-950/30 flex items-start justify-between gap-2 transition-colors"
                   >
                     <div className="min-w-0 flex items-start gap-2">
-                      <Church className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                      <Church className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
                       <div className="min-w-0">
-                        <div className="text-xs font-medium text-slate-900 truncate">
+                        <div className="text-xs font-medium text-slate-900 dark:text-white truncate">
                           {item.name}
                         </div>
-                        <div className="text-[11px] text-slate-500 truncate">
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                           {item.address}
                         </div>
                       </div>
                     </div>
-                    <span className="text-[11px] font-mono tabular-nums text-slate-500 shrink-0">
+                    <span className="text-[11px] font-mono tabular-nums text-slate-500 dark:text-slate-400 shrink-0">
                       {formatShortDist(item.distanceMeters)}
                     </span>
                   </button>
@@ -298,25 +303,25 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
                 setGpsError(null);
                 onNavigateSection('parish');
               }}
-              className="w-full min-h-[42px] px-3 py-2 text-left rounded-xl border border-amber-200 bg-amber-50/70 hover:bg-amber-100/70 flex items-center justify-between gap-2 transition-colors"
+              className="w-full min-h-[42px] px-3 py-2 text-left rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/70 dark:bg-amber-950/40 hover:bg-amber-100/70 dark:hover:bg-amber-900/50 flex items-center justify-between gap-2 transition-colors"
             >
               <div className="min-w-0">
-                <div className="text-xs font-semibold text-amber-950 truncate">
+                <div className="text-xs font-semibold text-amber-950 dark:text-amber-200 truncate">
                   Użyj mojej bieżącej pozycji GPS
                 </div>
-                <div className="text-[11px] text-amber-800 truncate">
+                <div className="text-[11px] text-amber-800 dark:text-amber-300/90 truncate">
                   {lastGpsLocation.address}
                 </div>
               </div>
-              <ArrowRight className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+              <ArrowRight className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
             </button>
           )}
         </div>
 
         {isSignedIn ? (
           savedParishes.length > 0 && (
-            <div className="pt-3 border-t border-slate-200 space-y-2">
-              <div className="text-xs font-medium text-slate-700">
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
+              <div className="text-xs font-medium text-slate-700 dark:text-slate-300">
                 Twoje zapisane parafie ({savedParishes.length})
               </div>
               <ul className="space-y-1.5">
@@ -325,13 +330,13 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
                     <button
                       type="button"
                       onClick={() => onSelectSavedParish(rec.id)}
-                      className="w-full min-h-[44px] px-3 py-2 text-left rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-between gap-2 transition-colors"
+                      className="w-full min-h-[44px] px-3 py-2 text-left rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between gap-2 transition-colors"
                     >
                       <div className="min-w-0">
-                        <div className="text-xs font-medium text-slate-900 truncate">
+                        <div className="text-xs font-medium text-slate-900 dark:text-white truncate">
                           {rec.parish.name}
                         </div>
-                        <div className="text-[11px] text-slate-500 truncate">
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                           {rec.parish.address}
                         </div>
                       </div>
@@ -343,11 +348,11 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
             </div>
           )
         ) : (
-          <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2.5">
-            <div className="text-xs font-medium text-slate-800">
+          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 space-y-2.5">
+            <div className="text-xs font-medium text-slate-800 dark:text-slate-100">
               Zapisuj swoje parafie i plany kolędy w chmurze
             </div>
-            <p className="text-xs text-slate-500 leading-relaxed">
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
               Zaloguj się przez Google lub załóż darmowe konto na dowolny
               adres e-mail — wszystkie tereny i plany będą przypisane wyłącznie
               do Twojego konta.
@@ -355,9 +360,9 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
             <button
               type="button"
               onClick={onSignInGoogle}
-              className="w-full min-h-[42px] py-2 px-3 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-xl inline-flex items-center justify-center gap-2 transition-colors"
+              className="w-full min-h-[42px] py-2 px-3 text-xs font-semibold text-white bg-slate-900 dark:bg-amber-700 hover:bg-slate-800 dark:hover:bg-amber-600 rounded-xl inline-flex items-center justify-center gap-2 transition-colors"
             >
-              <LogIn className="w-4 h-4 text-amber-400" />
+              <LogIn className="w-4 h-4 text-amber-400 dark:text-white" />
               Zaloguj się lub załóż konto
             </button>
           </div>
@@ -370,36 +375,36 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
   const hasBoundary = boundary.length >= 3;
 
   return (
-    <div className="divide-y divide-slate-200">
+    <div className="divide-y divide-slate-200 dark:divide-slate-800">
       {/* Compact Active Parish Header */}
       <section className="p-4 sm:p-5 space-y-3">
         <div className="min-w-0">
-          <div className="text-[11px] font-medium text-amber-800 flex items-center gap-1.5">
+          <div className="text-[11px] font-medium text-amber-800 dark:text-amber-400 flex items-center gap-1.5">
             <Church className="w-3.5 h-3.5 shrink-0" />
             <span>Aktywna parafia</span>
             {isSignedIn && (
               <>
                 <span aria-hidden="true">·</span>
-                <span className="inline-flex items-center gap-1 text-emerald-700 font-normal">
+                <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-normal">
                   <Cloud className="w-3 h-3" />
                   {userEmail?.split('@')[0] || 'Zapisano'}
                 </span>
               </>
             )}
           </div>
-          <h2 className="mt-1 text-base font-semibold text-slate-900 leading-snug">
+          <h2 className="mt-1 text-base font-semibold text-slate-900 dark:text-white leading-snug">
             {parish.name}
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5 truncate">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
             {parish.address}
           </p>
-          <p className="text-xs text-slate-600 mt-2 tabular-nums">
+          <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 tabular-nums">
             {hasSavedStops ? (
               <>
-                <strong className="text-slate-900">{savedStreetCount}</strong>{' '}
-                ulic · <strong className="text-slate-900">{stops.length}</strong>{' '}
+                <strong className="text-slate-900 dark:text-white">{savedStreetCount}</strong>{' '}
+                ulic · <strong className="text-slate-900 dark:text-white">{stops.length}</strong>{' '}
                 domów ·{' '}
-                <strong className="text-amber-800">{plannedDays.length}</strong>{' '}
+                <strong className="text-amber-800 dark:text-amber-400">{plannedDays.length}</strong>{' '}
                 {plannedDays.length === 1 ? 'dzień zaplanowany' : 'dni zaplanowane'}
               </>
             ) : (
@@ -413,7 +418,7 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
             aria-label="Zmień zapisaną parafię"
             value={activeParishId ?? ''}
             onChange={(e) => onSelectSavedParish(e.target.value)}
-            className="w-full min-h-[40px] px-3 py-2 text-xs font-medium bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:outline-none focus:border-amber-600"
+            className="w-full min-h-[44px] px-3 py-2 text-base sm:text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:border-amber-600"
           >
             {savedParishes.map((rec) => (
               <option key={rec.id} value={rec.id}>
@@ -430,22 +435,22 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
           <div
             className={`rounded-2xl border p-4 space-y-3 shadow-xs ${
               currentDayPlan.kind === 'today'
-                ? 'border-amber-300 bg-amber-50/45'
-                : 'border-slate-200 bg-white'
+                ? 'border-amber-300 dark:border-amber-700/80 bg-amber-50/45 dark:bg-amber-950/30'
+                : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'
             }`}
           >
             <div className="flex items-center justify-between gap-2">
               <span
-                className={`inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide ${
+                className={`inline-flex items-center gap-1.5 text-xs font-semibold ${
                   currentDayPlan.kind === 'today'
-                    ? 'text-amber-800'
-                    : 'text-slate-500'
+                    ? 'text-amber-800 dark:text-amber-400'
+                    : 'text-slate-500 dark:text-slate-400'
                 }`}
               >
                 <CalendarDays className="w-3.5 h-3.5 shrink-0" />
                 {currentDayPlan.badge}
               </span>
-              <span className="text-xs font-semibold text-slate-800 tabular-nums">
+              <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 font-mono tabular-nums">
                 {currentDayPlan.day.startTime}–
                 {currentDayPlan.day.plannedEndTime ||
                   currentDayPlan.day.estimatedEndTime}
@@ -453,11 +458,11 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
             </div>
 
             <div className="min-w-0">
-              <div className="text-base font-bold tracking-tight text-slate-900">
+              <div className="text-base font-bold tracking-tight text-slate-900 dark:text-white">
                 {currentDayPlan.day.weekdayLabel},{' '}
                 {currentDayPlan.day.shortDateLabel}
               </div>
-              <p className="text-xs sm:text-[13px] text-slate-700 font-medium mt-0.5 line-clamp-2">
+              <p className="text-xs sm:text-[13px] text-slate-700 dark:text-slate-300 font-medium mt-0.5 line-clamp-2">
                 {currentDayPlan.day.streetNames.length > 0
                   ? `${currentDayPlan.day.streetNames.slice(0, 3).join(', ')}${
                       currentDayPlan.day.streetNames.length > 3
@@ -466,16 +471,16 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
                     }`
                   : 'Wybrane punkty na mapie'}
               </p>
-              <div className="text-xs text-slate-500 mt-1.5 tabular-nums flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 tabular-nums flex flex-wrap items-center gap-x-2 gap-y-0.5">
                 <span>
-                  <strong className="font-semibold text-slate-900">
+                  <strong className="font-semibold text-slate-900 dark:text-white">
                     {currentDayPlan.day.stops.length}
                   </strong>{' '}
                   {currentDayPlan.day.stops.length === 1 ? 'dom' : 'domów'}
                 </span>
                 {currentDayPlan.day.totalDistanceMeters > 0 && (
                   <>
-                    <span aria-hidden="true" className="text-slate-300">
+                    <span aria-hidden="true" className="text-slate-300 dark:text-slate-600">
                       ·
                     </span>
                     <span>
@@ -485,7 +490,7 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
                 )}
                 {currentDayPlan.day.estimatedRoutes.length > 0 && (
                   <>
-                    <span aria-hidden="true" className="text-slate-300">
+                    <span aria-hidden="true" className="text-slate-300 dark:text-slate-600">
                       ·
                     </span>
                     <span>
@@ -498,10 +503,10 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
                 )}
                 {currentDayPlan.visitedCount > 0 && (
                   <>
-                    <span aria-hidden="true" className="text-slate-300">
+                    <span aria-hidden="true" className="text-slate-300 dark:text-slate-600">
                       ·
                     </span>
-                    <span className="text-emerald-700 font-semibold">
+                    <span className="text-emerald-700 dark:text-emerald-400 font-semibold">
                       Odwiedzono {currentDayPlan.visitedCount}/
                       {currentDayPlan.day.stops.length}
                     </span>
@@ -520,52 +525,66 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-2 pt-0.5">
-              {selectedDate === currentDayPlan.day.date && onViewWholeParish ? (
-                <>
+            {/* Dominant Single Primary CTA + Clean Secondary Controls */}
+            <div className="space-y-2 pt-0.5">
+              {onStartFieldMode && (
+                <button
+                  type="button"
+                  onClick={() => onStartFieldMode(currentDayPlan.day.date)}
+                  className="w-full min-h-[46px] px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold inline-flex items-center justify-center gap-2 transition-colors shadow-xs"
+                >
+                  <ClipboardCheck className="w-4 h-4 shrink-0" />
+                  <span>Rozpocznij kolędę w terenie</span>
+                </button>
+              )}
+
+              <div className="grid grid-cols-3 gap-2">
+                {selectedDate === currentDayPlan.day.date && onViewWholeParish ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => onViewDayOnMap(currentDayPlan.day.date)}
+                      className="lg:hidden min-h-[44px] sm:min-h-[40px] px-2.5 py-2 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-950 dark:text-amber-200 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+                    >
+                      <MapIcon className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
+                      <span>Mapa</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onViewWholeParish}
+                      className="hidden lg:inline-flex min-h-[40px] px-2.5 py-2 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-950 dark:text-amber-200 text-xs font-semibold items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+                    >
+                      <Church className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
+                      <span>Cała parafia</span>
+                    </button>
+                  </>
+                ) : (
                   <button
                     type="button"
                     onClick={() => onViewDayOnMap(currentDayPlan.day.date)}
-                    className="lg:hidden min-h-[44px] sm:min-h-[40px] px-2.5 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+                    className="min-h-[44px] sm:min-h-[40px] px-2.5 py-2 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-950 dark:text-amber-200 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
                   >
-                    <MapIcon className="w-3.5 h-3.5 shrink-0" />
+                    <MapIcon className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
                     <span>Mapa dnia</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={onViewWholeParish}
-                    className="hidden lg:inline-flex min-h-[40px] px-2.5 py-2 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-950 text-xs font-semibold items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
-                  >
-                    <Church className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-                    <span>Cała parafia</span>
-                  </button>
-                </>
-              ) : (
+                )}
                 <button
                   type="button"
-                  onClick={() => onViewDayOnMap(currentDayPlan.day.date)}
-                  className="min-h-[44px] sm:min-h-[40px] px-2.5 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+                  onClick={() => onOpenDayRoute(currentDayPlan.day.date)}
+                  className="min-h-[44px] sm:min-h-[40px] px-2.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
                 >
-                  <MapIcon className="w-3.5 h-3.5 shrink-0" />
-                  <span>Mapa dnia</span>
+                  <Route className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
+                  <span>Rozpiska</span>
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={() => onOpenDayRoute(currentDayPlan.day.date)}
-                className="min-h-[44px] sm:min-h-[40px] px-2.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
-              >
-                <Route className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-                <span>Rozpiska</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onEditDay(currentDayPlan.day.date)}
-                className="min-h-[44px] sm:min-h-[40px] px-2.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
-              >
-                <Pencil className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                <span>Edytuj</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => onEditDay(currentDayPlan.day.date)}
+                  className="min-h-[44px] sm:min-h-[40px] px-2.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+                >
+                  <Pencil className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
+                  <span>Edytuj</span>
+                </button>
+              </div>
             </div>
           </div>
         </section>
@@ -577,62 +596,62 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
           <button
             type="button"
             onClick={() => onNavigateSection('parish')}
-            className="w-full min-h-[56px] px-4 py-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100/80 text-left flex items-center justify-between gap-3 transition-colors"
+            className="w-full min-h-[56px] px-4 py-3 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100/80 dark:hover:bg-amber-900/50 text-left flex items-center justify-between gap-3 transition-colors"
           >
             <div className="flex items-center gap-3 min-w-0">
               {hasBoundary ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0" />
+                <CheckCircle2 className="w-5 h-5 text-emerald-700 dark:text-emerald-400 shrink-0" />
               ) : (
-                <Pentagon className="w-5 h-5 text-amber-800 shrink-0" />
+                <Pentagon className="w-5 h-5 text-amber-800 dark:text-amber-400 shrink-0" />
               )}
               <div className="min-w-0">
-                <div className="text-sm font-semibold text-slate-900">
+                <div className="text-sm font-semibold text-slate-900 dark:text-white">
                   Dodaj ulice parafii
                 </div>
-                <div className="text-xs text-slate-600 mt-0.5">
+                <div className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
                   Kliknij ulice na mapie lub pobierz teren
                 </div>
               </div>
             </div>
-            <ArrowRight className="w-4 h-4 text-amber-800 shrink-0" />
+            <ArrowRight className="w-4 h-4 text-amber-800 dark:text-amber-400 shrink-0" />
           </button>
         ) : (
           <>
             <button
               type="button"
               onClick={() => onNavigateSection('stops')}
-              className="w-full min-h-[56px] px-4 py-3 rounded-xl border border-amber-300 bg-amber-50/90 hover:bg-amber-100/80 text-left flex items-center justify-between gap-3 transition-colors"
+              className="w-full min-h-[56px] px-4 py-3 rounded-xl border border-amber-300 dark:border-amber-800 bg-amber-50/90 dark:bg-amber-950/35 hover:bg-amber-100/80 dark:hover:bg-amber-900/50 text-left flex items-center justify-between gap-3 transition-colors"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 rounded-xl bg-amber-700 text-white flex items-center justify-center shrink-0">
                   <Clock className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-semibold text-slate-900">
+                  <div className="text-sm font-semibold text-slate-900 dark:text-white">
                     Zaplanuj konkretny dzień
                   </div>
-                  <div className="text-xs text-slate-600 mt-0.5">
+                  <div className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
                     Data, godziny, ulice i punkt START
                   </div>
                 </div>
               </div>
-              <ArrowRight className="w-4 h-4 text-amber-800 shrink-0" />
+              <ArrowRight className="w-4 h-4 text-amber-800 dark:text-amber-400 shrink-0" />
             </button>
 
             <button
               type="button"
               onClick={() => onNavigateSection('schedule')}
-              className="w-full min-h-[56px] px-4 py-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-left flex items-center justify-between gap-3 transition-colors"
+              className="w-full min-h-[56px] px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-left flex items-center justify-between gap-3 transition-colors"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-slate-900 dark:bg-slate-700 text-white flex items-center justify-center shrink-0">
                   <CalendarCheck className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-semibold text-slate-900">
+                  <div className="text-sm font-semibold text-slate-900 dark:text-white">
                     Cały okres i wydruk PDF
                   </div>
-                  <div className="text-xs text-slate-500 mt-0.5">
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     {plannedDays.length > 0
                       ? `${plannedDays.length} ${
                           plannedDays.length === 1 ? 'dzień' : 'dni'
@@ -641,7 +660,7 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
                   </div>
                 </div>
               </div>
-              <ArrowRight className="w-4 h-4 text-slate-500 shrink-0" />
+              <ArrowRight className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
             </button>
 
             {routes.length > 0 &&
@@ -650,22 +669,22 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => onNavigateSection('routes')}
-                  className="w-full min-h-[50px] px-4 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100/60 text-left flex items-center justify-between gap-3 transition-colors"
+                  className="w-full min-h-[50px] px-4 py-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/35 hover:bg-emerald-100/60 dark:hover:bg-emerald-900/50 text-left flex items-center justify-between gap-3 transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <Route className="w-4 h-4 text-emerald-700 shrink-0" />
+                    <Route className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
                     <div className="min-w-0">
-                      <div className="text-xs font-semibold text-emerald-950">
+                      <div className="text-xs font-semibold text-emerald-950 dark:text-emerald-200">
                         Trasa dnia (
                         {routes.reduce((a, r) => a + r.orderedStops.length, 0)}{' '}
                         domów)
                       </div>
-                      <div className="text-[11px] text-emerald-800">
+                      <div className="text-[11px] text-emerald-800 dark:text-emerald-300/90">
                         Kolejność domów i tryb w terenie
                       </div>
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-emerald-700 shrink-0" />
+                  <ArrowRight className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
                 </button>
               )}
           </>
@@ -675,20 +694,20 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
           <button
             type="button"
             onClick={() => onNavigateSection('parish')}
-            className="min-h-[42px] px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-left flex items-center gap-2 transition-colors"
+            className="min-h-[42px] px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-left flex items-center gap-2 transition-colors"
           >
-            <Layers className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-            <span className="text-xs font-medium text-slate-800 truncate">
+            <Layers className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
+            <span className="text-xs font-medium text-slate-800 dark:text-slate-100 truncate">
               Ulice ({savedStreetCount})
             </span>
           </button>
           <button
             type="button"
             onClick={() => onNavigateSection('settings')}
-            className="min-h-[42px] px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-left flex items-center gap-2 transition-colors"
+            className="min-h-[42px] px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-left flex items-center gap-2 transition-colors"
           >
-            <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-            <span className="text-xs font-medium text-slate-800 truncate">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
+            <span className="text-xs font-medium text-slate-800 dark:text-slate-100 truncate">
               {config.priestCount} ks. · {config.defaultVisitMinutes} min
             </span>
           </button>
@@ -698,15 +717,15 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
           <button
             type="button"
             onClick={() => onNavigateSection('schedule')}
-            className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-amber-200 bg-amber-50/70 hover:bg-amber-100/70 text-left flex items-center justify-between gap-3 transition-colors"
+            className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/70 dark:bg-amber-950/35 hover:bg-amber-100/70 dark:hover:bg-amber-900/50 text-left flex items-center justify-between gap-3 transition-colors"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <RotateCcw className="w-4 h-4 text-amber-800 shrink-0" />
-              <span className="text-xs font-semibold text-amber-950 truncate tabular-nums">
+              <RotateCcw className="w-4 h-4 text-amber-800 dark:text-amber-400 shrink-0" />
+              <span className="text-xs font-semibold text-amber-950 dark:text-amber-200 truncate tabular-nums">
                 Powroty i zaproszenia ({returnCandidatesCount})
               </span>
             </div>
-            <ArrowRight className="w-4 h-4 text-amber-700 shrink-0" />
+            <ArrowRight className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
           </button>
         )}
       </section>

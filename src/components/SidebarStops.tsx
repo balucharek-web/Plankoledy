@@ -586,14 +586,14 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
   if (stops.length === 0) {
     return (
       <div className="p-6 sm:p-8 text-center space-y-4">
-        <div className="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto">
+        <div className="w-11 h-11 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800/70 text-amber-700 dark:text-amber-400 flex items-center justify-center mx-auto">
           <MapPin className="w-5 h-5" />
         </div>
         <div className="space-y-1.5">
-          <h2 className="text-sm font-semibold text-slate-900">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
             Brak ulic w bazie parafii
           </h2>
-          <p className="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto leading-relaxed">
             Najpierw pobierz ulice, domy i bloki w konfiguracji parafii, aby
             układać plan kolędy na poszczególne dni.
           </p>
@@ -601,7 +601,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
         <button
           type="button"
           onClick={onGoToSetup}
-          className="min-h-[42px] px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl inline-flex items-center gap-1.5 transition-colors"
+          className="min-h-[42px] px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 rounded-xl inline-flex items-center gap-1.5 transition-colors"
         >
           <Plus className="w-4 h-4" />
           <span>Skonfiguruj ulice i domy parafii</span>
@@ -613,20 +613,20 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
   return (
     <div className="flex flex-col h-full">
       {/* Compact Header (house & block config lives cleanly inside Parafia i ulice) */}
-      <div className="p-4 sm:p-5 border-b border-slate-200 space-y-2 bg-white shrink-0">
+      <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 space-y-2 bg-white dark:bg-slate-900 shrink-0">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
-              <CalendarPlus className="w-4 h-4 text-amber-700 shrink-0" />
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+              <CalendarPlus className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
               <span>Planowanie kolędy na dzień</span>
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5 tabular-nums">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 tabular-nums">
               Baza parafii:{' '}
-              <strong className="text-slate-900">
+              <strong className="text-slate-900 dark:text-slate-100">
                 {allStreetsSummary.length}
               </strong>{' '}
               ulic ({stops.length} punktów) · bez terminu:{' '}
-              <strong className="text-amber-800">
+              <strong className="text-amber-800 dark:text-amber-400">
                 {unassignedStops.length}
               </strong>
             </p>
@@ -635,7 +635,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
             <button
               type="button"
               onClick={onGoToSetup}
-              className="text-xs font-medium text-amber-800 hover:underline whitespace-nowrap min-h-[32px] inline-flex items-center"
+              className="text-xs font-medium text-amber-800 dark:text-amber-400 hover:underline whitespace-nowrap min-h-[32px] inline-flex items-center"
             >
               Domy i bloki
             </button>
@@ -643,7 +643,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
               <button
                 type="button"
                 onClick={onGoToSchedule}
-                className="text-xs font-medium text-slate-600 hover:text-slate-900 whitespace-nowrap min-h-[32px] inline-flex items-center"
+                className="text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white whitespace-nowrap min-h-[32px] inline-flex items-center"
               >
                 Okres ({plannedDays.length}) →
               </button>
@@ -654,11 +654,11 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
 
       {/* Scrollable Workspace */}
       <div className="flex-1 overflow-y-auto">
-        <div className="p-4 sm:p-5 space-y-5">
+        <div className="p-4 sm:p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] space-y-5">
             {/* Existing Planned Days Switcher Strip */}
             {plannedDays.length > 0 && (
               <div className="space-y-1.5">
-                <div className="text-[11px] font-medium text-slate-500">
+                <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
                   Nowy dzień lub szybka edycja istniejącego:
                 </div>
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
@@ -667,8 +667,8 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                     onClick={resetForNewDay}
                     className={`min-h-[34px] px-2.5 py-1 text-xs font-semibold rounded-lg whitespace-nowrap shrink-0 inline-flex items-center gap-1 border transition-colors ${
                       !isEditingPlannedDay
-                        ? 'bg-amber-700 text-white border-amber-700'
-                        : 'bg-white text-amber-900 border-amber-300 hover:bg-amber-50'
+                        ? 'bg-amber-700 dark:bg-amber-600 text-white border-amber-700 dark:border-amber-600'
+                        : 'bg-white dark:bg-slate-800 text-amber-900 dark:text-amber-300 border-amber-300 dark:border-amber-700/70 hover:bg-amber-50 dark:hover:bg-amber-950/50'
                     }`}
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -683,8 +683,8 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                         onClick={() => loadDayIntoPlanner(d.date)}
                         className={`min-h-[34px] px-2.5 py-1 text-xs font-medium rounded-lg whitespace-nowrap shrink-0 tabular-nums border transition-colors ${
                           active
-                            ? 'bg-slate-900 text-white border-slate-900'
-                            : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                            ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100'
+                            : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                         }`}
                       >
                         {formatPolishDateChip(d.date)} ({d.stops.length})
@@ -696,12 +696,12 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
             )}
 
             {/* KROK 1: Data i godziny */}
-            <section className="space-y-3 bg-slate-50/80 border border-slate-200 rounded-xl p-3.5 sm:p-4">
+            <section className="space-y-3 bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 sm:p-4">
               <div className="flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-amber-700 text-white text-[11px] font-bold inline-flex items-center justify-center shrink-0">
+                <span className="w-5 h-5 rounded-full bg-amber-700 dark:bg-amber-600 text-white text-[11px] font-bold inline-flex items-center justify-center shrink-0">
                   1
                 </span>
-                <h3 className="text-xs font-semibold text-slate-900">
+                <h3 className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                   Wybierz datę i godziny kolędy
                 </h3>
               </div>
@@ -717,8 +717,8 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                       onClick={() => handleDateChange(p.date)}
                       className={`min-h-[36px] px-1.5 py-1 rounded-lg text-[11px] font-semibold border transition-colors truncate ${
                         active
-                          ? 'bg-slate-900 text-white border-slate-900'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                          ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100'
+                          : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
                       }`}
                     >
                       {p.label}
@@ -730,11 +730,11 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
               <div>
                 <label
                   htmlFor="single-day-date"
-                  className="block text-[11px] font-medium text-slate-600 mb-1"
+                  className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1"
                 >
                   Data{' '}
                   {singleDayDate && (
-                    <span className="text-amber-800 font-semibold">
+                    <span className="text-amber-800 dark:text-amber-400 font-semibold">
                       ({formatPolishDateFull(singleDayDate)})
                     </span>
                   )}
@@ -744,7 +744,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                   type="date"
                   value={singleDayDate}
                   onChange={(e) => handleDateChange(e.target.value)}
-                  className="w-full min-h-[44px] px-3 py-2 text-base sm:text-xs font-mono tabular-nums bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-amber-600"
+                  className="w-full min-h-[44px] px-3 py-2 text-base sm:text-xs font-mono tabular-nums bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-600 dark:focus:border-amber-500"
                 />
               </div>
 
@@ -752,7 +752,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                 <div>
                   <label
                     htmlFor="single-start-time"
-                    className="block text-[11px] font-medium text-slate-600 mb-1"
+                    className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1"
                   >
                     Godzina od
                   </label>
@@ -761,13 +761,13 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                     type="time"
                     value={singleStartTime}
                     onChange={(e) => setSingleStartTime(e.target.value)}
-                    className="w-full min-h-[44px] px-3 py-2 text-base sm:text-xs font-mono tabular-nums bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-amber-600"
+                    className="w-full min-h-[44px] px-3 py-2 text-base sm:text-xs font-mono tabular-nums bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-600 dark:focus:border-amber-500"
                   />
                 </div>
                 <div>
                   <label
                     htmlFor="single-end-time"
-                    className="block text-[11px] font-medium text-slate-600 mb-1"
+                    className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1"
                   >
                     Godzina do
                   </label>
@@ -776,7 +776,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                     type="time"
                     value={singleEndTime}
                     onChange={(e) => setSingleEndTime(e.target.value)}
-                    className="w-full min-h-[44px] px-3 py-2 text-base sm:text-xs font-mono tabular-nums bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-amber-600"
+                    className="w-full min-h-[44px] px-3 py-2 text-base sm:text-xs font-mono tabular-nums bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-600 dark:focus:border-amber-500"
                   />
                 </div>
               </div>
@@ -785,7 +785,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                 <div>
                   <label
                     htmlFor="single-priest-assign"
-                    className="block text-[11px] font-medium text-slate-600 mb-1"
+                    className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1"
                   >
                     Przydział księży tego dnia
                   </label>
@@ -798,7 +798,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                         val === 'split' ? 'split' : Number.parseInt(val, 10)
                       );
                     }}
-                    className="w-full min-h-[42px] px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-amber-600"
+                    className="w-full min-h-[42px] px-3 py-2 text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-amber-600 dark:focus:border-amber-500"
                   >
                     <option value="split">
                       Podziel po równo na {config.priestCount} księży
@@ -814,13 +814,13 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
 
               {onChangeTravelMode && (
                 <div>
-                  <span className="block text-[11px] font-medium text-slate-600 mb-1">
+                  <span className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
                     Dotarcie z kościoła na ulicę
                   </span>
                   <div
                     role="group"
                     aria-label="Sposób dotarcia z kościoła na ulicę"
-                    className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-xl"
+                    className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-900 rounded-xl"
                   >
                     <button
                       type="button"
@@ -828,11 +828,11 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                       aria-pressed={config.travelMode === 'WALKING'}
                       className={`min-h-[38px] px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors ${
                         config.travelMode === 'WALKING'
-                          ? 'bg-white text-slate-900 shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900'
+                          ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                       }`}
                     >
-                      <Footprints className="w-3.5 h-3.5 text-teal-700 shrink-0" />
+                      <Footprints className="w-3.5 h-3.5 text-teal-700 dark:text-teal-400 shrink-0" />
                       <span>Piechotą</span>
                     </button>
                     <button
@@ -841,11 +841,11 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                       aria-pressed={config.travelMode === 'DRIVING'}
                       className={`min-h-[38px] px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors ${
                         config.travelMode === 'DRIVING'
-                          ? 'bg-white text-slate-900 shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900'
+                          ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                       }`}
                     >
-                      <Car className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                      <Car className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
                       <span>Samochodem</span>
                     </button>
                   </div>
@@ -857,10 +857,10 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
             <section className="space-y-2.5">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-amber-700 text-white text-[11px] font-bold inline-flex items-center justify-center shrink-0">
+                  <span className="w-5 h-5 rounded-full bg-amber-700 dark:bg-amber-600 text-white text-[11px] font-bold inline-flex items-center justify-center shrink-0">
                     2
                   </span>
-                  <h3 className="text-xs font-semibold text-slate-900">
+                  <h3 className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                     Zaznacz ulice na ten dzień ({effectiveSingleStreets.length}/
                     {allStreetsSummary.length})
                   </h3>
@@ -869,7 +869,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                   <button
                     type="button"
                     onClick={() => setSingleSelectedStreets([])}
-                    className="text-xs font-medium text-slate-500 hover:text-slate-900"
+                    className="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   >
                     Wyczyść
                   </button>
@@ -878,14 +878,14 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
 
               {/* Filter: Wszystkie vs Tylko wolne */}
               {allStreetsSummary.length > 1 && (
-                <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-xl">
+                <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
                   <button
                     type="button"
                     onClick={() => setSingleStreetFilter('all')}
                     className={`min-h-[34px] px-2 py-1 text-xs font-medium rounded-lg transition-colors tabular-nums ${
                       singleStreetFilter === 'all'
-                        ? 'bg-white text-slate-900 shadow-xs'
-                        : 'text-slate-600 hover:text-slate-900'
+                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                     }`}
                   >
                     Wszystkie ({allStreetsSummary.length})
@@ -895,8 +895,8 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                     onClick={() => setSingleStreetFilter('free')}
                     className={`min-h-[34px] px-2 py-1 text-xs font-medium rounded-lg transition-colors tabular-nums ${
                       singleStreetFilter === 'free'
-                        ? 'bg-white text-slate-900 shadow-xs'
-                        : 'text-slate-600 hover:text-slate-900'
+                        ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                     }`}
                   >
                     Bez terminu ({freeStreetsCount})
@@ -906,20 +906,20 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
 
               {allStreetsSummary.length > 5 && (
                 <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={singleStreetQuery}
                     onChange={(e) => setSingleStreetQuery(e.target.value)}
                     placeholder="Wpisz nazwę ulicy..."
-                    className="w-full min-h-[40px] pl-8 pr-8 py-2 text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-amber-600"
+                    className="w-full min-h-[40px] pl-8 pr-8 py-2 text-base sm:text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-amber-600 dark:focus:border-amber-500"
                   />
                   {singleStreetQuery && (
                     <button
                       type="button"
                       onClick={() => setSingleStreetQuery('')}
                       aria-label="Wyczyść szukanie ulicy"
-                      className="p-1.5 text-slate-400 hover:text-slate-700 absolute right-1.5 top-1/2 -translate-y-1/2"
+                      className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 absolute right-1.5 top-1/2 -translate-y-1/2"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -927,9 +927,9 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                 </div>
               )}
 
-              <div className="max-h-60 overflow-y-auto border border-slate-200 rounded-xl divide-y divide-slate-100 bg-white">
+              <div className="max-h-60 overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-xl divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
                 {filteredSingleStreets.length === 0 ? (
-                  <div className="p-5 text-center text-xs text-slate-500">
+                  <div className="p-5 text-center text-xs text-slate-500 dark:text-slate-400">
                     {singleStreetFilter === 'free'
                       ? 'Wszystkie ulice mają już przypisaną datę. Przełącz na „Wszystkie”, aby wybrać dowolną ulicę.'
                       : 'Brak pasujących ulic.'}
@@ -948,10 +948,12 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
 
                     const isPreviewOpen = previewCreatorStreet === st.streetName;
                     return (
-                      <div key={st.streetName} className="bg-white">
+                      <div key={st.streetName} className="bg-white dark:bg-slate-900">
                         <div
                           className={`flex items-stretch ${
-                            checked ? 'bg-amber-50/80' : 'hover:bg-slate-50'
+                            checked
+                              ? 'bg-amber-50/80 dark:bg-amber-950/35'
+                              : 'hover:bg-slate-50 dark:hover:bg-slate-800/70'
                           }`}
                         >
                           <button
@@ -976,23 +978,23 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                               aria-hidden="true"
                               className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-colors ${
                                 checked
-                                  ? 'bg-amber-700 border-amber-700 text-white'
-                                  : 'bg-white border-slate-300'
+                                  ? 'bg-amber-700 dark:bg-amber-600 border-amber-700 dark:border-amber-600 text-white'
+                                  : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600'
                               }`}
                             >
                               {checked && <Check className="w-3.5 h-3.5" />}
                             </span>
                             <div className="flex-1 min-w-0">
-                              <div className="text-xs font-semibold text-slate-900 truncate">
+                              <div className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
                                 {st.streetName}
                               </div>
-                              <div className="text-[11px] text-slate-500 flex items-center gap-1.5 flex-wrap tabular-nums">
+                              <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap tabular-nums">
                                 <span>
                                   {st.singleHouseCount}{' '}
                                   {formatHousesNoun(st.singleHouseCount)}
                                 </span>
                                 {st.blockCount > 0 && (
-                                  <span className="text-amber-800 font-medium">
+                                  <span className="text-amber-800 dark:text-amber-400 font-medium">
                                     · {st.blockCount}{' '}
                                     {formatBlocksNoun(st.blockCount)}
                                     {st.blockUnitsCount > 0
@@ -1001,7 +1003,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                                   </span>
                                 )}
                                 {st.bounds.all.minLabel && (
-                                  <span className="text-slate-400">
+                                  <span className="text-slate-400 dark:text-slate-500">
                                     ·{' '}
                                     {st.bounds.all.minLabel ===
                                     st.bounds.all.maxLabel
@@ -1013,18 +1015,18 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                             </div>
                             <span className="shrink-0">
                               {assignedHere ? (
-                                <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-semibold whitespace-nowrap">
+                                <span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 text-[11px] font-semibold whitespace-nowrap">
                                   ten dzień
                                 </span>
                               ) : otherDates.length > 0 ? (
-                                <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[10px] font-medium whitespace-nowrap tabular-nums">
+                                <span className="px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 text-[11px] font-medium whitespace-nowrap tabular-nums">
                                   {formatPolishDateChip(otherDates[0])}
                                   {otherDates.length > 1
                                     ? ` +${otherDates.length - 1}`
                                     : ''}
                                 </span>
                               ) : (
-                                <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 text-[10px] font-medium whitespace-nowrap">
+                                <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[11px] font-medium whitespace-nowrap">
                                   wolna
                                 </span>
                               )}
@@ -1039,10 +1041,10 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                               )
                             }
                             aria-label={`Pokaż adresy na ulicy ${st.streetName}`}
-                            className={`px-2.5 border-l border-slate-100 text-[11px] font-medium inline-flex items-center gap-1 shrink-0 transition-colors ${
+                            className={`px-2.5 border-l border-slate-100 dark:border-slate-800 text-[11px] font-medium inline-flex items-center gap-1 shrink-0 transition-colors ${
                               isPreviewOpen
-                                ? 'bg-slate-900 text-white'
-                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                                ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                             }`}
                           >
                             <span>Adresy</span>
@@ -1057,8 +1059,8 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                         {isPreviewOpen && (() => {
                           const missingGaps = findMissingHouseNumberGaps(st.stops);
                           return (
-                          <div className="px-3 py-2.5 bg-slate-50 border-t border-slate-100 space-y-2">
-                            <div className="flex items-center justify-between gap-2 text-[11px] text-slate-500">
+                          <div className="px-3 py-2.5 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                            <div className="flex items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-slate-400">
                               <span>
                                 Adresy (uporządkowane wg numerów — dotknij, aby
                                 pokazać na mapie):
@@ -1082,18 +1084,18 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                                     title={house.address || house.label}
                                     className={`px-2 py-1 text-[11px] font-mono tabular-nums rounded-md inline-flex items-center gap-1 border transition-colors ${
                                       isBlk
-                                        ? 'bg-amber-50 border-amber-300 text-amber-950 hover:bg-amber-100'
-                                        : 'bg-white border-slate-200 hover:border-amber-400 hover:bg-amber-50 text-slate-800'
+                                        ? 'bg-amber-50 dark:bg-amber-950/60 border-amber-300 dark:border-amber-700/70 text-amber-950 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/60'
+                                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-amber-400 dark:hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-slate-800 dark:text-slate-200'
                                     }`}
                                   >
                                     {isBlk && (
-                                      <Building2 className="w-3 h-3 text-amber-700 shrink-0" />
+                                      <Building2 className="w-3 h-3 text-amber-700 dark:text-amber-400 shrink-0" />
                                     )}
                                     <span className="font-semibold">
                                       {numLabel}
                                     </span>
                                     {isBlk && (
-                                      <span className="text-[9px] font-sans font-bold text-amber-800">
+                                      <span className="text-[10px] font-sans font-bold text-amber-800 dark:text-amber-300">
                                         {unitCnt > 0
                                           ? `BLOK · ${unitCnt}`
                                           : 'BLOK'}
@@ -1104,7 +1106,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                               })}
                             </div>
                             {missingGaps.length > 0 && (
-                              <div className="p-2 rounded-lg bg-amber-50/90 border border-amber-200 flex flex-wrap items-center justify-between gap-2 text-[11px] text-amber-950">
+                              <div className="p-2 rounded-lg bg-amber-50/90 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/70 flex flex-wrap items-center justify-between gap-2 text-[11px] text-amber-950 dark:text-amber-200">
                                 <span>
                                   Możliwe braki numeracji:{' '}
                                   <strong className="font-mono">
@@ -1115,7 +1117,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                                   <button
                                     type="button"
                                     onClick={() => onAddMissingOnStreet(st.streetName)}
-                                    className="px-2 py-1 font-semibold text-amber-900 bg-white hover:bg-amber-100 border border-amber-300 rounded-md inline-flex items-center gap-1 shrink-0"
+                                    className="px-2 py-1 font-semibold text-amber-900 dark:text-amber-200 bg-white dark:bg-slate-900 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-300 dark:border-amber-700 rounded-md inline-flex items-center gap-1 shrink-0"
                                   >
                                     <Plus className="w-3 h-3" />
                                     <span>Dodaj na mapie</span>
@@ -1134,18 +1136,18 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
             </section>
 
             {/* KROK 3: Zakres numerów (Parzyste/Nieparzyste + od-do), Kierunek i Zapis */}
-            <section className="space-y-3 bg-slate-50/80 border border-slate-200 rounded-xl p-3.5 sm:p-4">
+            <section className="space-y-3 bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 sm:p-4">
               <div className="flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-amber-700 text-white text-[11px] font-bold inline-flex items-center justify-center shrink-0">
+                <span className="w-5 h-5 rounded-full bg-amber-700 dark:bg-amber-600 text-white text-[11px] font-bold inline-flex items-center justify-center shrink-0">
                   3
                 </span>
-                <h3 className="text-xs font-semibold text-slate-900">
+                <h3 className="text-xs font-semibold text-slate-900 dark:text-slate-100">
                   Numery domów, kierunek i zapis
                 </h3>
               </div>
 
               {effectiveSingleStreets.length === 0 ? (
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                   Wybierz przynajmniej jedną ulicę powyżej, aby wybrać numery
                   (wszystkie, parzyste lub nieparzyste) oraz kierunek przejścia
                   od początku do końca ulicy.
@@ -1155,12 +1157,12 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                   {/* Strona ulicy: Wszystkie / Parzyste / Nieparzyste z auto-wykrytymi krańcami */}
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-1.5">
-                      <span className="text-[11px] font-medium text-slate-600">
+                      <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300">
                         Strona ulicy (wykryte numery)
                       </span>
                       {selectedStreetSummaries.length === 1 &&
                         activeParityBounds.minLabel && (
-                          <span className="text-[11px] font-mono text-amber-800 font-semibold tabular-nums">
+                          <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 font-semibold tabular-nums">
                             {activeParityBounds.minLabel ===
                             activeParityBounds.maxLabel
                               ? `nr ${activeParityBounds.minLabel}`
@@ -1203,16 +1205,18 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                             }}
                             className={`min-h-[50px] px-2 py-1.5 rounded-xl border text-center flex flex-col items-center justify-center gap-0.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                               active
-                                ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                                ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                                : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
                             }`}
                           >
                             <span className="text-xs font-semibold">
                               {opt.label}
                             </span>
                             <span
-                              className={`text-[10px] font-mono tabular-nums ${
-                                active ? 'text-amber-300' : 'text-slate-500'
+                              className={`text-[11px] font-mono tabular-nums ${
+                                active
+                                  ? 'text-amber-300 dark:text-amber-700'
+                                  : 'text-slate-500 dark:text-slate-400'
                               }`}
                             >
                               {rangeStr} ({b.count})
@@ -1227,9 +1231,9 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                   {activeParityBounds.minNum !== null &&
                     activeParityBounds.maxNum !== null &&
                     activeParityBounds.minNum !== activeParityBounds.maxNum && (
-                      <div className="bg-white border border-slate-200 rounded-xl p-2.5 space-y-1.5">
+                      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 space-y-1.5">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[11px] font-medium text-slate-700">
+                          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
                             Zakres numerów (opcjonalnie):
                           </span>
                           {parsedRangeBounds.hasFilter ? (
@@ -1240,23 +1244,23 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                                 setSingleRangeTo('');
                                 setSingleStartStopId('');
                               }}
-                              className="text-[11px] font-semibold text-amber-800 hover:underline"
+                              className="text-[11px] font-semibold text-amber-800 dark:text-amber-400 hover:underline"
                             >
                               Cała ulica ({activeParityBounds.minLabel}–
                               {activeParityBounds.maxLabel})
                             </button>
                           ) : (
-                            <span className="text-[11px] font-mono text-slate-500 tabular-nums">
+                            <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 tabular-nums">
                               cała: nr {activeParityBounds.minLabel}–
                               {activeParityBounds.maxLabel}
                             </span>
                           )}
                         </div>
                         <div className="grid grid-cols-2 gap-2">
-                          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 min-h-[38px]">
+                          <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 min-h-[38px]">
                             <label
                               htmlFor="single-range-from"
-                              className="text-[11px] text-slate-500 shrink-0"
+                              className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0"
                             >
                               Od nr
                             </label>
@@ -1271,13 +1275,13 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                                 setSingleStartStopId('');
                               }}
                               placeholder={String(activeParityBounds.minNum)}
-                              className="w-full min-w-0 bg-transparent text-base sm:text-xs font-mono tabular-nums text-slate-900 placeholder:text-slate-400 focus:outline-none text-right"
+                              className="w-full min-w-0 bg-transparent text-base sm:text-xs font-mono tabular-nums text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none text-right"
                             />
                           </div>
-                          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 min-h-[38px]">
+                          <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 min-h-[38px]">
                             <label
                               htmlFor="single-range-to"
-                              className="text-[11px] text-slate-500 shrink-0"
+                              className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0"
                             >
                               Do nr
                             </label>
@@ -1292,7 +1296,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                                 setSingleStartStopId('');
                               }}
                               placeholder={String(activeParityBounds.maxNum)}
-                              className="w-full min-w-0 bg-transparent text-base sm:text-xs font-mono tabular-nums text-slate-900 placeholder:text-slate-400 focus:outline-none text-right"
+                              className="w-full min-w-0 bg-transparent text-base sm:text-xs font-mono tabular-nums text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none text-right"
                             />
                           </div>
                         </div>
@@ -1301,7 +1305,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
 
                   {/* Kierunek kolędy: czytelne kafelki z automatycznymi numerami początku i końca */}
                   <div>
-                    <span className="block text-[11px] font-medium text-slate-600 mb-1.5">
+                    <span className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1.5">
                       Kierunek kolędy na ulicy
                     </span>
                     <div className="grid grid-cols-2 gap-1.5">
@@ -1334,15 +1338,15 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                               onClick={() => setSingleStartDirection('asc')}
                               className={`min-h-[54px] px-2.5 py-2 rounded-xl border text-left flex items-start gap-2 transition-colors ${
                                 singleStartDirection === 'asc'
-                                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                                  : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-100'
+                                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                                  : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
                               }`}
                             >
                               <ArrowUp
                                 className={`w-4 h-4 shrink-0 mt-0.5 ${
                                   singleStartDirection === 'asc'
-                                    ? 'text-amber-400'
-                                    : 'text-amber-700'
+                                    ? 'text-amber-400 dark:text-amber-600'
+                                    : 'text-amber-700 dark:text-amber-400'
                                 }`}
                               />
                               <div className="min-w-0">
@@ -1350,10 +1354,10 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                                   Od początku do końca
                                 </div>
                                 <div
-                                  className={`text-[10px] font-mono tabular-nums mt-0.5 truncate ${
+                                  className={`text-[11px] font-mono tabular-nums mt-0.5 truncate ${
                                     singleStartDirection === 'asc'
-                                      ? 'text-amber-200'
-                                      : 'text-slate-500'
+                                      ? 'text-amber-200 dark:text-amber-800'
+                                      : 'text-slate-500 dark:text-slate-400'
                                   }`}
                                 >
                                   {multiNote}
@@ -1366,15 +1370,15 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                               onClick={() => setSingleStartDirection('desc')}
                               className={`min-h-[54px] px-2.5 py-2 rounded-xl border text-left flex items-start gap-2 transition-colors ${
                                 singleStartDirection === 'desc'
-                                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                                  : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-100'
+                                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                                  : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
                               }`}
                             >
                               <ArrowDown
                                 className={`w-4 h-4 shrink-0 mt-0.5 ${
                                   singleStartDirection === 'desc'
-                                    ? 'text-amber-400'
-                                    : 'text-amber-700'
+                                    ? 'text-amber-400 dark:text-amber-600'
+                                    : 'text-amber-700 dark:text-amber-400'
                                 }`}
                               />
                               <div className="min-w-0">
@@ -1382,10 +1386,10 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                                   Od końca do początku
                                 </div>
                                 <div
-                                  className={`text-[10px] font-mono tabular-nums mt-0.5 truncate ${
+                                  className={`text-[11px] font-mono tabular-nums mt-0.5 truncate ${
                                     singleStartDirection === 'desc'
-                                      ? 'text-amber-200'
-                                      : 'text-slate-500'
+                                      ? 'text-amber-200 dark:text-amber-800'
+                                      : 'text-slate-500 dark:text-slate-400'
                                   }`}
                                 >
                                   {multiDescNote}
@@ -1401,15 +1405,15 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                               }
                               className={`min-h-[50px] px-2.5 py-1.5 rounded-xl border text-left flex items-start gap-2 transition-colors disabled:opacity-45 disabled:cursor-not-allowed ${
                                 singleStartDirection === 'side_by_side'
-                                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                                  : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-100'
+                                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                                  : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
                               }`}
                             >
                               <ArrowLeftRight
                                 className={`w-4 h-4 shrink-0 mt-0.5 ${
                                   singleStartDirection === 'side_by_side'
-                                    ? 'text-amber-400'
-                                    : 'text-slate-500'
+                                    ? 'text-amber-400 dark:text-amber-600'
+                                    : 'text-slate-500 dark:text-slate-400'
                                 }`}
                               />
                               <div className="min-w-0">
@@ -1417,10 +1421,10 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                                   Stronami ulicy
                                 </div>
                                 <div
-                                  className={`text-[10px] mt-0.5 truncate ${
+                                  className={`text-[11px] mt-0.5 truncate ${
                                     singleStartDirection === 'side_by_side'
-                                      ? 'text-amber-200'
-                                      : 'text-slate-500'
+                                      ? 'text-amber-200 dark:text-amber-800'
+                                      : 'text-slate-500 dark:text-slate-400'
                                   }`}
                                 >
                                   parzyste ↑, powrót ↓
@@ -1453,16 +1457,16 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                               className={`min-h-[50px] px-2.5 py-1.5 rounded-xl border text-left flex items-start gap-2 transition-colors ${
                                 singleStartDirection === 'from_stop' ||
                                 singleStartDirection === 'auto'
-                                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                                  : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-100'
+                                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                                  : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
                               }`}
                             >
                               <Compass
                                 className={`w-4 h-4 shrink-0 mt-0.5 ${
                                   singleStartDirection === 'from_stop' ||
                                   singleStartDirection === 'auto'
-                                    ? 'text-amber-400'
-                                    : 'text-slate-500'
+                                    ? 'text-amber-400 dark:text-amber-600'
+                                    : 'text-slate-500 dark:text-slate-400'
                                 }`}
                               />
                               <div className="min-w-0">
@@ -1472,11 +1476,11 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                                     : 'Konkretny dom'}
                                 </div>
                                 <div
-                                  className={`text-[10px] mt-0.5 truncate ${
+                                  className={`text-[11px] mt-0.5 truncate ${
                                     singleStartDirection === 'from_stop' ||
                                     singleStartDirection === 'auto'
-                                      ? 'text-amber-200'
-                                      : 'text-slate-500'
+                                      ? 'text-amber-200 dark:text-amber-800'
+                                      : 'text-slate-500 dark:text-slate-400'
                                   }`}
                                 >
                                   {singleStartDirection === 'auto'
@@ -1497,14 +1501,14 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                         <div className="flex items-center justify-between gap-2">
                           <label
                             htmlFor="single-start-house"
-                            className="block text-[11px] font-medium text-emerald-800"
+                            className="block text-[11px] font-medium text-emerald-800 dark:text-emerald-400"
                           >
                             Dom początkowy (START #1)
                           </label>
                           <button
                             type="button"
                             onClick={() => setSingleStartDirection('auto')}
-                            className="text-[11px] font-medium text-slate-500 hover:text-slate-900"
+                            className="text-[11px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                           >
                             Lub automatycznie od kościoła
                           </button>
@@ -1515,7 +1519,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                             singleStartStopId || singleMatchingStops[0].id
                           }
                           onChange={(e) => setSingleStartStopId(e.target.value)}
-                          className="w-full min-h-[42px] px-3 py-2 text-xs bg-emerald-50/70 border border-emerald-300 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-600"
+                          className="w-full min-h-[42px] px-3 py-2 text-base sm:text-xs bg-emerald-50/70 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-700/70 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500"
                         >
                           {singleMatchingStops.map((s) => (
                             <option key={s.id} value={s.id}>
@@ -1531,16 +1535,16 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                     <div
                       className={`p-3 rounded-xl border text-xs tabular-nums space-y-1.5 ${
                         singlePreviewEstimate.overLimit
-                          ? 'bg-amber-50 border-amber-300 text-amber-950'
-                          : 'bg-emerald-50/80 border-emerald-200 text-emerald-950'
+                          ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-800/70 text-amber-950 dark:text-amber-200'
+                          : 'bg-emerald-50/80 dark:bg-emerald-950/45 border-emerald-200 dark:border-emerald-800/70 text-emerald-950 dark:text-emerald-200'
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2 font-semibold">
                         <span className="inline-flex items-center gap-1.5 flex-wrap">
                           {matchingBuildingStats.blocks > 0 ? (
-                            <Building2 className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                            <Building2 className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
                           ) : (
-                            <Home className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                            <Home className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" />
                           )}
                           <span>
                             {matchingBuildingStats.houses > 0 &&
@@ -1565,14 +1569,14 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                         </span>
                       </div>
                       {singlePreviewEstimate.overLimit && (
-                        <div className="text-[11px] text-amber-800">
+                        <div className="text-[11px] text-amber-800 dark:text-amber-300">
                           Uwaga: przy {config.defaultVisitMinutes} min/dom
                           koniec przekracza godz. {singleEndTime} (wybierz
                           parzyste/nieparzyste albo zawęź zakres numerów).
                         </div>
                       )}
                       {excludedPermanentDeclineCount > 0 && (
-                        <div className="text-[11px] text-slate-700">
+                        <div className="text-[11px] text-slate-700 dark:text-slate-300">
                           Pominięto {excludedPermanentDeclineCount}{' '}
                           {excludedPermanentDeclineCount === 1
                             ? 'adres ze stałą odmową'
@@ -1581,7 +1585,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                           <button
                             type="button"
                             onClick={onGoToSetup}
-                            className="font-semibold text-amber-900 underline"
+                            className="font-semibold text-amber-900 dark:text-amber-300 underline"
                           >
                             zmień w Parafii
                           </button>
@@ -1591,7 +1595,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                       <button
                         type="button"
                         onClick={() => setShowCreatorMatchedList((v) => !v)}
-                        className="text-[11px] font-semibold text-amber-800 hover:text-amber-950 inline-flex items-center gap-1 pt-0.5"
+                        className="text-[11px] font-semibold text-amber-800 dark:text-amber-300 hover:text-amber-950 dark:hover:text-amber-200 inline-flex items-center gap-1 pt-0.5"
                       >
                         {showCreatorMatchedList ? (
                           <ChevronDown className="w-3.5 h-3.5" />
@@ -1615,12 +1619,12 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                                 onClick={() => onSelectStop(s.id)}
                                 className={`px-2 py-0.5 text-[11px] font-mono rounded-md border inline-flex items-center gap-1 ${
                                   isBlk
-                                    ? 'bg-amber-50 border-amber-300 text-amber-950'
-                                    : 'bg-white border-slate-200 hover:border-amber-400 text-slate-800'
+                                    ? 'bg-amber-50 dark:bg-amber-950/60 border-amber-300 dark:border-amber-700 text-amber-950 dark:text-amber-200'
+                                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-amber-400 dark:hover:border-amber-500 text-slate-800 dark:text-slate-200'
                                 }`}
                               >
                                 {isBlk && (
-                                  <Building2 className="w-2.5 h-2.5 text-amber-700" />
+                                  <Building2 className="w-2.5 h-2.5 text-amber-700 dark:text-amber-400" />
                                 )}
                                 <span>{s.label || s.address}</span>
                               </button>
@@ -1632,7 +1636,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                   )}
 
                   {singleMatchingStops.length === 0 && (
-                    <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900">
+                    <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/70 text-xs text-amber-900 dark:text-amber-200">
                       Brak budynków pasujących do wybranej strony lub zakresu
                       numerów. Zmień filtr na „Wszystkie” albo wyczyść zakres.
                     </div>
@@ -1641,7 +1645,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
               )}
 
               {effectiveSingleStreets.length > 0 && !isEditingPlannedDay && (
-                <div className="px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] font-medium text-amber-900">
+                <div className="px-2.5 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/70 text-[11px] font-medium text-amber-900 dark:text-amber-200">
                   Szkic dnia jest zachowany — po sprawdzeniu mapy kliknij przycisk
                   poniżej, aby zapisać dzień i zobaczyć trasę.
                 </div>
@@ -1668,7 +1672,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                         : undefined,
                   })
                 }
-                className="w-full min-h-[46px] py-2.5 px-4 text-xs sm:text-sm font-semibold text-white bg-amber-700 hover:bg-amber-800 disabled:bg-slate-300 disabled:cursor-not-allowed rounded-xl inline-flex items-center justify-center gap-2 transition-colors shadow-xs"
+                className="w-full min-h-[46px] py-2.5 px-4 text-xs sm:text-sm font-semibold text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 disabled:bg-slate-300 dark:disabled:bg-slate-700 dark:disabled:text-slate-400 disabled:cursor-not-allowed rounded-xl inline-flex items-center justify-center gap-2 transition-colors shadow-xs"
               >
                 <Route className="w-4 h-4 shrink-0" />
                 <span>
@@ -1682,7 +1686,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                 <button
                   type="button"
                   onClick={() => onDeleteDayPlan(singleDayDate)}
-                  className="w-full min-h-[40px] py-2 px-4 text-xs font-semibold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors"
+                  className="w-full min-h-[40px] py-2 px-4 text-xs font-semibold text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-950/70 border border-red-200 dark:border-red-900/70 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Usuń trasę z tego dnia</span>

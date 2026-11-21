@@ -93,23 +93,28 @@ const STATUS_BADGE: Record<
 > = {
   pending: {
     label: 'Do odwiedzenia',
-    className: 'bg-slate-100 text-slate-600',
+    className:
+      'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300',
   },
   accepted: {
     label: 'Przyjęto',
-    className: 'bg-emerald-50 text-emerald-800 border border-emerald-200',
+    className:
+      'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/70',
   },
   absent: {
     label: 'Nieobecni',
-    className: 'bg-amber-50 text-amber-800 border border-amber-200',
+    className:
+      'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/70',
   },
   declined: {
     label: 'Odmowa',
-    className: 'bg-red-50 text-red-700 border border-red-200',
+    className:
+      'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800/70',
   },
   invited: {
     label: 'Zaproszenie',
-    className: 'bg-sky-50 text-sky-800 border border-sky-200',
+    className:
+      'bg-sky-50 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800/70',
   },
 };
 
@@ -267,12 +272,12 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
   if (isComputing && routes.length === 0) {
     return (
       <div className="p-8 flex flex-col items-center justify-center text-center gap-3">
-        <Loader2 className="w-6 h-6 text-amber-700 animate-spin" />
+        <Loader2 className="w-6 h-6 text-amber-700 dark:text-amber-400 animate-spin" />
         <div>
-          <p className="text-sm font-medium text-slate-900">
+          <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
             Optymalizacja kolejności odwiedzin...
           </p>
-          <p className="text-xs text-slate-500 mt-1 tabular-nums">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 tabular-nums">
             {progressLabel ||
               'Algorytm układa najkrótsze trasy drogowe dla każdego księdza.'}
           </p>
@@ -284,22 +289,22 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
   return (
     <div className="flex flex-col h-full">
       {isComputing && (
-        <div className="px-4 py-2 bg-amber-50 border-b border-amber-200 flex items-center gap-2 text-xs text-amber-900 shrink-0">
-          <Loader2 className="w-3.5 h-3.5 text-amber-700 animate-spin shrink-0" />
+        <div className="px-4 py-2 bg-amber-50 dark:bg-amber-950/60 border-b border-amber-200 dark:border-amber-800/70 flex items-center gap-2 text-xs text-amber-900 dark:text-amber-200 shrink-0">
+          <Loader2 className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 animate-spin shrink-0" />
           <span className="truncate tabular-nums">
             {progressLabel || 'Trwa dopasowywanie dokładnej trasy po ulicach...'}
           </span>
         </div>
       )}
-      <div className="p-4 sm:p-5 border-b border-slate-200 space-y-3 bg-white shrink-0">
+      <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 space-y-3 bg-white dark:bg-slate-900 shrink-0">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h2 className="text-sm font-semibold text-slate-900 truncate">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
               {selectedDate
                 ? `Trasy · ${formatPolishDateFull(selectedDate)}`
                 : 'Wyznaczone trasy kolędowe'}
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5 tabular-nums">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 tabular-nums">
               Start: {effectiveStartTime} ·{' '}
               {config.travelMode === 'WALKING' ? 'Pieszo' : 'Samochodem'}
               {routes.length > 0 && (
@@ -309,8 +314,8 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                   <span
                     className={
                       isExactRoute
-                        ? 'text-emerald-700 font-medium'
-                        : 'text-amber-700 font-medium'
+                        ? 'text-emerald-700 dark:text-emerald-400 font-medium'
+                        : 'text-amber-700 dark:text-amber-400 font-medium'
                     }
                   >
                     {isExactRoute ? 'Dokładna trasa drogowa' : 'Szacunek trasy'}
@@ -324,7 +329,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
               type="button"
               onClick={onRecompute}
               disabled={!parish || routes.length === 0}
-              className="min-h-[36px] px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 rounded-lg inline-flex items-center gap-1.5 transition-colors whitespace-nowrap"
+              className="min-h-[36px] px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-40 rounded-lg inline-flex items-center gap-1.5 transition-colors whitespace-nowrap"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               {isExactRoute ? 'Przelicz' : 'Wyznacz drogowo'}
@@ -339,7 +344,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                     : 'Usuń wyznaczoną trasę'
                 }
                 aria-label="Usuń trasę"
-                className="min-h-[36px] px-2.5 py-1.5 text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg inline-flex items-center gap-1 transition-colors whitespace-nowrap"
+                className="min-h-[36px] px-2.5 py-1.5 text-xs font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/50 hover:bg-red-100 dark:hover:bg-red-950/80 border border-red-200 dark:border-red-900/70 rounded-lg inline-flex items-center gap-1 transition-colors whitespace-nowrap"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Usuń trasę</span>
@@ -360,8 +365,8 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                   onClick={() => onSelectDate(day.date)}
                   className={`min-h-[34px] px-2.5 py-1 text-xs font-medium rounded-lg whitespace-nowrap shrink-0 tabular-nums transition-colors ${
                     active
-                      ? 'bg-slate-900 text-white'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   {formatPolishDateChip(day.date)} ({day.stops.length})
@@ -373,8 +378,8 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
               onClick={() => onSelectDate(null)}
               className={`min-h-[34px] px-2.5 py-1 text-xs font-medium rounded-lg whitespace-nowrap shrink-0 transition-colors ${
                 selectedDate === null
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                  : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
               Wszystkie zaznaczone
@@ -384,17 +389,17 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
 
         {/* Sub-mode switcher: Lista trasy vs Kolęda w terenie */}
         {routes.length > 0 && (
-          <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-xl">
+          <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
             <button
               type="button"
               onClick={() => setViewSubMode('list')}
               className={`min-h-[36px] px-3 py-1 text-xs font-semibold rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors ${
                 viewSubMode === 'list'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
               }`}
             >
-              <ListOrdered className="w-3.5 h-3.5 text-amber-700" />
+              <ListOrdered className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
               <span>Lista i kolejność</span>
             </button>
             <button
@@ -402,11 +407,11 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
               onClick={() => setViewSubMode('field')}
               className={`min-h-[36px] px-3 py-1 text-xs font-semibold rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors ${
                 viewSubMode === 'field'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
               }`}
             >
-              <ClipboardCheck className="w-3.5 h-3.5 text-emerald-700" />
+              <ClipboardCheck className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
               <span>Kolęda w terenie</span>
             </button>
           </div>
@@ -418,7 +423,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
             <button
               type="button"
               onClick={() => onViewRouteOnMap(null)}
-              className="min-h-[40px] px-3 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors"
+              className="min-h-[40px] px-3 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors"
             >
               <MapIcon className="w-3.5 h-3.5" />
               <span>Zobacz trasy na mapie</span>
@@ -426,16 +431,16 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
             <button
               type="button"
               onClick={onOpenSchedule}
-              className="min-h-[40px] px-3 py-2 text-xs font-medium text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors"
+              className="min-h-[40px] px-3 py-2 text-xs font-medium text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors"
             >
-              <CalendarCheck className="w-3.5 h-3.5 text-slate-600" />
+              <CalendarCheck className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
               <span>Cały harmonogram</span>
             </button>
           </div>
         )}
 
         {routes.length > 0 && !isExactRoute && viewSubMode === 'list' && (
-          <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between gap-2 text-xs text-amber-900">
+          <div className="p-2.5 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/70 rounded-xl flex items-center justify-between gap-2 text-xs text-amber-900 dark:text-amber-200">
             <span className="leading-snug">
               Podgląd szacowanego czasu i kolejności. Przelicz po drogach, aby
               dodać dokładny przebieg ulicami.
@@ -443,7 +448,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
             <button
               type="button"
               onClick={onRecompute}
-              className="min-h-[32px] px-2.5 py-1 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-lg whitespace-nowrap shrink-0"
+              className="min-h-[32px] px-2.5 py-1 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 rounded-lg whitespace-nowrap shrink-0"
             >
               Wyznacz
             </button>
@@ -452,21 +457,21 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
       </div>
 
       {globalError && (
-        <div className="m-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-xs text-red-800">
-          <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+        <div className="m-4 p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900/70 rounded-lg flex items-start gap-2 text-xs text-red-800 dark:text-red-300">
+          <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
           <span>{globalError}</span>
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto divide-y divide-slate-200">
+      <div className="flex-1 overflow-y-auto divide-y divide-slate-200 dark:divide-slate-800">
         {routes.length === 0 ? (
           <div className="p-8 text-center space-y-3">
-            <Navigation className="w-6 h-6 text-slate-400 mx-auto" />
+            <Navigation className="w-6 h-6 text-slate-400 dark:text-slate-500 mx-auto" />
             <div>
-              <p className="text-sm font-medium text-slate-800">
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
                 Brak wyznaczonych tras
               </p>
-              <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto leading-relaxed">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
                 Wybierz datę i ulice w zakładce „Zaplanuj dzień” lub ułóż cały
                 okres w zakładce „Cały okres”.
               </p>
@@ -475,7 +480,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
               <button
                 type="button"
                 onClick={onGoToPlanner}
-                className="min-h-[40px] px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl inline-flex items-center gap-1.5 transition-colors"
+                className="min-h-[40px] px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 rounded-xl inline-flex items-center gap-1.5 transition-colors"
               >
                 Zaplanuj dzień
               </button>
@@ -485,7 +490,9 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
           /* LIVE FIELD MODE ("KOLĘDA W TERENIE") */
           <div
             className={`p-4 space-y-4 transition-colors ${
-              nightMode ? 'bg-slate-950 text-slate-100' : ''
+              nightMode
+                ? 'bg-slate-950 text-slate-100'
+                : 'dark:bg-slate-950 dark:text-slate-100'
             }`}
           >
             {/* Quick Field Toolbar: Prowadź na mapie + Tryb wieczorny */}
@@ -495,7 +502,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                   <button
                     type="button"
                     onClick={onOpenMapFieldMode}
-                    className="flex-1 min-h-[38px] px-3 py-1.5 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors shadow-xs"
+                    className="flex-1 min-h-[38px] px-3 py-1.5 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors shadow-xs"
                   >
                     <MapIcon className="w-3.5 h-3.5" />
                     <span>Prowadź na mapie (1-tap)</span>
@@ -513,7 +520,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                     className={`min-h-[38px] px-2.5 py-1.5 rounded-xl border text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shrink-0 ${
                       nightMode
                         ? 'bg-slate-800 border-slate-700 text-amber-300 hover:bg-slate-700'
-                        : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+                        : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
                   >
                     {nightMode ? (
@@ -544,10 +551,10 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                         active
                           ? nightMode
                             ? 'bg-amber-600 text-white'
-                            : 'bg-slate-900 text-white'
+                            : 'bg-slate-900 dark:bg-amber-600 text-white'
                           : nightMode
                             ? 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                       }`}
                     >
                       <span
@@ -563,35 +570,35 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
 
             {/* Progress Counters */}
             <div className="grid grid-cols-4 gap-1.5 text-center tabular-nums">
-              <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200">
-                <div className="text-sm font-bold text-emerald-900">
+              <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/70">
+                <div className="text-sm font-bold text-emerald-900 dark:text-emerald-200">
                   {fieldStats.accepted}
                 </div>
-                <div className="text-[10px] font-medium text-emerald-700">
+                <div className="text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
                   Przyjęto
                 </div>
               </div>
-              <div className="p-2 rounded-xl bg-amber-50 border border-amber-200">
-                <div className="text-sm font-bold text-amber-900">
+              <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/70">
+                <div className="text-sm font-bold text-amber-900 dark:text-amber-200">
                   {fieldStats.absent + fieldStats.invited}
                 </div>
-                <div className="text-[10px] font-medium text-amber-700">
+                <div className="text-[11px] font-medium text-amber-700 dark:text-amber-400">
                   Powroty
                 </div>
               </div>
-              <div className="p-2 rounded-xl bg-red-50 border border-red-200">
-                <div className="text-sm font-bold text-red-900">
+              <div className="p-2 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/70">
+                <div className="text-sm font-bold text-red-900 dark:text-red-200">
                   {fieldStats.declined}
                 </div>
-                <div className="text-[10px] font-medium text-red-700">
+                <div className="text-[11px] font-medium text-red-700 dark:text-red-400">
                   Odmowy
                 </div>
               </div>
-              <div className="p-2 rounded-xl bg-slate-100 border border-slate-200">
-                <div className="text-sm font-bold text-slate-900">
+              <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
                   {fieldStats.pending}
                 </div>
-                <div className="text-[10px] font-medium text-slate-600">
+                <div className="text-[11px] font-medium text-slate-600 dark:text-slate-400">
                   Zostało
                 </div>
               </div>
@@ -641,7 +648,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                   className={`p-4 rounded-2xl border-2 shadow-sm space-y-3.5 ${
                     nightMode
                       ? 'border-amber-500/60 bg-slate-900 text-slate-100'
-                      : 'border-amber-300 bg-white text-slate-900'
+                      : 'border-amber-300 dark:border-amber-500/60 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -657,14 +664,18 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                       <div className="min-w-0">
                         <div
                           className={`text-[11px] font-medium uppercase tracking-wide ${
-                            nightMode ? 'text-amber-300' : 'text-amber-800'
+                            nightMode
+                              ? 'text-amber-300'
+                              : 'text-amber-800 dark:text-amber-300'
                           }`}
                         >
                           Aktualny punkt · ~{activeItem.arrivalTime}
                         </div>
                         <h3
                           className={`text-base font-bold leading-snug mt-0.5 ${
-                            nightMode ? 'text-white' : 'text-slate-900'
+                            nightMode
+                              ? 'text-white'
+                              : 'text-slate-900 dark:text-white'
                           }`}
                         >
                           {activeItem.stop.address || activeItem.stop.label}
@@ -674,7 +685,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                             activeItem.stop.lastYearStatus !== 'pending')) && (
                           <div className="mt-1 flex flex-wrap items-center gap-1">
                             {activeItem.stop.permanentDecline ? (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-red-50 border border-red-200 text-red-700 text-[11px] font-semibold">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800/70 text-red-700 dark:text-red-300 text-[11px] font-semibold">
                                 Rok temu: Stała odmowa
                               </span>
                             ) : (
@@ -703,7 +714,9 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                               activeItem.stop.address)) && (
                           <p
                             className={`text-xs mt-0.5 ${
-                              nightMode ? 'text-slate-300' : 'text-slate-600'
+                              nightMode
+                                ? 'text-slate-300'
+                                : 'text-slate-600 dark:text-slate-300'
                             }`}
                           >
                             {activeItem.stop.notes || activeItem.stop.label}
@@ -727,10 +740,10 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                           title="Notatka i stała odmowa"
                           className={`min-w-[36px] min-h-[36px] px-2 py-1 text-xs font-medium rounded-xl inline-flex items-center justify-center transition-colors ${
                             isNoteEditing || activeItem.stop.notes
-                              ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                              ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700'
                               : nightMode
                                 ? 'bg-slate-800 text-slate-200 hover:bg-slate-700'
-                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
                           }`}
                         >
                           <MessageSquarePlus className="w-3.5 h-3.5" />
@@ -743,10 +756,10 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                         className={`min-w-[36px] min-h-[36px] px-2.5 py-1 text-xs font-medium rounded-xl inline-flex items-center gap-1 shrink-0 ${
                           nightMode
                             ? 'bg-slate-800 text-slate-200 hover:bg-slate-700'
-                            : 'text-slate-700 bg-slate-100 hover:bg-slate-200'
+                            : 'text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700'
                         }`}
                       >
-                        <MapIcon className="w-3.5 h-3.5 text-amber-600" />
+                        <MapIcon className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                         <span>Mapa</span>
                       </button>
                     </div>
@@ -757,7 +770,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                       className={`p-2.5 rounded-xl border space-y-2 ${
                         nightMode
                           ? 'bg-slate-800/80 border-slate-700'
-                          : 'bg-slate-50 border-slate-200'
+                          : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700'
                       }`}
                     >
                       <input
@@ -777,7 +790,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                         className={`w-full min-h-[36px] px-2.5 py-1.5 text-base sm:text-xs rounded-lg border focus:outline-none focus:border-amber-500 ${
                           nightMode
                             ? 'bg-slate-900 border-slate-600 text-white placeholder:text-slate-400'
-                            : 'bg-white border-slate-300 text-slate-900'
+                            : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white placeholder:text-slate-400'
                         }`}
                       />
                       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -794,7 +807,9 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                           />
                           <span
                             className={
-                              nightMode ? 'text-red-300' : 'text-red-700'
+                              nightMode
+                                ? 'text-red-300'
+                                : 'text-red-700 dark:text-red-300'
                             }
                           >
                             Stała odmowa (pomiń za rok)
@@ -808,7 +823,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                             });
                             setNoteOpenStopId(null);
                           }}
-                          className="min-h-[30px] px-2.5 py-1 text-[11px] font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg"
+                          className="min-h-[30px] px-2.5 py-1 text-[11px] font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-amber-600 dark:hover:bg-amber-500 rounded-lg"
                         >
                           Zapisz notatkę
                         </button>
@@ -821,7 +836,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                       <button
                         type="button"
                         onClick={() => onOpenBlockUnits(activeItem.stop.id)}
-                        className="w-full min-h-[46px] px-4 py-2.5 text-xs sm:text-sm font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl inline-flex items-center justify-center gap-2 transition-colors"
+                        className="w-full min-h-[46px] px-4 py-2.5 text-xs sm:text-sm font-semibold text-white bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 rounded-xl inline-flex items-center justify-center gap-2 transition-colors"
                       >
                         <Building2 className="w-4 h-4" />
                         <span>
@@ -840,7 +855,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                           className={`min-h-[48px] px-3 py-2.5 text-xs sm:text-sm font-semibold rounded-xl border inline-flex items-center justify-center gap-1.5 transition-colors ${
                             currentStatus === 'accepted'
                               ? 'bg-emerald-600 border-emerald-700 text-white shadow-xs'
-                              : 'bg-emerald-50 border-emerald-200 text-emerald-900 hover:bg-emerald-100'
+                              : 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800/70 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
                           }`}
                         >
                           <CheckCircle2 className="w-4 h-4 shrink-0" />
@@ -854,7 +869,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                           className={`min-h-[48px] px-3 py-2.5 text-xs sm:text-sm font-semibold rounded-xl border inline-flex items-center justify-center gap-1.5 transition-colors ${
                             currentStatus === 'absent'
                               ? 'bg-amber-600 border-amber-700 text-white shadow-xs'
-                              : 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100'
+                              : 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800/70 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/60'
                           }`}
                         >
                           <UserX className="w-4 h-4 shrink-0" />
@@ -868,7 +883,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                           className={`min-h-[48px] px-3 py-2.5 text-xs sm:text-sm font-semibold rounded-xl border inline-flex items-center justify-center gap-1.5 transition-colors ${
                             currentStatus === 'declined'
                               ? 'bg-red-600 border-red-700 text-white shadow-xs'
-                              : 'bg-red-50 border-red-200 text-red-900 hover:bg-red-100'
+                              : 'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800/70 text-red-900 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-900/60'
                           }`}
                         >
                           <Ban className="w-4 h-4 shrink-0" />
@@ -882,7 +897,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                           className={`min-h-[48px] px-3 py-2.5 text-xs sm:text-sm font-semibold rounded-xl border inline-flex items-center justify-center gap-1.5 transition-colors ${
                             currentStatus === 'invited'
                               ? 'bg-sky-600 border-sky-700 text-white shadow-xs'
-                              : 'bg-sky-50 border-sky-200 text-sky-900 hover:bg-sky-100'
+                              : 'bg-sky-50 dark:bg-sky-950/50 border-sky-200 dark:border-sky-800/70 text-sky-900 dark:text-sky-200 hover:bg-sky-100 dark:hover:bg-sky-900/60'
                           }`}
                         >
                           <BellRing className="w-4 h-4 shrink-0" />
@@ -895,7 +910,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                           onClick={() =>
                             onUpdateStopStatus(activeItem.stop.id, 'pending')
                           }
-                          className="w-full min-h-[38px] px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors"
+                          className="w-full min-h-[38px] px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl inline-flex items-center justify-center gap-1.5 transition-colors"
                         >
                           <RotateCcw className="w-3.5 h-3.5" />
                           <span>Przywróć status „Do odwiedzenia”</span>
@@ -904,13 +919,13 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                     </div>
                   )}
 
-                  <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
                     {navFromHere && (
                       <a
                         href={navFromHere.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="min-h-[38px] px-2.5 py-1.5 text-xs font-medium text-amber-900 bg-amber-50 border border-amber-200 hover:bg-amber-100 rounded-lg inline-flex items-center gap-1"
+                        className="min-h-[38px] px-2.5 py-1.5 text-xs font-medium text-amber-900 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800/70 hover:bg-amber-100 dark:hover:bg-amber-900/60 rounded-lg inline-flex items-center gap-1"
                       >
                         <span>Nawiguj od tego domu</span>
                         <ExternalLink className="w-3 h-3" />
@@ -920,7 +935,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                       <button
                         type="button"
                         onClick={() => setActiveFieldStopId(nextItem.stop.id)}
-                        className="min-h-[38px] px-2.5 py-1.5 text-xs font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-lg inline-flex items-center gap-1 ml-auto"
+                        className="min-h-[38px] px-2.5 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-100 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg inline-flex items-center gap-1 ml-auto"
                       >
                         <span className="truncate max-w-[160px]">
                           Następny: #{nextItem.orderIndex}
@@ -938,7 +953,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
               className={`border rounded-xl divide-y overflow-hidden ${
                 nightMode
                   ? 'border-slate-800 bg-slate-900 divide-slate-800'
-                  : 'border-slate-200 bg-white divide-slate-100'
+                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 divide-slate-100 dark:divide-slate-800'
               }`}
             >
               {activeFieldRoute.orderedStops.map((item) => {
@@ -958,10 +973,10 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                       isActive
                         ? nightMode
                           ? 'bg-amber-950/60'
-                          : 'bg-amber-50/70'
+                          : 'bg-amber-50/70 dark:bg-amber-950/50'
                         : nightMode
                           ? 'hover:bg-slate-800'
-                          : 'hover:bg-slate-50'
+                          : 'hover:bg-slate-50 dark:hover:bg-slate-800'
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
@@ -975,14 +990,16 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                       </span>
                       <span
                         className={`text-xs font-medium truncate ${
-                          nightMode ? 'text-slate-100' : 'text-slate-900'
+                          nightMode
+                            ? 'text-slate-100'
+                            : 'text-slate-900 dark:text-slate-100'
                         }`}
                       >
                         {item.stop.address || item.stop.label}
                       </span>
                     </div>
                     {isBlock ? (
-                      <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px] font-semibold shrink-0 tabular-nums">
+                      <span className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 text-[11px] font-semibold shrink-0 tabular-nums">
                         Blok (
                         {item.stop.units?.filter((u) => u.status === 'accepted')
                           .length ?? 0}
@@ -990,7 +1007,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                       </span>
                     ) : (
                       <span
-                        className={`px-1.5 py-0.5 rounded text-[10px] font-semibold shrink-0 ${badge.className}`}
+                        className={`px-1.5 py-0.5 rounded text-[11px] font-semibold shrink-0 ${badge.className}`}
                       >
                         {badge.label}
                       </span>
@@ -1028,29 +1045,29 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                         className="w-3 h-3 rounded-full shrink-0"
                         style={{ backgroundColor: route.color }}
                       />
-                      <h3 className="text-sm font-semibold text-slate-900">
+                      <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                         {route.priestName}
                       </h3>
                     </div>
                     {firstItem && (
-                      <div className="text-xs text-slate-700">
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-700 text-white text-[10px] font-bold mr-1.5">
+                      <div className="text-xs text-slate-700 dark:text-slate-300">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-700 dark:bg-emerald-600 text-white text-[10px] font-bold mr-1.5">
                           START
                         </span>
-                        <span className="font-semibold text-slate-900">
+                        <span className="font-semibold text-slate-900 dark:text-slate-100">
                           {firstItem.stop.address || firstItem.stop.label}
                         </span>
                       </div>
                     )}
                     {routeStreets.length > 0 && (
-                      <div className="text-[11px] text-slate-500">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
                         Ulice:{' '}
-                        <span className="text-slate-700 font-medium">
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">
                           {routeStreets.join(', ')}
                         </span>
                       </div>
                     )}
-                    <div className="text-xs text-slate-500 tabular-nums">
+                    <div className="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
                       {route.orderedStops.length}{' '}
                       {route.orderedStops.length === 1
                         ? 'punkt'
@@ -1073,8 +1090,8 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                       }}
                       className={`min-h-[34px] px-2.5 py-1.5 text-xs font-medium rounded-lg inline-flex items-center gap-1 transition-colors whitespace-nowrap ${
                         isFocused
-                          ? 'bg-slate-900 text-white'
-                          : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+                          ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
                       }`}
                     >
                       <Eye className="w-3.5 h-3.5" />
@@ -1086,7 +1103,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                         href={stages[0].url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="min-h-[34px] px-2.5 py-1.5 text-xs font-medium text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg inline-flex items-center gap-1 whitespace-nowrap transition-colors"
+                        className="min-h-[34px] px-2.5 py-1.5 text-xs font-medium text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800/70 rounded-lg inline-flex items-center gap-1 whitespace-nowrap transition-colors"
                       >
                         Nawiguj
                         <ExternalLink className="w-3 h-3" />
@@ -1097,7 +1114,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                         onClick={() =>
                           setOpenGmapsMenuPriest(gmapsOpen ? null : route.priestId)
                         }
-                        className="min-h-[34px] px-2.5 py-1.5 text-xs font-medium text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg inline-flex items-center gap-1 whitespace-nowrap transition-colors"
+                        className="min-h-[34px] px-2.5 py-1.5 text-xs font-medium text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800/70 rounded-lg inline-flex items-center gap-1 whitespace-nowrap transition-colors"
                       >
                         <Navigation className="w-3 h-3" />
                         Nawiguj
@@ -1107,8 +1124,8 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                 </div>
 
                 {gmapsOpen && stages.length > 1 && (
-                  <div className="p-2.5 bg-amber-50/70 border border-amber-200 rounded-xl space-y-1.5">
-                    <p className="text-[11px] text-amber-900 leading-snug">
+                  <div className="p-2.5 bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/70 rounded-xl space-y-1.5">
+                    <p className="text-[11px] text-amber-900 dark:text-amber-200 leading-snug">
                       Zewnętrzna aplikacja Google Maps przyjmuje maks. 10 punktów
                       na jeden link (w Planerze cała ulica jest jedną ciągłą trasą):
                     </p>
@@ -1119,7 +1136,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                           href={st.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="min-h-[30px] px-2.5 py-1 text-[11px] font-medium text-amber-900 bg-white hover:bg-amber-100 border border-amber-200 rounded-lg inline-flex items-center gap-1 whitespace-nowrap"
+                          className="min-h-[30px] px-2.5 py-1 text-[11px] font-medium text-amber-900 dark:text-amber-200 bg-white dark:bg-slate-900 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-200 dark:border-amber-800 rounded-lg inline-flex items-center gap-1 whitespace-nowrap"
                         >
                           <span>
                             {st.isReturnLeg
@@ -1134,13 +1151,13 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                 )}
 
                 {route.error && (
-                  <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
+                  <div className="p-2.5 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/70 rounded-lg text-xs text-amber-900 dark:text-amber-200">
                     {route.error}
                   </div>
                 )}
 
                 {route.orderedStops.length > 0 && (
-                  <ol className="divide-y divide-slate-100 border border-slate-200 rounded-lg bg-white overflow-hidden">
+                  <ol className="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 overflow-hidden">
                     {route.orderedStops.map((item, idx) => {
                       const isFirst = idx === 0;
                       const isBlock = Boolean(
@@ -1155,7 +1172,9 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                         <li
                           key={item.stop.id}
                           className={`flex items-start justify-between gap-2 px-3 py-2.5 transition-colors ${
-                            isFirst ? 'bg-emerald-50/40' : 'hover:bg-slate-50'
+                            isFirst
+                              ? 'bg-emerald-50/40 dark:bg-emerald-950/30'
+                              : 'hover:bg-slate-50 dark:hover:bg-slate-800/70'
                           }`}
                         >
                           <button
@@ -1175,9 +1194,9 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                             </span>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-baseline justify-between gap-2">
-                                <span className="text-xs font-semibold text-slate-900 truncate inline-flex items-center gap-1.5">
+                                <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate inline-flex items-center gap-1.5">
                                   {isFirst && (
-                                    <span className="px-1 py-0.5 rounded bg-emerald-700 text-white text-[9px] font-extrabold shrink-0">
+                                    <span className="px-1 py-0.5 rounded bg-emerald-700 dark:bg-emerald-600 text-white text-[10px] font-extrabold shrink-0">
                                       START
                                     </span>
                                   )}
@@ -1185,14 +1204,14 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                                     {item.stop.address || item.stop.label}
                                   </span>
                                   {isBlock && (
-                                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px] font-semibold shrink-0 tabular-nums">
+                                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 text-[11px] font-semibold shrink-0 tabular-nums">
                                       <Building2 className="w-2.5 h-2.5" />
                                       Blok{unitsTotal > 0 ? ` (${unitsTotal})` : ''}
                                     </span>
                                   )}
                                   {!isBlock && st !== 'pending' && (
                                     <span
-                                      className={`px-1.5 py-0.5 rounded text-[10px] font-semibold shrink-0 ${STATUS_BADGE[st].className}`}
+                                      className={`px-1.5 py-0.5 rounded text-[11px] font-semibold shrink-0 ${STATUS_BADGE[st].className}`}
                                     >
                                       {STATUS_BADGE[st].label}
                                     </span>
@@ -1202,7 +1221,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                                     item.stop.lastYearStatus &&
                                     item.stop.lastYearStatus !== 'pending' && (
                                       <span
-                                        className={`px-1.5 py-0.5 rounded border text-[10px] font-medium shrink-0 ${
+                                        className={`px-1.5 py-0.5 rounded border text-[11px] font-medium shrink-0 ${
                                           UNIT_STATUS_META[
                                             item.stop.lastYearStatus
                                           ].badgeClass
@@ -1217,18 +1236,18 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                                       </span>
                                     )}
                                 </span>
-                                <span className="text-xs font-mono text-slate-700 tabular-nums shrink-0">
+                                <span className="text-xs font-mono text-slate-700 dark:text-slate-300 tabular-nums shrink-0">
                                   {item.arrivalTime}–{item.departureTime}
                                 </span>
                               </div>
                               {(item.stop.notes ||
                                 (item.stop.label &&
                                   item.stop.label !== item.stop.address)) && (
-                                <div className="text-xs text-slate-500 truncate mt-0.5">
+                                <div className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
                                   {item.stop.notes || item.stop.label}
                                 </div>
                               )}
-                              <div className="text-[11px] text-slate-400 mt-0.5 tabular-nums">
+                              <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 tabular-nums">
                                 Dojazd: {formatDistance(item.legDistanceMeters)} ·{' '}
                                 {formatDurationMillis(item.legDurationMillis)} ·
                                 Wizyta: {item.stop.durationMinutes} min
@@ -1244,7 +1263,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                                   onSetRouteStartStop(route.priestId, item.stop.id)
                                 }
                                 title="Zacznij trasę od tego domu (ustaw jako START)"
-                                className="hidden lg:inline-flex px-1.5 py-1 text-[10px] font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-md whitespace-nowrap"
+                                className="hidden lg:inline-flex px-1.5 py-1 text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800/70 rounded-md whitespace-nowrap"
                               >
                                 Start
                               </button>
@@ -1253,7 +1272,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                               <button
                                 type="button"
                                 onClick={() => onOpenBlockUnits(item.stop.id)}
-                                className="px-2 py-1 text-[11px] font-semibold text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg whitespace-nowrap"
+                                className="px-2 py-1 text-[11px] font-semibold text-amber-900 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800/70 rounded-lg whitespace-nowrap"
                               >
                                 Lokale ({unitsTotal})
                               </button>
@@ -1273,7 +1292,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                                   }
                                   aria-label="Przesuń wcześniej w kolejności"
                                   title="Przesuń wcześniej"
-                                  className="p-1 text-slate-400 hover:text-slate-800 hover:bg-slate-200/70 disabled:opacity-25 rounded"
+                                  className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/70 dark:hover:bg-slate-700 disabled:opacity-25 rounded"
                                 >
                                   <ArrowUp className="w-3.5 h-3.5" />
                                 </button>
@@ -1291,7 +1310,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                                   }
                                   aria-label="Przesuń później w kolejności"
                                   title="Przesuń później"
-                                  className="p-1 text-slate-400 hover:text-slate-800 hover:bg-slate-200/70 disabled:opacity-25 rounded"
+                                  className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/70 dark:hover:bg-slate-700 disabled:opacity-25 rounded"
                                 >
                                   <ArrowDown className="w-3.5 h-3.5" />
                                 </button>
@@ -1302,7 +1321,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                       );
                     })}
                     {config.returnToParish && parish && (
-                      <li className="px-3 py-2 bg-slate-50 text-xs text-slate-600 flex items-center justify-between tabular-nums">
+                      <li className="px-3 py-2 bg-slate-50 dark:bg-slate-800/70 text-xs text-slate-600 dark:text-slate-300 flex items-center justify-between tabular-nums">
                         <span>Powrót: {parish.name}</span>
                         <span className="font-mono">
                           {formatDistance(route.returnLegDistanceMeters)} ·
@@ -1313,7 +1332,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                   </ol>
                 )}
 
-                <div className="text-xs text-slate-500 tabular-nums">
+                <div className="text-xs text-slate-500 dark:text-slate-400 tabular-nums">
                   Łączny czas wizyt w domach:{' '}
                   {formatMinutesLabel(route.totalVisitMinutes)}
                 </div>
@@ -1324,11 +1343,11 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
       </div>
 
       {routes.length > 0 && (
-        <div className="p-4 border-t border-slate-200 bg-white grid grid-cols-2 gap-2 shrink-0">
+        <div className="p-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 grid grid-cols-2 gap-2 shrink-0">
           <button
             type="button"
             onClick={() => exportScheduleToCsv(parish, routes)}
-            className="min-h-[40px] py-2 px-3 text-xs font-medium text-slate-800 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+            className="min-h-[40px] py-2 px-3 text-xs font-medium text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
           >
             <Download className="w-3.5 h-3.5" />
             Eksportuj CSV
@@ -1366,7 +1385,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                 img.addEventListener('error', onDone, { once: true });
               });
             }}
-            className="min-h-[40px] py-2 px-3 text-xs font-medium text-white bg-slate-900 hover:bg-slate-800 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+            className="min-h-[40px] py-2 px-3 text-xs font-medium text-white bg-slate-900 hover:bg-slate-800 dark:bg-amber-600 dark:hover:bg-amber-500 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
           >
             <Printer className="w-3.5 h-3.5" />
             Drukuj mapę i listę

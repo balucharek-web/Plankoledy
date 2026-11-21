@@ -237,16 +237,16 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
         <button
           type="button"
           onClick={() => setMinimized(false)}
-          className="min-h-[44px] px-4 py-2 bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-lg text-xs font-semibold text-slate-900 hover:bg-white inline-flex items-center gap-2 tabular-nums"
+          className="min-h-[44px] px-4 py-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-700 rounded-2xl shadow-lg text-xs font-semibold text-slate-900 dark:text-white hover:bg-white dark:hover:bg-slate-900 inline-flex items-center gap-2 tabular-nums"
         >
-          <ChevronUp className="w-4 h-4 text-amber-700 shrink-0" />
+          <ChevronUp className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
           <span className="truncate">
             {selectedDaySummary
               ? `${formatPolishDateChip(selectedDaySummary.date)} · ${streetHeadline}`
               : 'Cała parafia'}
           </span>
           {routes.length > 0 && (
-            <span className="text-slate-500 font-normal shrink-0">
+            <span className="text-slate-500 dark:text-slate-400 font-normal shrink-0">
               · {formatHousesLabel(totalStopsOnRoutes)}
             </span>
           )}
@@ -257,7 +257,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
 
   return (
     <div className="no-print absolute bottom-2.5 left-2.5 right-2.5 sm:bottom-4 sm:left-4 sm:right-auto sm:w-[468px] lg:w-[500px] z-[460]">
-      <div className="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-xl overflow-hidden">
+      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-700 rounded-2xl shadow-xl overflow-hidden">
         {/* Clean Drag-Handle Affordance */}
         <button
           type="button"
@@ -265,7 +265,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
           aria-label={expanded ? 'Zwiń opcje trasy' : 'Rozwiń opcje trasy'}
           className="w-full pt-2 pb-1 flex items-center justify-center group focus:outline-none"
         >
-          <span className="w-9 h-1 rounded-full bg-slate-300 group-hover:bg-slate-400 transition-colors" />
+          <span className="w-9 h-1 rounded-full bg-slate-300 dark:bg-slate-600 group-hover:bg-slate-400 dark:group-hover:bg-slate-500 transition-colors" />
         </button>
 
         {/* Instant 1-Click Map View Switcher: Mapa dnia <-> Cała parafia */}
@@ -274,7 +274,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
             <div
               role="group"
               aria-label="Tryb widoku mapy"
-              className="inline-flex items-center rounded-xl bg-slate-100 p-0.5 flex-1 sm:flex-initial"
+              className="inline-flex items-center rounded-xl bg-slate-100 dark:bg-slate-800 p-0.5 flex-1 sm:flex-initial"
             >
               <button
                 type="button"
@@ -287,11 +287,11 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                 aria-pressed={Boolean(selectedDate)}
                 className={`flex-1 sm:flex-initial min-h-[32px] px-3 py-1 rounded-lg text-[11px] font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap ${
                   selectedDate
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-500 hover:text-slate-900'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <CalendarDays className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                <CalendarDays className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
                 <span>Mapa dnia</span>
               </button>
               <button
@@ -304,11 +304,11 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                 aria-pressed={!selectedDate}
                 className={`flex-1 sm:flex-initial min-h-[32px] px-3 py-1 rounded-lg text-[11px] font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap ${
                   !selectedDate
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-500 hover:text-slate-900'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <Church className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                <Church className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
                 <span>Cała parafia</span>
               </button>
             </div>
@@ -320,7 +320,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                     type="button"
                     onClick={() => stepDay(-1)}
                     aria-label="Poprzedni dzień kolędy"
-                    className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-xl text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                    className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-xl text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -328,7 +328,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                     type="button"
                     onClick={() => stepDay(1)}
                     aria-label="Następny dzień kolędy"
-                    className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-xl text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                    className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-xl text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -340,7 +340,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                 onClick={() => setMinimized(true)}
                 aria-label="Zwiń kartę podglądu"
                 title="Zwiń kartę podglądu"
-                className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
                 <ChevronDown className="w-4 h-4" />
               </button>
@@ -354,7 +354,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
             {selectedDaySummary ? (
               <>
                 <div className="flex items-baseline gap-2 flex-wrap">
-                  <span className="text-sm sm:text-[15px] font-bold tracking-tight text-slate-900">
+                  <span className="text-sm sm:text-[15px] font-bold tracking-tight text-slate-900 dark:text-white">
                     <span className="sm:hidden">
                       {formatPolishDateChip(selectedDaySummary.date)}
                     </span>
@@ -363,22 +363,22 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                     </span>
                   </span>
                   {displayTimeWindow && (
-                    <span className="text-xs font-semibold text-amber-800 tabular-nums">
+                    <span className="text-xs font-semibold text-amber-800 dark:text-amber-400 tabular-nums">
                       {displayTimeWindow}
                     </span>
                   )}
                   {hasMultipleDays && selectedDayIdx >= 0 && (
-                    <span className="text-[11px] font-medium text-slate-400 tabular-nums">
+                    <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500 tabular-nums">
                       {selectedDayIdx + 1}/{plannedDays.length}
                     </span>
                   )}
                 </div>
 
-                <div className="mt-0.5 text-xs text-slate-600 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 tabular-nums">
-                  <span className="font-medium text-slate-800 truncate max-w-[190px] sm:max-w-[230px]">
+                <div className="mt-0.5 text-xs text-slate-600 dark:text-slate-300 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 tabular-nums">
+                  <span className="font-medium text-slate-800 dark:text-slate-100 truncate max-w-[190px] sm:max-w-[230px]">
                     {streetHeadline}
                   </span>
-                  <span aria-hidden="true" className="text-slate-300">
+                  <span aria-hidden="true" className="text-slate-300 dark:text-slate-600">
                     ·
                   </span>
                   <span>
@@ -388,7 +388,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                   </span>
                   {adjustedTotalDistMeters > 0 && (
                     <>
-                      <span aria-hidden="true" className="text-slate-300">
+                      <span aria-hidden="true" className="text-slate-300 dark:text-slate-600">
                         ·
                       </span>
                       <span>{formatDistance(adjustedTotalDistMeters)}</span>
@@ -398,10 +398,10 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
               </>
             ) : (
               <>
-                <div className="text-sm font-bold tracking-tight text-slate-900">
+                <div className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">
                   Teren parafii
                 </div>
-                <div className="mt-0.5 text-xs text-slate-500">
+                <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                   Dotknij dowolną ulicę na mapie, aby zobaczyć domy
                 </div>
               </>
@@ -414,7 +414,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
               onClick={() => setMinimized(true)}
               aria-label="Zwiń kartę podglądu"
               title="Zwiń kartę podglądu"
-              className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors shrink-0"
+              className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
             >
               <ChevronDown className="w-4 h-4" />
             </button>
@@ -425,11 +425,11 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
         {routes.length > 0 && (
           <div className="px-3.5 pb-2.5 space-y-2">
             {/* Compact Travel Mode & Approach Readout Row */}
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
               <div
                 role="group"
                 aria-label="Sposób dotarcia na kolędę"
-                className="inline-flex items-center rounded-xl bg-slate-100 p-0.5 shrink-0"
+                className="inline-flex items-center rounded-xl bg-slate-100 dark:bg-slate-800 p-0.5 shrink-0"
               >
                 <button
                   type="button"
@@ -437,11 +437,11 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                   aria-pressed={travelMode === 'WALKING'}
                   className={`min-h-[32px] px-2.5 py-1 rounded-lg text-[11px] font-semibold inline-flex items-center gap-1 transition-colors whitespace-nowrap ${
                     travelMode === 'WALKING'
-                      ? 'bg-white text-slate-900 shadow-xs'
-                      : 'text-slate-500 hover:text-slate-900'
+                      ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <Footprints className="w-3.5 h-3.5 text-teal-700 shrink-0" />
+                  <Footprints className="w-3.5 h-3.5 text-teal-700 dark:text-teal-400 shrink-0" />
                   <span>Piechotą</span>
                 </button>
                 <button
@@ -450,16 +450,16 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                   aria-pressed={travelMode === 'DRIVING'}
                   className={`min-h-[32px] px-2.5 py-1 rounded-lg text-[11px] font-semibold inline-flex items-center gap-1 transition-colors whitespace-nowrap ${
                     travelMode === 'DRIVING'
-                      ? 'bg-white text-slate-900 shadow-xs'
-                      : 'text-slate-500 hover:text-slate-900'
+                      ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <Car className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                  <Car className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
                   <span>Autem</span>
                 </button>
               </div>
 
-              <div className="min-w-0 text-right text-[11px] text-slate-600 tabular-nums truncate">
+              <div className="min-w-0 text-right text-[11px] text-slate-600 dark:text-slate-300 tabular-nums truncate">
                 {approachMeters >= 30 ? (
                   <span className="inline-flex items-center justify-end gap-1.5">
                     <span
@@ -472,21 +472,21 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                     />
                     <span>
                       {travelMode === 'DRIVING' ? 'Dojazd' : 'Dojście'}:{' '}
-                      <strong className="font-semibold text-slate-900">
+                      <strong className="font-semibold text-slate-900 dark:text-white">
                         {approachMinutes} min
                       </strong>
-                      <span className="text-slate-400">
+                      <span className="text-slate-400 dark:text-slate-500">
                         {' '}
                         ({formatDistance(approachMeters)})
                       </span>
                     </span>
                   </span>
                 ) : liveRoadMetrics?.isLoading ? (
-                  <span className="text-slate-400">Wyznaczanie drogi...</span>
+                  <span className="text-slate-400 dark:text-slate-500">Wyznaczanie drogi...</span>
                 ) : firstArrivalTime ? (
                   <span>
                     Start pod domem:{' '}
-                    <strong className="font-semibold text-slate-900">
+                    <strong className="font-semibold text-slate-900 dark:text-white">
                       {firstArrivalTime}
                     </strong>
                   </span>
@@ -499,7 +499,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
               <div
                 role="group"
                 aria-label="Trasa powrotna z mety"
-                className="inline-flex items-center rounded-xl bg-slate-100 p-0.5 shrink-0"
+                className="inline-flex items-center rounded-xl bg-slate-100 dark:bg-slate-800 p-0.5 shrink-0"
               >
                 {(
                   [
@@ -515,8 +515,8 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                     aria-pressed={returnTarget === opt.id}
                     className={`min-h-[30px] px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap ${
                       returnTarget === opt.id
-                        ? 'bg-white text-slate-900 shadow-xs'
-                        : 'text-slate-500 hover:text-slate-900'
+                        ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     {opt.label}
@@ -524,46 +524,46 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                 ))}
               </div>
 
-              <div className="min-w-0 text-right text-[11px] text-slate-600 tabular-nums truncate">
+              <div className="min-w-0 text-right text-[11px] text-slate-600 dark:text-slate-300 tabular-nums truncate">
                 {returnTarget === 'none' ? (
-                  <span className="text-slate-400">Bez powrotu</span>
+                  <span className="text-slate-400 dark:text-slate-500">Bez powrotu</span>
                 ) : returnMeters >= 30 ? (
                   <span className="inline-flex items-center justify-end gap-1.5">
                     <span
                       aria-hidden="true"
-                      className="w-2 h-2 rounded-full bg-violet-600 shrink-0"
+                      className="w-2 h-2 rounded-full bg-violet-600 dark:bg-violet-400 shrink-0"
                     />
                     <span>
                       Powrót:{' '}
-                      <strong className="font-semibold text-slate-900">
+                      <strong className="font-semibold text-slate-900 dark:text-white">
                         {returnMinutes} min
                       </strong>
-                      <span className="text-slate-400">
+                      <span className="text-slate-400 dark:text-slate-500">
                         {' '}
                         ({formatDistance(returnMeters)})
                       </span>
                     </span>
                   </span>
                 ) : liveRoadMetrics?.isLoading ? (
-                  <span className="text-slate-400">Liczenie powrotu...</span>
+                  <span className="text-slate-400 dark:text-slate-500">Liczenie powrotu...</span>
                 ) : (
-                  <span className="text-slate-400">Powrót po drogach</span>
+                  <span className="text-slate-400 dark:text-slate-500">Powrót po drogach</span>
                 )}
               </div>
             </div>
 
             {activeStartAddress && (
-              <div className="flex items-center justify-between gap-2 text-[11px] text-slate-600">
+              <div className="flex items-center justify-between gap-2 text-[11px] text-slate-600 dark:text-slate-300">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span className="w-2 h-2 rounded-full bg-emerald-600 shrink-0" />
-                  <span className="font-semibold text-slate-900 truncate">
+                  <span className="font-semibold text-slate-900 dark:text-white truncate">
                     {activeStartAddress}
                   </span>
                   {activeEndAddress && activeEndAddress !== activeStartAddress && (
                     <>
                       <ArrowRight className="w-3 h-3 text-slate-400 shrink-0" />
-                      <span className="w-2 h-2 rounded-full bg-slate-900 shrink-0" />
-                      <span className="text-slate-600 truncate">
+                      <span className="w-2 h-2 rounded-full bg-slate-900 dark:bg-slate-200 shrink-0" />
+                      <span className="text-slate-600 dark:text-slate-300 truncate">
                         {activeEndAddress}
                       </span>
                     </>
@@ -571,7 +571,9 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                 </div>
                 <span
                   className={`shrink-0 font-medium ${
-                    hasLiveRoadGeometry ? 'text-emerald-700' : 'text-slate-400'
+                    hasLiveRoadGeometry
+                      ? 'text-emerald-700 dark:text-emerald-400'
+                      : 'text-slate-400 dark:text-slate-500'
                   }`}
                 >
                   {hasLiveRoadGeometry
@@ -591,8 +593,8 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                   onClick={() => onFocusPriest(null)}
                   className={`min-h-[36px] sm:min-h-[32px] px-2.5 py-1 text-[11px] font-semibold rounded-xl whitespace-nowrap shrink-0 tabular-nums transition-colors ${
                     focusedPriestId === null
-                      ? 'bg-slate-900 text-white'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      ? 'bg-slate-900 dark:bg-amber-700 text-white'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   Wszyscy ({routes.reduce((a, r) => a + r.orderedStops.length, 0)})
@@ -606,10 +608,10 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                       onClick={() => onFocusPriest(active ? null : r.priestId)}
                       className={`min-h-[36px] sm:min-h-[32px] px-2.5 py-1 text-[11px] font-semibold rounded-xl inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 tabular-nums border transition-colors ${
                         active
-                          ? 'bg-slate-900 text-white border-slate-900'
+                          ? 'bg-slate-900 dark:bg-amber-700 text-white border-slate-900 dark:border-amber-700'
                           : focusedPriestId !== null
-                            ? 'bg-slate-50 text-slate-400 border-slate-200 hover:text-slate-700'
-                            : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100'
+                            ? 'bg-slate-50 dark:bg-slate-800/60 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700 hover:text-slate-700 dark:hover:text-slate-200'
+                            : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                       }`}
                     >
                       <span
@@ -640,9 +642,9 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
               <button
                 type="button"
                 onClick={onOpenRouteList}
-                className="min-h-[44px] sm:min-h-[38px] px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-900 text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+                className="min-h-[44px] sm:min-h-[38px] px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
               >
-                <ListOrdered className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                <ListOrdered className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
                 <span>Rozpiska</span>
               </button>
 
@@ -652,8 +654,8 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                 aria-expanded={expanded}
                 className={`min-h-[44px] sm:min-h-[38px] px-2.5 py-1.5 rounded-xl border text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap ${
                   expanded
-                    ? 'bg-slate-900 border-slate-900 text-white'
-                    : 'bg-slate-100/90 border-slate-200/80 text-slate-800 hover:bg-slate-200/80'
+                    ? 'bg-slate-900 dark:bg-amber-700 border-slate-900 dark:border-amber-700 text-white'
+                    : 'bg-slate-100/90 dark:bg-slate-800 border-slate-200/80 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:bg-slate-200/80 dark:hover:bg-slate-700'
                 }`}
               >
                 <SlidersHorizontal className="w-3.5 h-3.5 shrink-0" />
@@ -665,7 +667,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
 
         {/* Quick 1-tap Jump into Kolęda Day when viewing Whole Parish */}
         {!selectedDate && nearestDayDate && plannedDays.length > 0 && (
-          <div className="px-3.5 pb-3 pt-1.5 border-t border-slate-100 flex items-center justify-between gap-2">
+          <div className="px-3.5 pb-3 pt-1.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
             <button
               type="button"
               onClick={() => {
@@ -683,8 +685,8 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
               aria-expanded={expanded}
               className={`min-h-[42px] px-3 py-1.5 rounded-xl border text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap ${
                 expanded
-                  ? 'bg-slate-900 border-slate-900 text-white'
-                  : 'bg-slate-100 border-slate-200 text-slate-800 hover:bg-slate-200'
+                  ? 'bg-slate-900 dark:bg-amber-700 border-slate-900 dark:border-amber-700 text-white'
+                  : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
               <SlidersHorizontal className="w-3.5 h-3.5 shrink-0" />
@@ -695,7 +697,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
 
         {/* Expandable Options Drawer */}
         {expanded && (
-          <div className="px-3.5 py-3 bg-slate-50/95 border-t border-slate-200 space-y-2.5">
+          <div className="px-3.5 py-3 bg-slate-50/95 dark:bg-slate-950/85 border-t border-slate-200 dark:border-slate-800 space-y-2.5">
             {plannedDays.length > 0 && (
               <div className="flex items-center gap-2">
                 <select
@@ -705,7 +707,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                     onFocusPriest(null);
                   }}
                   aria-label="Wybierz dzień kolędy na mapie"
-                  className="flex-1 min-w-0 min-h-[40px] px-2.5 py-1.5 text-xs font-semibold bg-white border border-slate-200 rounded-xl text-slate-900 tabular-nums focus:outline-none focus:border-amber-600"
+                  className="flex-1 min-w-0 min-h-[42px] px-2.5 py-1.5 text-base sm:text-xs font-semibold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 tabular-nums focus:outline-none focus:border-amber-600"
                 >
                   {plannedDays.map((d, idx) => (
                     <option key={d.date} value={d.date}>
@@ -726,9 +728,9 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                       onFocusPriest(null);
                       onFocusStreet(null);
                     }}
-                    className="min-h-[40px] px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-800 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap"
+                    className="min-h-[42px] px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap"
                   >
-                    <Church className="w-3.5 h-3.5 text-amber-700" />
+                    <Church className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                     <span>Parafia</span>
                   </button>
                 )}
@@ -741,9 +743,9 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                   type="button"
                   disabled={isComputingExact}
                   onClick={onComputeExactDayRoute}
-                  className="min-h-[38px] px-3 py-1.5 text-xs font-semibold text-amber-950 bg-amber-50 hover:bg-amber-100 border border-amber-300 disabled:opacity-50 rounded-xl inline-flex items-center gap-1.5 whitespace-nowrap transition-colors"
+                  className="min-h-[38px] px-3 py-1.5 text-xs font-semibold text-amber-950 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-300 dark:border-amber-800 disabled:opacity-50 rounded-xl inline-flex items-center gap-1.5 whitespace-nowrap transition-colors"
                 >
-                  <Navigation className="w-3.5 h-3.5 text-amber-700" />
+                  <Navigation className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                   <span>
                     {isComputingExact
                       ? 'Liczenie trasy...'
@@ -761,8 +763,8 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                   aria-pressed={showHousesOnMap}
                   className={`min-h-[38px] px-2.5 py-1.5 text-xs font-semibold rounded-xl inline-flex items-center gap-1.5 transition-colors whitespace-nowrap border ${
                     showHousesOnMap
-                      ? 'bg-slate-900 text-white border-slate-900'
-                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                      ? 'bg-slate-900 dark:bg-amber-700 text-white border-slate-900 dark:border-amber-700'
+                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                   }`}
                 >
                   <Home className="w-3.5 h-3.5" />
@@ -776,8 +778,8 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                   onClick={onToggleRouteLines}
                   className={`min-h-[38px] px-2.5 py-1.5 text-xs font-semibold rounded-xl inline-flex items-center gap-1.5 transition-colors whitespace-nowrap border ${
                     showRouteLines
-                      ? 'bg-slate-900 text-white border-slate-900'
-                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                      ? 'bg-slate-900 dark:bg-amber-700 text-white border-slate-900 dark:border-amber-700'
+                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                   }`}
                 >
                   {showRouteLines ? (
@@ -793,7 +795,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                 <div
                   role="group"
                   aria-label="Sposób wyświetlania punktów na mapie"
-                  className="inline-flex items-center rounded-xl bg-slate-200/80 p-0.5"
+                  className="inline-flex items-center rounded-xl bg-slate-200/80 dark:bg-slate-800 p-0.5"
                 >
                   {(
                     [
@@ -808,8 +810,8 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                       onClick={() => onChangeMarkerLabelMode(opt.id)}
                       className={`min-h-[34px] px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-colors whitespace-nowrap ${
                         markerLabelMode === opt.id
-                          ? 'bg-white text-slate-900 shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900'
+                          ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                       }`}
                     >
                       {opt.label}
@@ -823,10 +825,10 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                   value={focusedStreet ?? ''}
                   onChange={(e) => onFocusStreet(e.target.value || null)}
                   aria-label="Filtruj ulicę na mapie"
-                  className={`min-h-[38px] px-2.5 py-1.5 text-xs font-medium border rounded-xl focus:outline-none max-w-[200px] ${
+                  className={`min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs font-medium border rounded-xl focus:outline-none max-w-[220px] ${
                     focusedStreet
-                      ? 'bg-amber-50 border-amber-400 text-amber-950 font-semibold'
-                      : 'bg-white border-slate-200 text-slate-800'
+                      ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-400 dark:border-amber-700 text-amber-950 dark:text-amber-200 font-semibold'
+                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100'
                   }`}
                 >
                   <option value="">

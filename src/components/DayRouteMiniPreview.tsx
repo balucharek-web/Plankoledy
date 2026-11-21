@@ -218,10 +218,10 @@ export const DayRouteMiniPreview: React.FC<DayRouteMiniPreviewProps> = ({
       type="button"
       onClick={onOpenMap}
       aria-label={`Otwórz pełną mapę dnia ${day.shortDateLabel}`}
-      className="group w-full rounded-xl overflow-hidden border border-slate-200/90 bg-slate-50 hover:border-amber-400 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
+      className="group w-full rounded-xl overflow-hidden border border-slate-200/90 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 hover:border-amber-400 dark:hover:border-amber-500 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
     >
       {/* Crisp clean schematic viewport — zero cluttered overlays */}
-      <div className="relative bg-gradient-to-b from-slate-50 to-slate-100/70">
+      <div className="relative bg-gradient-to-b from-slate-50 to-slate-100/70 dark:from-slate-900 dark:to-slate-950">
         <svg
           viewBox={`0 0 ${geometry.width} ${geometry.height}`}
           className="w-full h-[116px] block select-none"
@@ -360,13 +360,13 @@ export const DayRouteMiniPreview: React.FC<DayRouteMiniPreviewProps> = ({
       </div>
 
       {/* Integrated Start → Meta address footer strip (clean, scannable, zero floating pills) */}
-      <div className="bg-white border-t border-slate-200/80 px-3 py-2 flex items-center justify-between gap-2 text-[11px]">
-        <div className="flex items-center gap-2 min-w-0 text-slate-700">
+      <div className="bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 px-3 py-2 flex items-center justify-between gap-2 text-[11px]">
+        <div className="flex items-center gap-2 min-w-0 text-slate-700 dark:text-slate-300">
           {geometry.startLabel ? (
             <>
               <span className="inline-flex items-center gap-1.5 min-w-0">
                 <span className="w-2 h-2 rounded-full bg-emerald-600 shrink-0" />
-                <span className="font-semibold text-slate-900 truncate">
+                <span className="font-semibold text-slate-900 dark:text-slate-100 truncate">
                   {geometry.startLabel}
                 </span>
               </span>
@@ -374,8 +374,8 @@ export const DayRouteMiniPreview: React.FC<DayRouteMiniPreviewProps> = ({
                 <>
                   <ArrowRight className="w-3 h-3 text-slate-400 shrink-0" />
                   <span className="inline-flex items-center gap-1.5 min-w-0">
-                    <span className="w-2 h-2 rounded-full bg-slate-900 shrink-0" />
-                    <span className="text-slate-600 truncate">
+                    <span className="w-2 h-2 rounded-full bg-slate-900 dark:bg-slate-200 shrink-0" />
+                    <span className="text-slate-600 dark:text-slate-400 truncate">
                       {geometry.endLabel}
                     </span>
                   </span>
@@ -383,10 +383,12 @@ export const DayRouteMiniPreview: React.FC<DayRouteMiniPreviewProps> = ({
               )}
             </>
           ) : (
-            <span className="text-slate-500">Podgląd trasy dnia</span>
+            <span className="text-slate-500 dark:text-slate-400">
+              Podgląd trasy dnia
+            </span>
           )}
         </div>
-        <span className="text-amber-800 font-semibold whitespace-nowrap shrink-0 inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+        <span className="text-amber-800 dark:text-amber-400 font-semibold whitespace-nowrap shrink-0 inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
           <span>Pełna mapa</span>
           <ArrowRight className="w-3 h-3" />
         </span>

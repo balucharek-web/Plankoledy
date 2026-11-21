@@ -25,11 +25,13 @@ import {
   Map as MapIcon,
   MapPinPlus,
   Menu,
+  Moon,
   Pentagon,
   Route,
   Scan,
   ScanSearch,
   SlidersHorizontal,
+  Sun,
   Trash2,
   Undo2,
   Users,
@@ -90,6 +92,7 @@ import { useOsmRouteOptimizer } from './hooks/useOsmRouteOptimizer';
 import { useParishCollaboration } from './hooks/useParishCollaboration';
 import { useParishRouteOptimizer } from './hooks/useParishRouteOptimizer';
 import { useParishWorkspaceStats } from './hooks/useParishWorkspaceStats';
+import { useThemeMode } from './hooks/useThemeMode';
 import { fetchStreetRoadGeometry } from './services/osmSearchAndRouting';
 import {
   fetchStreetHousesAtLocation,
@@ -511,9 +514,23 @@ function ParishPlannerWorkspace({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser?.uid]);
 
+  const { themePreference, isDark, setThemePreference, toggleLightDark } =
+    useThemeMode();
+
   const [settingsInitialTab, setSettingsInitialTab] = useState<
     'route' | 'season' | 'team'
   >('route');
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [mobileMenuOpen]);
 
   const collaboration = useParishCollaboration({
     authUser,
@@ -2786,12 +2803,12 @@ function ParishPlannerWorkspace({
   const isMobileFullMap = mobilePane === 'map' && !isScheduleView;
 
   return (
-    <div className="flex flex-col h-full min-h-0 bg-slate-50 print-reset">
+    <div className="flex flex-col h-full min-h-0 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 print-reset">
       <PwaUpdateBanner />
 
       {/* Three-Zone Top Bar (hidden on mobile during full-screen map view for Google Maps-grade immersion) */}
       <header
-        className={`no-print h-14 px-3 sm:px-5 bg-white border-b border-slate-200 items-center justify-between gap-3 shrink-0 ${
+        className={`no-print min-h-[56px] pt-safe px-3 sm:px-5 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 items-center justify-between gap-3 shrink-0 ${
           isMobileFullMap ? 'hidden lg:flex' : 'flex'
         }`}
       >
@@ -2800,7 +2817,7 @@ function ParishPlannerWorkspace({
             type="button"
             onClick={() => setMobileMenuOpen(true)}
             aria-label="Otwórz menu"
-            className="lg:hidden min-w-[40px] min-h-[40px] -ml-1 inline-flex items-center justify-center rounded-xl text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
+            className="lg:hidden min-w-[44px] min-h-[44px] -ml-1.5 inline-flex items-center justify-center rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -2808,52 +2825,66 @@ function ParishPlannerWorkspace({
           <button
             type="button"
             onClick={() => navigateToSection('overview')}
-            className="text-sm sm:text-base font-bold tracking-tight text-slate-900 whitespace-nowrap shrink-0 text-left"
+            className="text-sm sm:text-base font-bold tracking-tight text-slate-900 dark:text-white whitespace-nowrap shrink-0 text-left"
           >
             Planer Kolędy
           </button>
 
           {parish && (
-            <span className="hidden md:inline-flex items-center gap-2 text-xs text-slate-500 min-w-0">
+            <span className="hidden md:inline-flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 min-w-0">
               <span aria-hidden="true">/</span>
-              <span className="truncate max-w-[260px] text-slate-700 font-medium">
+              <span className="truncate max-w-[260px] text-slate-700 dark:text-slate-200 font-medium">
                 {parish.name}
               </span>
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={toggleLightDark}
+            aria-label={isDark ? 'Przełącz na tryb jasny' : 'Przełącz na tryb ciemny'}
+            title={isDark ? 'Tryb jasny' : 'Tryb ciemny (na kolędę po zmroku)'}
+            className="min-w-[40px] min-h-[40px] inline-flex items-center justify-center rounded-xl text-slate-600 dark:text-amber-300 bg-slate-100/80 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shrink-0"
+          >
+            {isDark ? (
+              <Sun className="w-4 h-4" />
+            ) : (
+              <Moon className="w-4 h-4" />
+            )}
+          </button>
+
           {authUser ? (
             <button
               type="button"
               onClick={onSignOutGoogle}
               title={`Zalogowano: ${authUser.email ?? ''}`}
-              className="min-h-[38px] px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl inline-flex items-center gap-1.5 transition-colors whitespace-nowrap"
+              className="min-h-[40px] px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl inline-flex items-center gap-1.5 transition-colors whitespace-nowrap"
             >
-              <LogOut className="w-3.5 h-3.5 text-slate-500" />
+              <LogOut className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span className="hidden sm:inline max-w-[120px] truncate">
                 {authUser.displayName?.split(' ')[0] || 'Konto'}
               </span>
-              <span className="hidden sm:inline text-slate-400">·</span>
+              <span className="hidden sm:inline text-slate-400 dark:text-slate-500">·</span>
               <span>Wyloguj</span>
             </button>
           ) : pendingVerificationEmail ? (
             <button
               type="button"
               onClick={onSignInGoogle}
-              className="min-h-[38px] px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-amber-950 bg-amber-100 border border-amber-300 hover:bg-amber-200 rounded-xl inline-flex items-center gap-1.5 transition-colors whitespace-nowrap"
+              className="min-h-[40px] px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-amber-950 dark:text-amber-100 bg-amber-100 dark:bg-amber-900/50 border border-amber-300 dark:border-amber-700 hover:bg-amber-200 dark:hover:bg-amber-900/70 rounded-xl inline-flex items-center gap-1.5 transition-colors whitespace-nowrap"
             >
-              <LogIn className="w-3.5 h-3.5 text-amber-800" />
+              <LogIn className="w-3.5 h-3.5 text-amber-800 dark:text-amber-300" />
               <span>Potwierdź e-mail</span>
             </button>
           ) : (
             <button
               type="button"
               onClick={onSignInGoogle}
-              className="min-h-[38px] px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-800 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl inline-flex items-center gap-1.5 transition-colors whitespace-nowrap"
+              className="min-h-[40px] px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl inline-flex items-center gap-1.5 transition-colors whitespace-nowrap"
             >
-              <LogIn className="w-3.5 h-3.5 text-amber-700" />
+              <LogIn className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
               <span>Zaloguj</span>
               <span className="hidden sm:inline">/ Konto</span>
             </button>
@@ -2863,7 +2894,7 @@ function ParishPlannerWorkspace({
             type="button"
             disabled={!parish || activeStopsCount === 0 || isComputing}
             onClick={handleComputeRoutes}
-            className="min-h-[38px] px-3 sm:px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 disabled:bg-slate-300 disabled:cursor-not-allowed rounded-xl transition-colors whitespace-nowrap shrink-0"
+            className="min-h-[40px] px-3 sm:px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 disabled:bg-slate-300 dark:disabled:bg-slate-700 dark:disabled:text-slate-400 disabled:cursor-not-allowed rounded-xl transition-colors whitespace-nowrap shrink-0"
           >
             {isComputing ? 'Liczenie...' : 'Wyznacz trasy'}
           </button>
@@ -2872,57 +2903,36 @@ function ParishPlannerWorkspace({
 
       <OfflineIndicator />
 
-      {/* Pending Email Verification Banner */}
-      {pendingVerificationEmail && (
-        <div className="no-print bg-amber-100 border-b border-amber-300 px-3 sm:px-5 py-2 flex items-center justify-between gap-2 text-xs text-amber-950 shrink-0">
+      {/* Single Prioritized Contextual Status Strip (prevents multi-banner stacking on mobile) */}
+      {pendingVerificationEmail ? (
+        <div className="no-print bg-amber-100 dark:bg-amber-950/80 border-b border-amber-300 dark:border-amber-800 px-3 sm:px-5 py-2 flex items-center justify-between gap-2 text-xs text-amber-950 dark:text-amber-100 shrink-0">
           <span className="truncate">
-            Konto <strong>{pendingVerificationEmail}</strong> oczekuje na
-            kliknięcie linku w e-mailu, aby zapisać dane w chmurze.
+            Konto <strong>{pendingVerificationEmail}</strong> czeka na
+            potwierdzenie linkiem w e-mailu.
           </span>
           <div className="flex items-center gap-1.5 shrink-0">
             <button
               type="button"
               onClick={onSignInGoogle}
-              className="px-2.5 py-1 text-[11px] font-semibold bg-amber-800 hover:bg-amber-900 text-white rounded-lg whitespace-nowrap"
+              className="min-h-[32px] px-2.5 py-1 text-xs font-semibold bg-amber-800 hover:bg-amber-900 text-white rounded-lg whitespace-nowrap"
             >
-              Potwierdź teraz
+              Potwierdź
             </button>
             <button
               type="button"
               onClick={onSignOutGoogle}
-              className="px-2 py-1 text-[11px] font-medium bg-white border border-amber-300 text-amber-900 hover:bg-amber-50 rounded-lg whitespace-nowrap"
+              className="min-h-[32px] px-2 py-1 text-xs font-medium bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 hover:bg-amber-50 dark:hover:bg-slate-800 rounded-lg whitespace-nowrap"
             >
               Wyloguj
             </button>
           </div>
         </div>
-      )}
-
-      {/* Guest Mode Warning Banner */}
-      {!authUser && !pendingVerificationEmail && parish && activeSection !== 'schedule' && (
-        <div className="no-print bg-amber-50 border-b border-amber-200 px-3 sm:px-5 py-2 flex items-center justify-between gap-2 text-xs text-amber-950 shrink-0">
-          <span className="truncate">
-            <strong>Tryb gościa</strong> — zmiany nie zapisują się na stałe po
-            odświeżeniu.
-          </span>
-          <button
-            type="button"
-            onClick={onSignInGoogle}
-            className="px-2.5 py-1 text-[11px] font-semibold bg-slate-900 hover:bg-slate-800 text-white rounded-lg whitespace-nowrap shrink-0"
-          >
-            Zaloguj / Załóż konto
-          </button>
-        </div>
-      )}
-
-      {/* Pending Parish Invitation Banner (for invited Wikariusz) */}
-      {authUser && collaboration.pendingIncomingInvites.length > 0 && (
-        <div className="no-print bg-emerald-50 border-b border-emerald-200 px-3 sm:px-5 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-950 shrink-0">
+      ) : authUser && collaboration.pendingIncomingInvites.length > 0 ? (
+        <div className="no-print bg-emerald-50 dark:bg-emerald-950/70 border-b border-emerald-200 dark:border-emerald-800 px-3 sm:px-5 py-2 flex items-center justify-between gap-2 text-xs text-emerald-950 dark:text-emerald-100 shrink-0">
           <span className="min-w-0 truncate">
-            Zaproszenie do wspólnej parafii:{' '}
+            Zaproszenie:{' '}
             <strong>{collaboration.pendingIncomingInvites[0].parishName}</strong>{' '}
-            (Wikariusz · Ksiądz{' '}
-            {collaboration.pendingIncomingInvites[0].priestId})
+            · Ks. {collaboration.pendingIncomingInvites[0].priestId}
           </span>
           <div className="flex items-center gap-1.5 shrink-0">
             <button
@@ -2933,9 +2943,9 @@ function ParishPlannerWorkspace({
                   collaboration.pendingIncomingInvites[0]
                 )
               }
-              className="px-2.5 py-1 text-[11px] font-semibold bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg whitespace-nowrap disabled:opacity-50"
+              className="min-h-[32px] px-2.5 py-1 text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg whitespace-nowrap disabled:opacity-50"
             >
-              Dołącz do parafii
+              Dołącz
             </button>
             <button
               type="button"
@@ -2945,24 +2955,38 @@ function ParishPlannerWorkspace({
                   collaboration.pendingIncomingInvites[0].id
                 )
               }
-              className="px-2 py-1 text-[11px] font-medium bg-white border border-emerald-300 text-emerald-900 hover:bg-emerald-100 rounded-lg whitespace-nowrap disabled:opacity-50"
+              className="min-h-[32px] px-2 py-1 text-xs font-medium bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-slate-800 rounded-lg whitespace-nowrap disabled:opacity-50"
             >
               Odrzuć
             </button>
           </div>
         </div>
-      )}
-
-      {/* Active Shared Parish Role Indicator (Wikariusz) */}
-      {authUser && collaboration.isCollaborator && parish && activeSection !== 'schedule' && (
-        <div className="no-print bg-slate-100 border-b border-slate-200 px-3 sm:px-5 py-1.5 flex items-center justify-between gap-2 text-[11px] text-slate-700 shrink-0">
+      ) : !authUser && parish && activeSection !== 'schedule' ? (
+        <div className="no-print bg-amber-50 dark:bg-amber-950/50 border-b border-amber-200 dark:border-amber-900/70 px-3 sm:px-5 py-1.5 flex items-center justify-between gap-2 text-xs text-amber-950 dark:text-amber-100 shrink-0">
           <span className="truncate">
-            Wspólna parafia · Rola:{' '}
-            <strong className="text-emerald-800">Wikariusz</strong>
+            <strong>Tryb gościa</strong> — zaloguj się, aby zapisać plan na stałe.
+          </span>
+          <button
+            type="button"
+            onClick={onSignInGoogle}
+            className="min-h-[32px] px-2.5 py-1 text-xs font-semibold bg-slate-900 dark:bg-amber-700 hover:bg-slate-800 dark:hover:bg-amber-600 text-white rounded-lg whitespace-nowrap shrink-0"
+          >
+            Zaloguj
+          </button>
+        </div>
+      ) : authUser &&
+        collaboration.isCollaborator &&
+        parish &&
+        activeSection !== 'schedule' ? (
+        <div className="no-print bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-3 sm:px-5 py-1.5 flex items-center justify-between gap-2 text-xs text-slate-700 dark:text-slate-300 shrink-0">
+          <span className="truncate">
+            Wspólna parafia ·{' '}
+            <strong className="text-emerald-800 dark:text-emerald-400">
+              Wikariusz
+            </strong>
             {collaboration.assignedPriestId
-              ? ` (Ksiądz ${collaboration.assignedPriestId})`
-              : ''}{' '}
-            — odhaczanie wizyt i notatek synchronizuje się na żywo.
+              ? ` (Ks. ${collaboration.assignedPriestId})`
+              : ''}
           </span>
           <button
             type="button"
@@ -2970,12 +2994,12 @@ function ParishPlannerWorkspace({
               setSettingsInitialTab('team');
               navigateToSection('settings');
             }}
-            className="px-2 py-0.5 text-[11px] font-semibold text-slate-800 bg-white border border-slate-200 hover:bg-slate-50 rounded-md whitespace-nowrap shrink-0"
+            className="min-h-[30px] px-2.5 py-0.5 text-xs font-semibold text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-md whitespace-nowrap shrink-0"
           >
             Zespół
           </button>
         </div>
-      )}
+      ) : null}
 
       {/* Main App Body: Desktop Left Menu Rail + Panel + Map */}
       <div className="flex-1 min-h-0 flex overflow-hidden print-reset">
@@ -3043,7 +3067,7 @@ function ParishPlannerWorkspace({
 
         {/* Active Workspace or Schedule */}
         {isScheduleView ? (
-          <main className="flex-1 min-h-0 overflow-y-auto bg-slate-50 print-reset">
+          <main className="flex-1 min-h-0 overflow-y-auto bg-slate-50 dark:bg-slate-950 print-reset">
             <Suspense fallback={null}>
               <PrintScheduleSheet
                 parish={parish}
@@ -3087,13 +3111,13 @@ function ParishPlannerWorkspace({
           <main className="no-print flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden">
             {/* Left Detail Panel (hidden on mobile when Map pane is active) */}
             <aside
-              className={`no-print w-full lg:w-[400px] xl:w-[430px] bg-white lg:border-r border-slate-200 flex-col min-h-0 shrink-0 ${
+              className={`no-print w-full lg:w-[400px] xl:w-[430px] bg-white dark:bg-slate-900 lg:border-r border-slate-200 dark:border-slate-800 flex-col min-h-0 shrink-0 ${
                 mobilePane === 'panel' ? 'flex flex-1 lg:flex-none' : 'hidden lg:flex'
               }`}
             >
               {/* Mobile section sub-header with 1-tap Parafia / Ustawienia / Mapa shortcuts */}
-              <div className="lg:hidden px-3 py-2 border-b border-slate-200 bg-slate-50/90 flex items-center justify-between gap-2 shrink-0">
-                <span className="text-xs font-semibold text-slate-900 truncate">
+              <div className="lg:hidden px-3 py-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/95 flex items-center justify-between gap-2 shrink-0">
+                <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
                   {SECTION_TITLES[activeSection]}
                 </span>
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -3101,9 +3125,9 @@ function ParishPlannerWorkspace({
                     <button
                       type="button"
                       onClick={() => navigateToSection('parish')}
-                      className="min-h-[32px] px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-[11px] font-medium text-slate-700 hover:bg-slate-100 inline-flex items-center gap-1 whitespace-nowrap"
+                      className="min-h-[34px] px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 inline-flex items-center gap-1 whitespace-nowrap"
                     >
-                      <Church className="w-3 h-3 text-amber-700" />
+                      <Church className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                       <span>Parafia</span>
                     </button>
                   )}
@@ -3113,18 +3137,18 @@ function ParishPlannerWorkspace({
                       onClick={() => navigateToSection('settings')}
                       aria-label="Ustawienia"
                       title="Ustawienia"
-                      className="min-h-[32px] min-w-[32px] px-2 py-1 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 inline-flex items-center justify-center"
+                      className="min-h-[34px] min-w-[34px] px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 inline-flex items-center justify-center"
                     >
-                      <SlidersHorizontal className="w-3.5 h-3.5 text-slate-600" />
+                      <SlidersHorizontal className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
                     </button>
                   )}
                   {parish && (
                     <button
                       type="button"
                       onClick={() => setMobilePane('map')}
-                      className="min-h-[32px] px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-xs font-semibold text-amber-900 inline-flex items-center gap-1 whitespace-nowrap"
+                      className="min-h-[34px] px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-xs font-semibold text-amber-900 dark:text-amber-200 inline-flex items-center gap-1 whitespace-nowrap"
                     >
-                      <MapIcon className="w-3.5 h-3.5 text-amber-700" />
+                      <MapIcon className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                       <span>Mapa</span>
                     </button>
                   )}
@@ -3153,6 +3177,13 @@ function ParishPlannerWorkspace({
                       setSelectedDate(date);
                       setFocusedPriestId(null);
                       navigateToSection('routes');
+                    }}
+                    onStartFieldMode={(date) => {
+                      setSelectedDate(date);
+                      setFocusedPriestId(null);
+                      setFieldModeOnMap(true);
+                      setInteractionMode('pan');
+                      setMobilePane('map');
                     }}
                     onViewDayOnMap={handleViewDayOnMap}
                     onViewWholeParish={() => {
@@ -3342,6 +3373,8 @@ function ParishPlannerWorkspace({
                     onOpenGuide={() => setGuideOpen(true)}
                     onOpenSchedule={() => navigateToSection('schedule')}
                     initialTab={settingsInitialTab}
+                    themePreference={themePreference}
+                    onChangeThemePreference={setThemePreference}
                     teamPanelProps={{
                       isAuthenticated: Boolean(authUser),
                       userEmail: authUser?.email ?? null,
@@ -3376,7 +3409,7 @@ function ParishPlannerWorkspace({
             >
               {/* Desktop Compact Map Actions Toolbar (mobile uses sleek floating glass top bar on the map) */}
               {interactionMode === 'pan' && (
-                <div className="no-print hidden lg:flex shrink-0 bg-white border-b border-slate-200 px-3 py-1.5 items-center gap-1.5 overflow-x-auto">
+                <div className="no-print hidden lg:flex shrink-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-3 py-1.5 items-center gap-1.5 overflow-x-auto">
                   <button
                     type="button"
                     onClick={() => setMobilePane('panel')}
@@ -3480,7 +3513,7 @@ function ParishPlannerWorkspace({
                               className={`min-h-[36px] px-2.5 py-1.5 rounded-xl border text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors ${
                                 fieldModeOnMap
                                   ? 'bg-emerald-700 border-emerald-700 text-white shadow-xs'
-                                  : 'border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-950'
+                                  : 'border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-950 dark:text-emerald-200'
                               }`}
                             >
                               <ClipboardCheck className="w-3.5 h-3.5 shrink-0" />
@@ -3501,9 +3534,9 @@ function ParishPlannerWorkspace({
                                   : 'draw_boundary'
                               )
                             }
-                            className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
+                            className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
                           >
-                            <Pentagon className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                            <Pentagon className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
                             <span>
                               {boundary.length >= 3
                                 ? 'Popraw granice'
@@ -3515,9 +3548,9 @@ function ParishPlannerWorkspace({
                             <button
                               type="button"
                               onClick={() => setAreaScannerOpen(true)}
-                              className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-950 text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
+                              className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-950 dark:text-emerald-200 text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
                             >
-                              <ScanSearch className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                              <ScanSearch className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" />
                               <span>Wykryj z terenu</span>
                             </button>
                           )}
@@ -3529,9 +3562,9 @@ function ParishPlannerWorkspace({
                                 setLassoSelectedStopIds([]);
                                 setInteractionMode('lasso_select');
                               }}
-                              className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-950 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
+                              className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-950 dark:text-indigo-200 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
                             >
-                              <Scan className="w-3.5 h-3.5 text-indigo-700 shrink-0" />
+                              <Scan className="w-3.5 h-3.5 text-indigo-700 dark:text-indigo-400 shrink-0" />
                               <span>Zaznacz lassem</span>
                             </button>
                           )}
@@ -3539,18 +3572,18 @@ function ParishPlannerWorkspace({
                           <button
                             type="button"
                             onClick={() => setInteractionMode('pick_street')}
-                            className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
+                            className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
                           >
-                            <Route className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                            <Route className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
                             <span>+ Ulica z mapy</span>
                           </button>
 
                           <button
                             type="button"
                             onClick={() => setInteractionMode('add_stop')}
-                            className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
+                            className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
                           >
-                            <MapPinPlus className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                            <MapPinPlus className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
                             <span>+ Dom</span>
                           </button>
 
@@ -3558,18 +3591,18 @@ function ParishPlannerWorkspace({
                             type="button"
                             onClick={() => setRecenterSignal((n) => n + 1)}
                             title="Wycentruj mapę na parafii / trasie"
-                            className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
+                            className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
                           >
-                            <Crosshair className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                            <Crosshair className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
                             <span>Wycentruj</span>
                           </button>
 
                           <button
                             type="button"
                             onClick={() => navigateToSection('parish')}
-                            className="lg:hidden min-h-[36px] px-2.5 py-1.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-950 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
+                            className="lg:hidden min-h-[36px] px-2.5 py-1.5 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-950 dark:text-amber-200 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
                           >
-                            <Church className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                            <Church className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
                             <span>Parafia i ulice</span>
                           </button>
                         </>
@@ -3582,21 +3615,21 @@ function ParishPlannerWorkspace({
               <div className="flex-1 min-h-0 relative w-full">
                 {/* Sleek Floating Mobile Glass Top Bar (Google Maps / Apple Maps style — leaves ~85% screen for the map) */}
                 {interactionMode === 'pan' && !fieldModeOnMap && (
-                  <div className="no-print lg:hidden absolute top-2.5 left-2.5 right-2.5 z-[470] flex items-center gap-2 pointer-events-none">
+                  <div className="no-print lg:hidden absolute top-[max(0.625rem,env(safe-area-inset-top))] left-2.5 right-2.5 z-[470] flex items-center gap-2 pointer-events-none">
                     <button
                       type="button"
                       onClick={() => setMobilePane('panel')}
                       aria-label="Wróć do panelu"
-                      className="pointer-events-auto min-w-[44px] min-h-[44px] rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md text-slate-900 hover:bg-white inline-flex items-center justify-center shrink-0 transition-colors"
+                      className="pointer-events-auto min-w-[44px] min-h-[44px] rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-700 shadow-md text-slate-900 dark:text-slate-100 hover:bg-white dark:hover:bg-slate-800 inline-flex items-center justify-center shrink-0 transition-colors"
                     >
                       <ArrowLeft className="w-5 h-5" />
                     </button>
 
-                    <div className="pointer-events-auto flex-1 min-w-0 min-h-[44px] px-3.5 py-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md flex items-center justify-between gap-2">
+                    <div className="pointer-events-auto flex-1 min-w-0 min-h-[44px] px-3.5 py-1.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-700 shadow-md flex items-center justify-between gap-2">
                       <div className="min-w-0">
                         {selectedDaySummary ? (
                           <>
-                            <div className="text-xs font-bold text-slate-900 truncate leading-tight">
+                            <div className="text-xs font-bold text-slate-900 dark:text-white truncate leading-tight">
                               {formatPolishDateChip(selectedDaySummary.date)}
                               {selectedDaySummary.streetNames[0]
                                 ? ` · ${selectedDaySummary.streetNames[0]}${
@@ -3606,7 +3639,7 @@ function ParishPlannerWorkspace({
                                   }`
                                 : ''}
                             </div>
-                            <div className="text-[10px] text-slate-500 truncate leading-tight mt-0.5 tabular-nums">
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate leading-tight mt-0.5 tabular-nums">
                               {selectedDaySummary.startTime}–
                               {selectedDaySummary.plannedEndTime ||
                                 selectedDaySummary.estimatedEndTime}{' '}
@@ -3618,10 +3651,10 @@ function ParishPlannerWorkspace({
                           </>
                         ) : (
                           <>
-                            <div className="text-xs font-bold text-slate-900 truncate leading-tight">
+                            <div className="text-xs font-bold text-slate-900 dark:text-white truncate leading-tight">
                               {parish?.name || 'Mapa parafii'}
                             </div>
-                            <div className="text-[10px] text-slate-500 truncate leading-tight mt-0.5">
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate leading-tight mt-0.5">
                               Cały teren parafii
                             </div>
                           </>
@@ -3640,9 +3673,9 @@ function ParishPlannerWorkspace({
                         }}
                         aria-label="Pokaż całą parafię"
                         title="Pokaż całą parafię"
-                        className="pointer-events-auto min-h-[44px] px-3 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md text-xs font-semibold text-slate-800 hover:bg-white inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
+                        className="pointer-events-auto min-h-[44px] px-3 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-700 shadow-md text-xs font-semibold text-slate-800 dark:text-slate-100 hover:bg-white dark:hover:bg-slate-800 inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
                       >
-                        <Church className="w-4 h-4 text-amber-700 shrink-0" />
+                        <Church className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
                         <span>Parafia</span>
                       </button>
                     ) : nearestPlannedDayDate ? (
@@ -3785,8 +3818,8 @@ function ParishPlannerWorkspace({
                 boundary.length >= 3 &&
                 validLassoSelectedIds.length === 0 &&
                 !streetPickFeedback && (
-                  <div className="no-print absolute top-14 sm:top-3 left-1/2 -translate-x-1/2 z-[475] w-[calc(100%-20px)] sm:w-max sm:max-w-[calc(100%-260px)] bg-white/95 backdrop-blur-md border border-emerald-300 rounded-2xl shadow-xl px-3 py-2.5 flex flex-wrap items-center justify-center gap-2 text-xs">
-                    <span className="font-semibold text-slate-900">
+                  <div className="no-print absolute top-14 sm:top-3 left-1/2 -translate-x-1/2 z-[475] w-[calc(100%-20px)] sm:w-max sm:max-w-[calc(100%-260px)] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-emerald-300 dark:border-emerald-800 rounded-2xl shadow-xl px-3 py-2.5 flex flex-wrap items-center justify-center gap-2 text-xs">
+                    <span className="font-semibold text-slate-900 dark:text-white">
                       Teren parafii gotowy (
                       {formatPolygonArea(computePolygonAreaSqMeters(boundary))}
                       )
@@ -3806,9 +3839,9 @@ function ParishPlannerWorkspace({
                       <button
                         type="button"
                         onClick={handleDeleteOutsideBoundaryStops}
-                        className="min-h-[34px] px-2.5 py-1.5 text-xs font-semibold text-red-800 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl inline-flex items-center gap-1.5 transition-colors"
+                        className="min-h-[34px] px-2.5 py-1.5 text-xs font-semibold text-red-800 dark:text-red-200 bg-red-50 dark:bg-red-950/50 hover:bg-red-100 dark:hover:bg-red-900/60 border border-red-200 dark:border-red-800 rounded-xl inline-flex items-center gap-1.5 transition-colors"
                       >
-                        <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
+                        <AlertTriangle className="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
                         <span>
                           Usuń domy spoza granicy ({outsideBoundaryCount})
                         </span>
@@ -3818,7 +3851,7 @@ function ParishPlannerWorkspace({
                       type="button"
                       onClick={() => setPostBoundaryBanner(false)}
                       aria-label="Zamknij baner"
-                      className="min-w-[30px] min-h-[30px] inline-flex items-center justify-center text-slate-400 hover:text-slate-700 rounded-lg"
+                      className="min-w-[30px] min-h-[30px] inline-flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -3831,8 +3864,8 @@ function ParishPlannerWorkspace({
                 !postBoundaryBanner &&
                 validLassoSelectedIds.length === 0 &&
                 !streetPickFeedback && (
-                  <div className="no-print absolute top-14 sm:top-3 left-1/2 -translate-x-1/2 z-[470] w-[calc(100%-20px)] sm:w-max sm:max-w-[calc(100%-260px)] bg-white/95 backdrop-blur-md border border-amber-300 rounded-2xl shadow-lg px-3 py-2 flex flex-wrap items-center justify-center gap-2 text-xs">
-                    <span className="font-semibold text-amber-950 truncate max-w-[200px]">
+                  <div className="no-print absolute top-14 sm:top-3 left-1/2 -translate-x-1/2 z-[470] w-[calc(100%-20px)] sm:w-max sm:max-w-[calc(100%-260px)] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-amber-300 dark:border-amber-800 rounded-2xl shadow-lg px-3 py-2 flex flex-wrap items-center justify-center gap-2 text-xs">
+                    <span className="font-semibold text-amber-950 dark:text-amber-200 truncate max-w-[200px]">
                       Ulica: {focusedStreet}
                     </span>
                     <button
@@ -3846,7 +3879,7 @@ function ParishPlannerWorkspace({
                     <button
                       type="button"
                       onClick={() => setFocusedStreet(null)}
-                      className="min-h-[32px] px-2.5 py-1 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg"
+                      className="min-h-[32px] px-2.5 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg"
                     >
                       Pokaż wszystkie ulice
                     </button>
@@ -4080,10 +4113,10 @@ function ParishPlannerWorkspace({
                     );
                     if (!primaryStart) return null;
                     return (
-                      <div className="bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 shadow-md text-[11px] text-slate-800 space-y-0.5 pointer-events-auto">
+                      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 shadow-md text-[11px] text-slate-800 dark:text-slate-200 space-y-0.5 pointer-events-auto">
                         <div className="flex flex-wrap items-center gap-1.5 font-semibold">
                           {selectedDate && (
-                            <span className="text-slate-900 tabular-nums">
+                            <span className="text-slate-900 dark:text-white tabular-nums">
                               {formatPolishDateChip(selectedDate)} ·{' '}
                               {effectiveStartTime}–{effectiveEndTime}
                             </span>
@@ -4091,17 +4124,17 @@ function ParishPlannerWorkspace({
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-700 text-white text-[10px] font-extrabold uppercase tracking-wide">
                             START
                           </span>
-                          <span className="text-emerald-900 truncate max-w-[160px] sm:max-w-[220px]">
+                          <span className="text-emerald-900 dark:text-emerald-300 truncate max-w-[160px] sm:max-w-[220px]">
                             {primaryStart.stop.address ||
                               primaryStart.stop.label}
                           </span>
                         </div>
-                        <div className="text-[11px] text-slate-600 truncate">
-                          <span className="font-medium text-slate-800">
+                        <div className="text-[11px] text-slate-600 dark:text-slate-400 truncate">
+                          <span className="font-medium text-slate-800 dark:text-slate-200">
                             Ulice:
                           </span>{' '}
                           {coveredStreets.join(', ')} ·{' '}
-                          <span className="font-mono font-semibold text-slate-900 tabular-nums">
+                          <span className="font-mono font-semibold text-slate-900 dark:text-white tabular-nums">
                             {totalPoints}{' '}
                             {totalPoints === 1
                               ? 'dom'
@@ -4179,17 +4212,22 @@ function ParishPlannerWorkspace({
       {/* Mobile Thumb-Zone Bottom Tab Bar (< lg, hidden during immersive full-screen map view) */}
       <nav
         aria-label="Nawigacja mobilna"
-        className={`no-print shrink-0 bg-white border-t border-slate-200 grid-cols-5 h-16 px-1 ${
+        className={`no-print shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 grid-cols-5 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] px-1 ${
           isMobileFullMap ? 'hidden' : 'lg:hidden grid'
         }`}
       >
         <button
           type="button"
           onClick={() => navigateToSection('overview')}
-          className={`flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors ${
+          aria-current={
             mobilePane === 'panel' && activeSection === 'overview'
-              ? 'text-amber-800'
-              : 'text-slate-500 hover:text-slate-900'
+              ? 'page'
+              : undefined
+          }
+          className={`min-h-[54px] flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors ${
+            mobilePane === 'panel' && activeSection === 'overview'
+              ? 'text-amber-800 dark:text-amber-400 font-semibold'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
           }`}
         >
           <LayoutDashboard className="w-5 h-5" />
@@ -4199,10 +4237,15 @@ function ParishPlannerWorkspace({
         <button
           type="button"
           onClick={() => navigateToSection('stops')}
-          className={`flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors ${
+          aria-current={
             mobilePane === 'panel' && activeSection === 'stops'
-              ? 'text-amber-800'
-              : 'text-slate-500 hover:text-slate-900'
+              ? 'page'
+              : undefined
+          }
+          className={`min-h-[54px] flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors ${
+            mobilePane === 'panel' && activeSection === 'stops'
+              ? 'text-amber-800 dark:text-amber-400 font-semibold'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
           }`}
         >
           <CalendarPlus className="w-5 h-5" />
@@ -4215,10 +4258,11 @@ function ParishPlannerWorkspace({
             if (activeSection === 'schedule') navigateToSection('overview');
             setMobilePane((p) => (p === 'map' ? 'panel' : 'map'));
           }}
-          className={`flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors ${
+          aria-current={mobilePane === 'map' ? 'page' : undefined}
+          className={`min-h-[54px] flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors ${
             mobilePane === 'map'
-              ? 'text-amber-800'
-              : 'text-slate-500 hover:text-slate-900'
+              ? 'text-amber-800 dark:text-amber-400 font-semibold'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
           }`}
         >
           <MapIcon className="w-5 h-5" />
@@ -4228,10 +4272,15 @@ function ParishPlannerWorkspace({
         <button
           type="button"
           onClick={() => navigateToSection('routes')}
-          className={`flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors ${
+          aria-current={
             mobilePane === 'panel' && activeSection === 'routes'
-              ? 'text-amber-800'
-              : 'text-slate-500 hover:text-slate-900'
+              ? 'page'
+              : undefined
+          }
+          className={`min-h-[54px] flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors ${
+            mobilePane === 'panel' && activeSection === 'routes'
+              ? 'text-amber-800 dark:text-amber-400 font-semibold'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
           }`}
         >
           <Route className="w-5 h-5" />
@@ -4243,10 +4292,15 @@ function ParishPlannerWorkspace({
         <button
           type="button"
           onClick={() => navigateToSection('schedule')}
-          className={`flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors ${
+          aria-current={
             mobilePane === 'panel' && activeSection === 'schedule'
-              ? 'text-amber-800'
-              : 'text-slate-500 hover:text-slate-900'
+              ? 'page'
+              : undefined
+          }
+          className={`min-h-[54px] flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors ${
+            mobilePane === 'panel' && activeSection === 'schedule'
+              ? 'text-amber-800 dark:text-amber-400 font-semibold'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
           }`}
         >
           <CalendarCheck className="w-5 h-5" />
@@ -4265,33 +4319,33 @@ function ParishPlannerWorkspace({
           className="no-print lg:hidden fixed inset-0 z-[1200] flex"
         >
           <div
-            className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs"
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="relative z-10 w-[290px] max-w-[85vw] bg-white h-full shadow-2xl flex flex-col">
-            <div className="h-14 px-4 border-b border-slate-200 flex items-center justify-between shrink-0">
-              <span className="text-base font-bold text-slate-900">
+          <div className="relative z-10 w-[290px] max-w-[85vw] bg-white dark:bg-slate-900 h-full shadow-2xl flex flex-col pt-safe">
+            <div className="h-14 px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+              <span className="text-base font-bold text-slate-900 dark:text-white">
                 Planer Kolędy
               </span>
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
                 aria-label="Zamknij menu"
-                className="min-w-[40px] min-h-[40px] inline-flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                className="min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {parish && (
-              <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
-                <div className="text-[11px] font-medium text-amber-800">
+              <div className="px-4 py-3 bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800">
+                <div className="text-[11px] font-medium text-amber-800 dark:text-amber-400">
                   Aktywna parafia
                 </div>
-                <div className="text-xs font-semibold text-slate-900 truncate mt-0.5">
+                <div className="text-xs font-semibold text-slate-900 dark:text-white truncate mt-0.5">
                   {parish.name}
                 </div>
-                <div className="text-[11px] text-slate-500 truncate">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                   {parish.address}
                 </div>
               </div>
@@ -4306,23 +4360,26 @@ function ParishPlannerWorkspace({
                   <button
                     key={item.id}
                     type="button"
+                    aria-current={isActive ? 'page' : undefined}
                     onClick={() => navigateToSection(item.id)}
                     className={`w-full min-h-[46px] px-3.5 py-2.5 rounded-xl text-sm font-medium flex items-center justify-between gap-2 transition-colors ${
                       isActive
-                        ? 'bg-amber-50 text-amber-900 border border-amber-200'
-                        : 'text-slate-700 hover:bg-slate-100'
+                        ? 'bg-amber-50 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 border border-amber-200 dark:border-amber-800'
+                        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                   >
                     <span className="inline-flex items-center gap-3 min-w-0">
                       <Icon
                         className={`w-4 h-4 shrink-0 ${
-                          isActive ? 'text-amber-700' : 'text-slate-500'
+                          isActive
+                            ? 'text-amber-700 dark:text-amber-400'
+                            : 'text-slate-500 dark:text-slate-400'
                         }`}
                       />
                       <span className="truncate">{item.label}</span>
                     </span>
                     {item.count !== undefined && (
-                      <span className="font-mono tabular-nums text-xs text-slate-500">
+                      <span className="font-mono tabular-nums text-xs text-slate-500 dark:text-slate-400">
                         {item.count}
                       </span>
                     )}
@@ -4330,27 +4387,42 @@ function ParishPlannerWorkspace({
                 );
               })}
 
-              <div className="pt-2 mt-2 border-t border-slate-200">
+              <div className="pt-2 mt-2 border-t border-slate-200 dark:border-slate-800 space-y-1">
+                <button
+                  type="button"
+                  onClick={toggleLightDark}
+                  className="w-full min-h-[46px] px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 transition-colors"
+                >
+                  {isDark ? (
+                    <Sun className="w-4 h-4 text-amber-400 shrink-0" />
+                  ) : (
+                    <Moon className="w-4 h-4 text-slate-500 shrink-0" />
+                  )}
+                  <span>{isDark ? 'Przełącz na motyw jasny' : 'Przełącz na motyw ciemny'}</span>
+                </button>
                 <button
                   type="button"
                   onClick={() => {
                     setMobileMenuOpen(false);
                     setGuideOpen(true);
                   }}
-                  className="w-full min-h-[46px] px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 flex items-center gap-3 transition-colors"
+                  className="w-full min-h-[46px] px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-3 transition-colors"
                 >
-                  <HelpCircle className="w-4 h-4 text-slate-500 shrink-0" />
+                  <HelpCircle className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
                   <span>Jak to działa</span>
                 </button>
               </div>
             </div>
 
-            <div className="p-4 border-t border-slate-200 bg-slate-50 space-y-2 shrink-0">
-              <PWAInstallButton tone="light" />
+            <div className="p-4 pb-safe border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 space-y-2 shrink-0">
+              <PWAInstallButton tone={isDark ? 'dark' : 'light'} />
               {authUser ? (
                 <>
-                  <div className="text-xs text-slate-600 truncate">
-                    Konto: <strong className="text-slate-900">{authUser.email}</strong>
+                  <div className="text-xs text-slate-600 dark:text-slate-400 truncate">
+                    Konto:{' '}
+                    <strong className="text-slate-900 dark:text-slate-100">
+                      {authUser.email}
+                    </strong>
                   </div>
                   <button
                     type="button"

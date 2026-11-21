@@ -352,15 +352,15 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
   };
 
   return (
-    <div className="pt-3 border-t border-slate-200 space-y-4">
+    <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-4">
       {/* Wizard Header + Live Overview Strip */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h3 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-amber-700 shrink-0" />
+          <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+            <Sparkles className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
             <span>Inteligentny kreator całego sezonu kolędy</span>
           </h3>
-          <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
             Układa ulice spójnymi strefami (bez zygzakowania po parafii), z
             uwzględnieniem świąt, przerw obiadowych/mszalnych i bloków. Działa
             w pełni lokalnie (0 zł dodatkowych kosztów).
@@ -371,7 +371,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="self-start sm:self-auto text-[11px] font-medium text-slate-500 hover:text-slate-900 px-2 py-1"
+            className="self-start sm:self-auto text-[11px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 px-2 py-1"
           >
             Zwiń kreator
           </button>
@@ -380,8 +380,8 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
 
       {/* Mode Switch if Existing Days Already Exist */}
       {plannedDays.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl p-2">
-          <span className="text-[11px] font-semibold text-slate-600 px-1.5">
+        <div className="flex flex-wrap items-center gap-2 bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-xl p-2">
+          <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 px-1.5">
             Tryb planowania:
           </span>
           <button
@@ -389,8 +389,8 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
             onClick={() => setSimulationMode('all')}
             className={`min-h-[34px] px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
               effectiveSimMode === 'all'
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
+                : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             Przeplanuj całą parafię od nowa
@@ -401,8 +401,8 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
             onClick={() => setSimulationMode('unscheduled')}
             className={`min-h-[34px] px-3 py-1 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 ${
               effectiveSimMode === 'unscheduled'
-                ? 'bg-amber-700 text-white'
-                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                ? 'bg-amber-700 dark:bg-amber-600 text-white'
+                : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             Dopisuj tylko bez terminu ({unscheduledCount})
@@ -414,7 +414,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
       <div
         role="tablist"
         aria-label="Kroki planowania całego okresu"
-        className="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-xl"
+        className="grid grid-cols-3 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl"
       >
         <button
           type="button"
@@ -423,11 +423,11 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
           onClick={() => setStepTab('calendar')}
           className={`min-h-[40px] px-2 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors ${
             stepTab === 'calendar'
-              ? 'bg-white text-slate-900 shadow-xs'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
           }`}
         >
-          <Calendar className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+          <Calendar className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
           <span className="truncate">1. Kalendarz i wolne</span>
         </button>
 
@@ -438,11 +438,11 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
           onClick={() => setStepTab('rules')}
           className={`min-h-[40px] px-2 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors ${
             stepTab === 'rules'
-              ? 'bg-white text-slate-900 shadow-xs'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
           }`}
         >
-          <Clock className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+          <Clock className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
           <span className="truncate">2. Godziny i przerwy</span>
         </button>
 
@@ -453,11 +453,11 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
           onClick={() => setStepTab('preview')}
           className={`min-h-[40px] px-2 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors ${
             stepTab === 'preview'
-              ? 'bg-white text-slate-900 shadow-xs'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
           }`}
         >
-          <CalendarCheck className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+          <CalendarCheck className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" />
           <span className="truncate tabular-nums">
             3. Podgląd ({simulation?.simulatedDays.length ?? 0})
           </span>
@@ -473,7 +473,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
               <div>
                 <label
                   htmlFor="wiz-start-date"
-                  className="block text-[11px] font-medium text-slate-600 mb-1"
+                  className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1"
                 >
                   Początek kolędy
                 </label>
@@ -497,13 +497,13 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                     }
                     onChangeSeasonConfig(next);
                   }}
-                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:border-amber-600"
+                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-amber-600"
                 />
               </div>
               <div>
                 <label
                   htmlFor="wiz-end-date"
-                  className="block text-[11px] font-medium text-slate-600 mb-1"
+                  className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1"
                 >
                   Koniec (opcjonalnie)
                 </label>
@@ -518,13 +518,13 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                     else delete copy.endDate;
                     onChangeSeasonConfig(copy);
                   }}
-                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:border-amber-600"
+                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-amber-600"
                 />
               </div>
             </div>
 
             <div>
-              <span className="block text-[11px] font-medium text-slate-600 mb-1">
+              <span className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
                 Stałe dni tygodnia z kolędą
               </span>
               <div className="grid grid-cols-7 gap-1">
@@ -547,8 +547,8 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                       title={opt.full}
                       className={`min-h-[40px] rounded-xl text-xs font-semibold transition-colors ${
                         checked
-                          ? 'bg-slate-900 text-white'
-                          : 'bg-slate-50 text-slate-500 border border-slate-200 hover:bg-slate-100'
+                          ? 'bg-slate-900 dark:bg-amber-600 text-white'
+                          : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                       }`}
                     >
                       {opt.short}
@@ -561,7 +561,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
 
           {/* 1-Tap Polish Holidays & First Fridays Presets */}
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] font-medium text-slate-500 mr-1">
+            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mr-1">
               Szybkie wykluczenia:
             </span>
             <button
@@ -569,11 +569,11 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
               onClick={applyHolidayPreset}
               className={`min-h-[34px] px-2.5 py-1 rounded-lg text-[11px] font-semibold border inline-flex items-center gap-1 transition-colors ${
                 holidayPresetActiveCount === holidayDates.length
-                  ? 'bg-red-50 border-red-300 text-red-900'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                  ? 'bg-red-50 dark:bg-red-950/50 border-red-300 dark:border-red-800/70 text-red-900 dark:text-red-200'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
-              <Ban className="w-3 h-3 text-red-600" />
+              <Ban className="w-3 h-3 text-red-600 dark:text-red-400" />
               <span>
                 Święta (24–26.12, 31.12, 1.01, 6.01)
                 {holidayPresetActiveCount > 0
@@ -588,8 +588,8 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                 onClick={applyFirstFridaysPreset}
                 className={`min-h-[34px] px-2.5 py-1 rounded-lg text-[11px] font-semibold border inline-flex items-center gap-1 transition-colors ${
                   firstFridaysActiveCount === firstFridayDates.length
-                    ? 'bg-red-50 border-red-300 text-red-900'
-                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                    ? 'bg-red-50 dark:bg-red-950/50 border-red-300 dark:border-red-800/70 text-red-900 dark:text-red-200'
+                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
               >
                 <span>I piątki miesiąca ({firstFridayDates.length})</span>
@@ -604,7 +604,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                   delete copy.excludedDates;
                   onChangeSeasonConfig(copy);
                 }}
-                className="min-h-[34px] px-2 py-1 text-[11px] font-medium text-slate-500 hover:text-red-700"
+                className="min-h-[34px] px-2 py-1 text-[11px] font-medium text-slate-500 dark:text-slate-400 hover:text-red-700 dark:hover:text-red-400"
               >
                 Wyczyść ({seasonConfig.excludedDates?.length})
               </button>
@@ -613,24 +613,24 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
 
           {/* Interactive Calendar Month View + Selected Day Inspector */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
-            <div className="lg:col-span-7 border border-slate-200 rounded-xl bg-slate-50/50 p-3 space-y-2.5">
+            <div className="lg:col-span-7 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50/50 dark:bg-slate-800/40 p-3 space-y-2.5">
               <div className="flex items-center justify-between">
                 <button
                   type="button"
                   onClick={() => shiftCalendarMonth(-1)}
                   aria-label="Poprzedni miesiąc"
-                  className="min-w-[36px] min-h-[36px] rounded-lg border border-slate-200 bg-white hover:bg-slate-100 inline-flex items-center justify-center text-slate-700"
+                  className="min-w-[36px] min-h-[36px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 inline-flex items-center justify-center text-slate-700 dark:text-slate-200"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <div className="text-xs sm:text-sm font-bold text-slate-900">
+                <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
                   {MONTH_NAMES_PL[viewMonth]} {viewYear}
                 </div>
                 <button
                   type="button"
                   onClick={() => shiftCalendarMonth(1)}
                   aria-label="Następny miesiąc"
-                  className="min-w-[36px] min-h-[36px] rounded-lg border border-slate-200 bg-white hover:bg-slate-100 inline-flex items-center justify-center text-slate-700"
+                  className="min-w-[36px] min-h-[36px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 inline-flex items-center justify-center text-slate-700 dark:text-slate-200"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -640,7 +640,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                 {CALENDAR_WEEK_HEADERS.map((h) => (
                   <div
                     key={h}
-                    className="text-[10px] font-semibold text-slate-500 py-1"
+                    className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 py-1"
                   >
                     {h}
                   </div>
@@ -669,16 +669,16 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                       onClick={() => setFocusedDate(iso)}
                       className={`relative h-11 sm:h-12 rounded-lg border flex flex-col items-center justify-center p-0.5 text-xs transition-all tabular-nums ${
                         isFocused
-                          ? 'ring-2 ring-amber-600 border-amber-600 z-10'
-                          : 'border-slate-200'
+                          ? 'ring-2 ring-amber-600 dark:ring-amber-400 border-amber-600 dark:border-amber-400 z-10'
+                          : 'border-slate-200 dark:border-slate-700'
                       } ${
                         isExcluded
-                          ? 'bg-red-50 text-red-700 border-red-200'
+                          ? 'bg-red-50 dark:bg-red-950/50 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800/60'
                           : outOfHorizon || !inMask
-                            ? 'bg-slate-100/70 text-slate-400'
+                            ? 'bg-slate-100/70 dark:bg-slate-900/50 text-slate-400 dark:text-slate-600'
                             : simDay
-                              ? 'bg-amber-50 text-slate-900 border-amber-300 font-semibold'
-                              : 'bg-white text-slate-800 hover:bg-slate-50'
+                              ? 'bg-amber-50 dark:bg-amber-950/50 text-slate-900 dark:text-amber-100 border-amber-300 dark:border-amber-700/70 font-semibold'
+                              : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
                       }`}
                     >
                       <span
@@ -689,15 +689,15 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                         {cell.dayNum}
                       </span>
                       {isExcluded ? (
-                        <span className="text-[9px] font-semibold text-red-700 mt-0.5 leading-none">
+                        <span className="text-[9px] font-semibold text-red-700 dark:text-red-300 mt-0.5 leading-none">
                           wolne
                         </span>
                       ) : simDay ? (
-                        <span className="text-[9px] font-mono font-bold text-amber-800 mt-0.5 leading-none">
+                        <span className="text-[9px] font-mono font-bold text-amber-800 dark:text-amber-300 mt-0.5 leading-none">
                           {simDay.stops.length}d
                         </span>
                       ) : !inMask && !outOfHorizon ? (
-                        <span className="text-[8px] text-slate-400 mt-0.5 leading-none">
+                        <span className="text-[8px] text-slate-400 dark:text-slate-600 mt-0.5 leading-none">
                           —
                         </span>
                       ) : null}
@@ -705,7 +705,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                       {hasOverride && !isExcluded && (
                         <span
                           title="Własne godziny lub przerwy"
-                          className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-indigo-600"
+                          className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"
                         />
                       )}
                     </button>
@@ -713,30 +713,30 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                 })}
               </div>
 
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-500 pt-1">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500 dark:text-slate-400 pt-1">
                 <span className="inline-flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded bg-amber-100 border border-amber-300" />
+                  <span className="w-2.5 h-2.5 rounded bg-amber-100 dark:bg-amber-900/60 border border-amber-300 dark:border-amber-700" />
                   Dzień kolędy w symulacji
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded bg-red-100 border border-red-200" />
+                  <span className="w-2.5 h-2.5 rounded bg-red-100 dark:bg-red-900/60 border border-red-200 dark:border-red-800" />
                   Dzień wolny
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-indigo-600" />
+                  <span className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
                   Własne godziny / przerwa
                 </span>
               </div>
             </div>
 
             {/* Selected Date Action Panel */}
-            <div className="lg:col-span-5 border border-slate-200 rounded-xl bg-white p-3.5 space-y-3">
+            <div className="lg:col-span-5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 p-3.5 space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <div className="text-[11px] font-semibold text-amber-800 uppercase tracking-wide">
+                  <div className="text-[11px] font-semibold text-amber-800 dark:text-amber-400 uppercase tracking-wide">
                     Wybrany dzień
                   </div>
-                  <div className="text-sm font-bold text-slate-900 mt-0.5">
+                  <div className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5">
                     {formatPolishDateFull(focusedDate)}
                   </div>
                 </div>
@@ -745,8 +745,8 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                   onClick={() => toggleExcludedDate(focusedDate)}
                   className={`min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors shrink-0 ${
                     focusedIsExcluded
-                      ? 'bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100'
-                      : 'bg-red-50 border-red-200 text-red-800 hover:bg-red-100'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-800/70 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-emerald-950/70'
+                      : 'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800/70 text-red-800 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-950/70'
                   }`}
                 >
                   {focusedIsExcluded ? 'Przywróć kolędę' : 'Oznacz dzień wolny'}
@@ -754,7 +754,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
               </div>
 
               {!focusedIsExcluded && !focusedInWeekdayMask && (
-                <p className="text-[11px] text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-2">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-2">
                   Ten dzień tygodnia jest wyłączony w masce dni tygodnia (np.
                   niedziela). Aby go uwzględnić, zaznacz ten dzień tygodnia
                   powyżej.
@@ -765,7 +765,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                 <div className="space-y-2.5">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-[10px] font-medium text-slate-500 mb-0.5">
+                      <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-0.5">
                         Start tego dnia
                       </label>
                       <input
@@ -776,11 +776,11 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                             startTime: e.target.value,
                           })
                         }
-                        className="w-full min-h-[38px] px-2 py-1 text-base sm:text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg"
+                        className="w-full min-h-[38px] px-2 py-1 text-base sm:text-xs font-mono bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-medium text-slate-500 mb-0.5">
+                      <label className="block text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-0.5">
                         Koniec tego dnia do
                       </label>
                       <input
@@ -791,22 +791,22 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                             endTime: e.target.value,
                           })
                         }
-                        className="w-full min-h-[38px] px-2 py-1 text-base sm:text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg"
+                        className="w-full min-h-[38px] px-2 py-1 text-base sm:text-xs font-mono bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100"
                       />
                     </div>
                   </div>
 
                   {/* Per-day breaks */}
-                  <div className="space-y-1.5 pt-1 border-t border-slate-100">
+                  <div className="space-y-1.5 pt-1 border-t border-slate-100 dark:border-slate-800">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-semibold text-slate-700">
+                      <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
                         Przerwy w tym dniu ({focusedBreaks.length})
                       </span>
                       {focusedOverride && (
                         <button
                           type="button"
                           onClick={clearFocusedDayOverride}
-                          className="text-[11px] text-amber-800 hover:underline"
+                          className="text-[11px] text-amber-800 dark:text-amber-400 hover:underline"
                         >
                           Przywróć domyślne
                         </button>
@@ -818,9 +818,9 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                         {focusedBreaks.map((bw) => (
                           <div
                             key={bw.id}
-                            className="flex items-center justify-between gap-2 px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-[11px]"
+                            className="flex items-center justify-between gap-2 px-2 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[11px]"
                           >
-                            <span className="truncate text-slate-800">
+                            <span className="truncate text-slate-800 dark:text-slate-200">
                               <strong className="font-mono">
                                 {bw.startTime}–{bw.endTime}
                               </strong>{' '}
@@ -834,7 +834,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                                 );
                                 updateFocusedDayOverride({ breaks: next });
                               }}
-                              className="text-red-600 hover:text-red-800 p-0.5"
+                              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-0.5"
                               aria-label="Usuń przerwę z tego dnia"
                             >
                               <Trash2 className="w-3 h-3" />
@@ -850,19 +850,19 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                         value={dayBreakLabel}
                         onChange={(e) => setDayBreakLabel(e.target.value)}
                         placeholder="Nazwa"
-                        className="col-span-4 min-h-[34px] px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded-lg"
+                        className="col-span-4 min-h-[34px] px-2 py-1 text-base sm:text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                       />
                       <input
                         type="time"
                         value={dayBreakStart}
                         onChange={(e) => setDayBreakStart(e.target.value)}
-                        className="col-span-3 min-h-[34px] px-1 py-1 text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg"
+                        className="col-span-3 min-h-[34px] px-1 py-1 text-base sm:text-xs font-mono bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100"
                       />
                       <input
                         type="time"
                         value={dayBreakEnd}
                         onChange={(e) => setDayBreakEnd(e.target.value)}
-                        className="col-span-3 min-h-[34px] px-1 py-1 text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg"
+                        className="col-span-3 min-h-[34px] px-1 py-1 text-base sm:text-xs font-mono bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100"
                       />
                       <button
                         type="button"
@@ -882,7 +882,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                           updateFocusedDayOverride({ breaks: next });
                         }}
                         aria-label="Dodaj przerwę do tego dnia"
-                        className="col-span-2 min-h-[34px] bg-slate-900 hover:bg-slate-800 text-white rounded-lg inline-flex items-center justify-center"
+                        className="col-span-2 min-h-[34px] bg-slate-900 dark:bg-amber-600 hover:bg-slate-800 dark:hover:bg-amber-500 text-white rounded-lg inline-flex items-center justify-center"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
@@ -893,23 +893,23 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
 
               {/* Preview of streets assigned to focused date */}
               {focusedSimDay ? (
-                <div className="p-2.5 bg-amber-50/70 border border-amber-200 rounded-lg text-[11px] space-y-1">
-                  <div className="font-semibold text-amber-950 flex items-center justify-between">
+                <div className="p-2.5 bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-lg text-[11px] space-y-1">
+                  <div className="font-semibold text-amber-950 dark:text-amber-200 flex items-center justify-between">
                     <span>Symulacja na ten dzień:</span>
                     <span className="font-mono tabular-nums">
                       {focusedSimDay.startTime}–{focusedSimDay.estimatedEndTime}
                     </span>
                   </div>
-                  <div className="text-amber-900 leading-snug">
+                  <div className="text-amber-900 dark:text-amber-100/90 leading-snug">
                     {focusedSimDay.streetNames.join(', ')}
                   </div>
-                  <div className="text-amber-800 font-mono tabular-nums">
+                  <div className="text-amber-800 dark:text-amber-300 font-mono tabular-nums">
                     {focusedSimDay.stops.length} punktów ·{' '}
                     {focusedSimDay.estimatedRoutes.length} ks.
                   </div>
                 </div>
               ) : focusedExistingDay ? (
-                <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-700">
+                <div className="p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[11px] text-slate-700 dark:text-slate-300">
                   Obecny zapisany plan: {focusedExistingDay.streetNames.join(', ')} (
                   {focusedExistingDay.stops.length} domów).
                 </div>
@@ -923,16 +923,16 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
       {stepTab === 'rules' && (
         <div className="space-y-4">
           {/* Default Hours by Day Type */}
-          <div className="bg-slate-50/70 border border-slate-200 rounded-xl p-3.5 space-y-3">
-            <h4 className="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-amber-700" />
+          <div className="bg-slate-50/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 space-y-3">
+            <h4 className="text-xs font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
               <span>Domyślne godziny odwiedzin</span>
             </h4>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               <div>
                 <label
                   htmlFor="wiz-weekday-start"
-                  className="block text-[11px] font-medium text-slate-600 mb-1"
+                  className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1"
                 >
                   Start (Pn–Pt)
                 </label>
@@ -946,14 +946,14 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                       weekdayStartTime: e.target.value,
                     })
                   }
-                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white border border-slate-200 rounded-xl"
+                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="wiz-sat-start"
-                  className="block text-[11px] font-medium text-slate-600 mb-1"
+                  className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1"
                 >
                   Start (Sobota)
                 </label>
@@ -970,14 +970,14 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                       saturdayStartTime: e.target.value,
                     })
                   }
-                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white border border-slate-200 rounded-xl"
+                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="wiz-sun-start"
-                  className="block text-[11px] font-medium text-slate-600 mb-1"
+                  className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1"
                 >
                   Start (Niedziela)
                 </label>
@@ -991,14 +991,14 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                       weekendStartTime: e.target.value,
                     })
                   }
-                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white border border-slate-200 rounded-xl"
+                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="wiz-daily-end"
-                  className="block text-[11px] font-medium text-slate-600 mb-1"
+                  className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1"
                 >
                   Koniec dnia do
                 </label>
@@ -1012,20 +1012,20 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                       dailyEndTime: e.target.value,
                     })
                   }
-                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white border border-slate-200 rounded-xl"
+                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs font-mono tabular-nums bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100"
                 />
               </div>
             </div>
           </div>
 
           {/* Daily Breaks Config */}
-          <div className="bg-slate-50/70 border border-slate-200 rounded-xl p-3.5 space-y-3">
+          <div className="bg-slate-50/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h4 className="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
-                <Coffee className="w-3.5 h-3.5 text-amber-700" />
+              <h4 className="text-xs font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                <Coffee className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                 <span>Przerwy w ciągu dnia (obiad, Msza św., odpoczynek)</span>
               </h4>
-              <span className="text-[11px] text-slate-500">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
                 Obowiązują, gdy godziny dnia obejmują przerwę
               </span>
             </div>
@@ -1034,25 +1034,25 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
               <button
                 type="button"
                 onClick={() => addDefaultBreak('12:30', '14:00', 'Przerwa obiadowa')}
-                className="min-h-[34px] px-2.5 py-1 text-[11px] font-semibold bg-white hover:bg-amber-50 border border-slate-200 hover:border-amber-300 rounded-lg text-slate-800 inline-flex items-center gap-1"
+                className="min-h-[34px] px-2.5 py-1 text-[11px] font-semibold bg-white dark:bg-slate-900 hover:bg-amber-50 dark:hover:bg-amber-950/40 border border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-700 rounded-lg text-slate-800 dark:text-slate-200 inline-flex items-center gap-1"
               >
-                <Plus className="w-3 h-3 text-amber-700" />
+                <Plus className="w-3 h-3 text-amber-700 dark:text-amber-400" />
                 Obiad (12:30–14:00)
               </button>
               <button
                 type="button"
                 onClick={() => addDefaultBreak('17:45', '18:45', 'Msza św. wieczorna')}
-                className="min-h-[34px] px-2.5 py-1 text-[11px] font-semibold bg-white hover:bg-amber-50 border border-slate-200 hover:border-amber-300 rounded-lg text-slate-800 inline-flex items-center gap-1"
+                className="min-h-[34px] px-2.5 py-1 text-[11px] font-semibold bg-white dark:bg-slate-900 hover:bg-amber-50 dark:hover:bg-amber-950/40 border border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-700 rounded-lg text-slate-800 dark:text-slate-200 inline-flex items-center gap-1"
               >
-                <Plus className="w-3 h-3 text-amber-700" />
+                <Plus className="w-3 h-3 text-amber-700 dark:text-amber-400" />
                 Msza św. wieczorna (17:45–18:45)
               </button>
               <button
                 type="button"
                 onClick={() => addDefaultBreak('17:00', '17:30', 'Przerwa na posiłek')}
-                className="min-h-[34px] px-2.5 py-1 text-[11px] font-semibold bg-white hover:bg-amber-50 border border-slate-200 hover:border-amber-300 rounded-lg text-slate-800 inline-flex items-center gap-1"
+                className="min-h-[34px] px-2.5 py-1 text-[11px] font-semibold bg-white dark:bg-slate-900 hover:bg-amber-50 dark:hover:bg-amber-950/40 border border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-700 rounded-lg text-slate-800 dark:text-slate-200 inline-flex items-center gap-1"
               >
-                <Plus className="w-3 h-3 text-amber-700" />
+                <Plus className="w-3 h-3 text-amber-700 dark:text-amber-400" />
                 Krótka przerwa (17:00–17:30)
               </button>
             </div>
@@ -1062,20 +1062,20 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                 {(seasonConfig.defaultBreaks ?? []).map((bw) => (
                   <div
                     key={bw.id}
-                    className="flex items-center justify-between gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs"
+                    className="flex items-center justify-between gap-2 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs"
                   >
                     <div className="min-w-0">
-                      <span className="font-mono font-bold text-slate-900 tabular-nums">
+                      <span className="font-mono font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                         {bw.startTime} – {bw.endTime}
                       </span>
-                      <span className="text-slate-600 ml-2">
+                      <span className="text-slate-600 dark:text-slate-400 ml-2">
                         {bw.label || 'Przerwa'}
                       </span>
                     </div>
                     <button
                       type="button"
                       onClick={() => removeDefaultBreak(bw.id)}
-                      className="min-h-[32px] px-2 py-1 text-red-700 hover:bg-red-50 rounded-lg inline-flex items-center gap-1 text-[11px] font-medium"
+                      className="min-h-[32px] px-2 py-1 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg inline-flex items-center gap-1 text-[11px] font-medium"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Usuń</span>
@@ -1091,21 +1091,21 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                 value={newBreakLabel}
                 onChange={(e) => setNewBreakLabel(e.target.value)}
                 placeholder="Nazwa przerwy (np. Obiad)"
-                className="col-span-12 sm:col-span-5 min-h-[38px] px-2.5 py-1 text-base sm:text-xs bg-white border border-slate-200 rounded-xl"
+                className="col-span-12 sm:col-span-5 min-h-[38px] px-2.5 py-1 text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               <input
                 type="time"
                 value={newBreakStart}
                 onChange={(e) => setNewBreakStart(e.target.value)}
                 aria-label="Początek przerwy"
-                className="col-span-5 sm:col-span-3 min-h-[38px] px-2 py-1 text-base sm:text-xs font-mono bg-white border border-slate-200 rounded-xl"
+                className="col-span-5 sm:col-span-3 min-h-[38px] px-2 py-1 text-base sm:text-xs font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100"
               />
               <input
                 type="time"
                 value={newBreakEnd}
                 onChange={(e) => setNewBreakEnd(e.target.value)}
                 aria-label="Koniec przerwy"
-                className="col-span-5 sm:col-span-3 min-h-[38px] px-2 py-1 text-base sm:text-xs font-mono bg-white border border-slate-200 rounded-xl"
+                className="col-span-5 sm:col-span-3 min-h-[38px] px-2 py-1 text-base sm:text-xs font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100"
               />
               <button
                 type="button"
@@ -1113,7 +1113,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                   addDefaultBreak(newBreakStart, newBreakEnd, newBreakLabel)
                 }
                 aria-label="Dodaj przerwę własną"
-                className="col-span-2 sm:col-span-1 min-h-[38px] bg-slate-900 hover:bg-slate-800 text-white rounded-xl inline-flex items-center justify-center"
+                className="col-span-2 sm:col-span-1 min-h-[38px] bg-slate-900 dark:bg-amber-600 hover:bg-slate-800 dark:hover:bg-amber-500 text-white rounded-xl inline-flex items-center justify-center"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -1121,15 +1121,15 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
           </div>
 
           {/* Zone & Street Grouping Rules */}
-          <div className="bg-slate-50/70 border border-slate-200 rounded-xl p-3.5 space-y-3">
-            <h4 className="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
-              <Compass className="w-3.5 h-3.5 text-amber-700" />
+          <div className="bg-slate-50/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 space-y-3">
+            <h4 className="text-xs font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+              <Compass className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
               <span>Zasady dzielenia ulic, bloków i stref</span>
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
                   Jak dzielić długie ulice?
                 </label>
                 <select
@@ -1139,7 +1139,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                       splitMode: e.target.value as SeasonStreetSplitMode,
                     })
                   }
-                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs bg-white border border-slate-200 rounded-xl text-slate-900"
+                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100"
                 >
                   <option value="whole_or_half">
                     Całe ulice (duże dziel na połowy)
@@ -1154,7 +1154,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
                   Kierunek przejścia po parafii
                 </label>
                 <select
@@ -1164,7 +1164,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                       zoneDirection: e.target.value as SeasonZoneDirection,
                     })
                   }
-                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs bg-white border border-slate-200 rounded-xl text-slate-900"
+                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100"
                 >
                   <option value="clockwise">
                     Sektorami wokół kościoła (dzień obok dnia)
@@ -1179,7 +1179,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
                   Preferencja bloków i domów
                 </label>
                 <select
@@ -1189,7 +1189,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                       blockPreference: e.target.value as SeasonBlockPreference,
                     })
                   }
-                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs bg-white border border-slate-200 rounded-xl text-slate-900"
+                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100"
                 >
                   <option value="any">
                     Wszystko spójnymi strefami po kolei
@@ -1201,7 +1201,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
                   Bufor bezpieczeństwa dziennie
                 </label>
                 <select
@@ -1214,7 +1214,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                       ),
                     })
                   }
-                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs bg-white border border-slate-200 rounded-xl text-slate-900"
+                  className="w-full min-h-[40px] px-2.5 py-1.5 text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100"
                 >
                   <option value={0}>0 min (wykorzystaj czas do końca)</option>
                   <option value={10}>10 min zapasu</option>
@@ -1231,15 +1231,15 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
       {stepTab === 'preview' && (
         <div className="space-y-3">
           {!simulation || simulation.simulatedDays.length === 0 ? (
-            <div className="p-6 bg-slate-50 border border-slate-200 rounded-xl text-center text-xs text-slate-600">
+            <div className="p-6 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-center text-xs text-slate-600 dark:text-slate-300">
               Brak domów do zaplanowania lub brak aktywnych dni w wybranym
               okresie kalendarza.
             </div>
           ) : (
             <>
               {simulation.skippedPermanentDeclineCount > 0 && (
-                <div className="flex items-start gap-2 px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-[11px] text-slate-700">
-                  <Info className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[11px] text-slate-700 dark:text-slate-300">
+                  <Info className="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0 mt-0.5" />
                   <span>
                     Pominięto automatycznie{' '}
                     <strong>{simulation.skippedPermanentDeclineCount}</strong>{' '}
@@ -1250,8 +1250,8 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
               )}
 
               {simulation.unscheduledRemainingCount > 0 && (
-                <div className="flex items-start gap-2 px-3 py-2.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-900">
-                  <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 px-3 py-2.5 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/70 rounded-xl text-xs text-red-900 dark:text-red-200">
+                  <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
                   <span>
                     <strong>Uwaga:</strong> {simulation.unscheduledRemainingCount}{' '}
                     punktów nie zmieściło się przed datą końcową (
@@ -1261,22 +1261,22 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                 </div>
               )}
 
-              <div className="max-h-[340px] overflow-y-auto border border-slate-200 rounded-xl divide-y divide-slate-100 bg-white">
+              <div className="max-h-[340px] overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-xl divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
                 {simulation.simulatedDays.map((day, idx) => (
                   <div
                     key={day.date}
-                    className="px-3.5 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs hover:bg-slate-50/70"
+                    className="px-3.5 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs hover:bg-slate-50/70 dark:hover:bg-slate-800/60"
                   >
                     <div className="min-w-0 space-y-0.5">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-[11px] font-mono font-bold text-amber-800 tabular-nums">
+                        <span className="text-[11px] font-mono font-bold text-amber-800 dark:text-amber-400 tabular-nums">
                           {idx + 1}. {formatPolishDateChip(day.date)}
                         </span>
-                        <span className="font-mono text-[11px] font-semibold text-slate-900 tabular-nums">
+                        <span className="font-mono text-[11px] font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
                           {day.startTime}–{day.estimatedEndTime}
                         </span>
                         {(day.activeBreaks?.length ?? 0) > 0 && (
-                          <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px]">
+                          <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px]">
                             przerwa:{' '}
                             {day.activeBreaks!
                               .map((b) => `${b.startTime}–${b.endTime}`)
@@ -1284,16 +1284,16 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
                           </span>
                         )}
                       </div>
-                      <div className="text-slate-700 font-medium leading-snug">
+                      <div className="text-slate-700 dark:text-slate-300 font-medium leading-snug">
                         {day.streetNames.join(', ')}
                       </div>
                     </div>
 
-                    <div className="flex sm:flex-col items-center sm:items-end justify-between gap-1 shrink-0 font-mono text-[11px] text-slate-600 tabular-nums">
-                      <span className="font-semibold text-slate-900">
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between gap-1 shrink-0 font-mono text-[11px] text-slate-600 dark:text-slate-400 tabular-nums">
+                      <span className="font-semibold text-slate-900 dark:text-slate-100">
                         {day.stops.length} pkt
                       </span>
-                      <span className="text-[10px] text-slate-500">
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">
                         {day.estimatedRoutes
                           .map((r) => `Ks.${r.priestId}: ${r.orderedStops.length}`)
                           .join(' · ')}
@@ -1308,7 +1308,7 @@ export const SeasonCalendarPlanner: React.FC<SeasonCalendarPlannerProps> = ({
       )}
 
       {/* Persistent Live Simulation Summary + Apply Bar */}
-      <div className="bg-slate-900 text-white rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-slate-900 dark:bg-slate-950 border border-transparent dark:border-slate-800 text-white rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-0.5 text-xs">
           {simulation && simulation.simulatedDays.length > 0 ? (
             <>
