@@ -242,13 +242,38 @@ export interface StreetPickFeedback {
   message: string;
 }
 
+export type ParishRole = 'proboszcz' | 'wikariusz';
+
+export type ParishInviteStatus = 'pending' | 'accepted' | 'revoked';
+
+export interface ParishInviteRecord {
+  id: string;
+  ownerId: string;
+  ownerEmail?: string;
+  parishId: string;
+  parishName: string;
+  invitedEmail: string;
+  role: 'wikariusz';
+  priestId: number;
+  memberLabel?: string;
+  status: ParishInviteStatus;
+  memberUid?: string;
+  createdAtMs: number;
+  updatedAtMs: number;
+}
+
 export interface SavedParishRecord {
   id: string;
+  ownerId?: string;
+  userRole?: ParishRole;
+  memberUids?: string[];
+  invitedEmails?: string[];
   parish: ParishCenter;
   boundary: LatLng[];
   config: PlanConfig;
   seasonConfig?: SeasonPlanConfig;
   updatedAtMs: number;
 }
+
 
 

@@ -575,7 +575,10 @@ export function exportScheduleToCsv(
     }
   }
 
-  const escapeCsv = (val: string) => `"${val.replaceAll('"', '""')}"`;
+  const escapeCsv = (val: string) => {
+    const safe = /^[=+\-@\t\r]/.test(val) ? `'${val}` : val;
+    return `"${safe.replaceAll('"', '""')}"`;
+  };
   const csvContent =
     '\uFEFF' +
     [header, ...rows].map((row) => row.map(escapeCsv).join(';')).join('\r\n');

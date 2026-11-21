@@ -158,8 +158,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setError('Podaj swój adres e-mail.');
       return;
     }
-    if (password.length < 6) {
-      setError('Hasło musi mieć co najmniej 6 znaków.');
+    if (password.length < 8) {
+      setError('Hasło musi mieć co najmniej 8 znaków.');
       return;
     }
     if (password !== passwordConfirm) {

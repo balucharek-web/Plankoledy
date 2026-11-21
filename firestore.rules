@@ -41,6 +41,18 @@ service cloud.firestore {
         && (boundary.size() == 0 || isValidLatLng(boundary[0]));
     }
 
+    function isValidMemberUids(uids) {
+      return uids is list
+        && uids.size() <= 10
+        && (uids.size() == 0 || (uids[0] is string && isValidId(uids[0])));
+    }
+
+    function isValidInvitedEmails(emails) {
+      return emails is list
+        && emails.size() <= 10
+        && (emails.size() == 0 || (emails[0] is string && emails[0].size() >= 3 && emails[0].size() <= 200));
+    }
+
     function isValidPlanConfig(cfg) {
       return cfg is map
         && cfg.keys().hasAll(['priestCount', 'startTime', 'defaultVisitMinutes', 'travelMode', 'returnToParish'])
@@ -94,8 +106,8 @@ service cloud.firestore {
 
     function isValidParish(data) {
       return data.keys().hasAll(['ownerId', 'name', 'address', 'location', 'boundary', 'config', 'createdAt', 'updatedAt'])
-        && data.keys().hasOnly(['ownerId', 'name', 'address', 'placeId', 'location', 'boundary', 'config', 'seasonConfig', 'createdAt', 'updatedAt'])
-        && data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 && data.ownerId == request.auth.uid
+        && data.keys().hasOnly(['ownerId', 'name', 'address', 'placeId', 'location', 'boundary', 'config', 'seasonConfig', 'memberUids', 'invitedEmails', 'createdAt', 'updatedAt'])
+        && data.ownerId is string && isValidId(data.ownerId)
         && data.name is string && data.name.size() >= 1 && data.name.size() <= 200
         && data.address is string && data.address.size() <= 350
         && (!('placeId' in data) || (data.placeId is string && data.placeId.size() <= 250))
@@ -103,6 +115,25 @@ service cloud.firestore {
         && isValidBoundary(data.boundary)
         && isValidPlanConfig(data.config)
         && (!('seasonConfig' in data) || isValidSeasonConfig(data.seasonConfig))
+        && (!('memberUids' in data) || isValidMemberUids(data.memberUids))
+        && (!('invitedEmails' in data) || isValidInvitedEmails(data.invitedEmails))
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidParishInvite(data) {
+      return data.keys().hasAll(['ownerId', 'parishId', 'parishName', 'invitedEmail', 'role', 'priestId', 'status', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['ownerId', 'ownerEmail', 'parishId', 'parishName', 'invitedEmail', 'role', 'priestId', 'memberLabel', 'status', 'memberUid', 'createdAt', 'updatedAt'])
+        && data.ownerId is string && isValidId(data.ownerId)
+        && (!('ownerEmail' in data) || (data.ownerEmail is string && data.ownerEmail.size() <= 200))
+        && data.parishId is string && isValidId(data.parishId)
+        && data.parishName is string && data.parishName.size() >= 1 && data.parishName.size() <= 200
+        && data.invitedEmail is string && data.invitedEmail.size() >= 3 && data.invitedEmail.size() <= 200
+        && data.role == 'wikariusz'
+        && data.priestId is number && data.priestId >= 1 && data.priestId <= 4
+        && (!('memberLabel' in data) || (data.memberLabel is string && data.memberLabel.size() <= 120))
+        && data.status in ['pending', 'accepted', 'revoked']
+        && (!('memberUid' in data) || (data.memberUid is string && data.memberUid.size() <= 128))
         && data.createdAt is timestamp
         && data.updatedAt is timestamp;
     }
@@ -130,8 +161,8 @@ service cloud.firestore {
     function isValidVisitStop(data, parishId) {
       return data.keys().hasAll(['ownerId', 'parishId', 'label', 'address', 'location', 'durationMinutes', 'priestId', 'inBoundary', 'createdAt', 'updatedAt'])
         && data.keys().hasOnly(['ownerId', 'parishId', 'label', 'address', 'placeId', 'location', 'durationMinutes', 'priestId', 'inBoundary', 'included', 'visitDate', 'notes', 'isMultiUnit', 'unitsCount', 'minutesPerUnit', 'units', 'visitStatus', 'lastYearStatus', 'permanentDecline', 'manualOrder', 'createdAt', 'updatedAt'])
-        && data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 && data.ownerId == request.auth.uid
-        && data.parishId is string && data.parishId.size() >= 1 && data.parishId.size() <= 128 && data.parishId == parishId
+        && data.ownerId is string && isValidId(data.ownerId)
+        && data.parishId is string && isValidId(data.parishId) && data.parishId == parishId
         && data.label is string && data.label.size() >= 1 && data.label.size() <= 250
         && data.address is string && data.address.size() >= 1 && data.address.size() <= 350
         && (!('placeId' in data) || (data.placeId is string && data.placeId.size() <= 250))
@@ -154,48 +185,89 @@ service cloud.firestore {
         && data.updatedAt is timestamp;
     }
 
+    function isParishMemberData(data) {
+      return data.ownerId == request.auth.uid
+        || ('memberUids' in data && request.auth.uid in data.memberUids);
+    }
+
     function isParishOwner(parishId) {
       return isSignedIn()
         && exists(/databases/$(database)/documents/parishes/$(parishId))
         && get(/databases/$(database)/documents/parishes/$(parishId)).data.ownerId == request.auth.uid;
     }
 
+    function isParishMember(parishId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/parishes/$(parishId))
+        && isParishMemberData(get(/databases/$(database)/documents/parishes/$(parishId)).data);
+    }
+
     match /parishes/{parishId} {
-      allow get: if isSignedIn() && isValidId(parishId) && (resource == null || existing().ownerId == request.auth.uid);
-      allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+      allow get: if isSignedIn()
+        && isValidId(parishId)
+        && (resource == null || isParishMemberData(existing()));
+      allow list: if isSignedIn()
+        && isParishMemberData(existing());
       allow create: if isVerifiedUser()
         && isValidId(parishId)
         && isValidParish(incoming())
+        && incoming().ownerId == request.auth.uid
         && incoming().createdAt == request.time
         && incoming().updatedAt == request.time;
       allow update: if isVerifiedUser()
         && isValidId(parishId)
         && isValidParish(incoming())
-        && existing().ownerId == request.auth.uid
         && incoming().ownerId == existing().ownerId
         && incoming().createdAt == existing().createdAt
         && incoming().updatedAt == request.time
         && (
-          incoming().diff(existing()).affectedKeys().hasOnly(['boundary', 'updatedAt'])
-          || incoming().diff(existing()).affectedKeys().hasOnly(['config', 'updatedAt'])
-          || incoming().diff(existing()).affectedKeys().hasOnly(['seasonConfig', 'updatedAt'])
-          || incoming().diff(existing()).affectedKeys().hasOnly(['name', 'address', 'placeId', 'location', 'boundary', 'config', 'seasonConfig', 'updatedAt'])
+          // Tier 1: Proboszcz (Owner)
+          (existing().ownerId == request.auth.uid && (
+            incoming().diff(existing()).affectedKeys().hasOnly(['boundary', 'updatedAt'])
+            || incoming().diff(existing()).affectedKeys().hasOnly(['config', 'updatedAt'])
+            || incoming().diff(existing()).affectedKeys().hasOnly(['seasonConfig', 'updatedAt'])
+            || incoming().diff(existing()).affectedKeys().hasOnly(['invitedEmails', 'updatedAt'])
+            || incoming().diff(existing()).affectedKeys().hasOnly(['memberUids', 'updatedAt'])
+            || incoming().diff(existing()).affectedKeys().hasOnly(['invitedEmails', 'memberUids', 'updatedAt'])
+            || incoming().diff(existing()).affectedKeys().hasOnly(['name', 'address', 'placeId', 'location', 'boundary', 'config', 'seasonConfig', 'updatedAt'])
+          ))
+          // Tier 2a: Verified invitee joining memberUids
+          || ('invitedEmails' in existing()
+            && request.auth.token.email is string
+            && request.auth.token.email.lower() in existing().invitedEmails
+            && incoming().diff(existing()).affectedKeys().hasOnly(['memberUids', 'updatedAt'])
+            && 'memberUids' in incoming()
+            && request.auth.uid in incoming().memberUids
+            && (!('memberUids' in existing())
+              ? incoming().memberUids.size() == 1
+              : (incoming().memberUids.hasAll(existing().memberUids) && incoming().memberUids.size() <= existing().memberUids.size() + 1)))
+          // Tier 2b: Accepted Wikariusz leaving shared parish
+          || ('memberUids' in existing()
+            && request.auth.uid in existing().memberUids
+            && incoming().diff(existing()).affectedKeys().hasOnly(['memberUids', 'updatedAt'])
+            && 'memberUids' in incoming()
+            && !(request.auth.uid in incoming().memberUids)
+            && existing().memberUids.hasAll(incoming().memberUids)
+            && incoming().memberUids.size() == existing().memberUids.size() - 1)
         );
-      allow delete: if isVerifiedUser() && isValidId(parishId) && existing().ownerId == request.auth.uid;
+      allow delete: if isVerifiedUser()
+        && isValidId(parishId)
+        && existing().ownerId == request.auth.uid;
 
       match /stops/{stopId} {
         allow get: if isSignedIn()
           && isValidId(parishId)
           && isValidId(stopId)
-          && (resource == null || existing().ownerId == request.auth.uid)
-          && isParishOwner(parishId);
+          && (resource == null || existing().ownerId == request.auth.uid || isParishMember(parishId))
+          && isParishMember(parishId);
         allow list: if isSignedIn()
           && isValidId(parishId)
-          && existing().ownerId == request.auth.uid;
+          && (existing().ownerId == request.auth.uid || isParishMember(parishId));
         allow create: if isVerifiedUser()
           && isValidId(parishId)
           && isValidId(stopId)
           && isValidVisitStop(incoming(), parishId)
+          && incoming().ownerId == request.auth.uid
           && incoming().createdAt == request.time
           && incoming().updatedAt == request.time
           && isParishOwner(parishId);
@@ -203,24 +275,36 @@ service cloud.firestore {
           && isValidId(parishId)
           && isValidId(stopId)
           && isValidVisitStop(incoming(), parishId)
-          && existing().ownerId == request.auth.uid
           && incoming().ownerId == existing().ownerId
           && incoming().parishId == existing().parishId
           && incoming().createdAt == existing().createdAt
           && incoming().updatedAt == request.time
-          && isParishOwner(parishId)
           && (
-            incoming().diff(existing()).affectedKeys().hasOnly(['priestId', 'updatedAt'])
-            || incoming().diff(existing()).affectedKeys().hasOnly(['inBoundary', 'updatedAt'])
-            || incoming().diff(existing()).affectedKeys().hasOnly(['included', 'updatedAt'])
-            || incoming().diff(existing()).affectedKeys().hasOnly(['visitDate', 'updatedAt'])
-            || incoming().diff(existing()).affectedKeys().hasOnly(['visitStatus', 'updatedAt'])
-            || incoming().diff(existing()).affectedKeys().hasOnly(['manualOrder', 'updatedAt'])
-            || incoming().diff(existing()).affectedKeys().hasOnly(['visitDate', 'priestId', 'updatedAt'])
-            || incoming().diff(existing()).affectedKeys().hasOnly(['visitDate', 'priestId', 'included', 'updatedAt'])
-            || incoming().diff(existing()).affectedKeys().hasOnly(['visitDate', 'priestId', 'included', 'manualOrder', 'updatedAt'])
-            || incoming().diff(existing()).affectedKeys().hasOnly(['visitStatus', 'lastYearStatus', 'permanentDecline', 'visitDate', 'included', 'manualOrder', 'units', 'updatedAt'])
-            || incoming().diff(existing()).affectedKeys().hasOnly(['label', 'address', 'durationMinutes', 'priestId', 'inBoundary', 'included', 'visitDate', 'notes', 'isMultiUnit', 'unitsCount', 'minutesPerUnit', 'units', 'visitStatus', 'lastYearStatus', 'permanentDecline', 'manualOrder', 'updatedAt'])
+            // Tier 1: Proboszcz (Owner) full schedule & stop editing
+            (existing().ownerId == request.auth.uid
+              && isParishOwner(parishId)
+              && (
+                incoming().diff(existing()).affectedKeys().hasOnly(['priestId', 'updatedAt'])
+                || incoming().diff(existing()).affectedKeys().hasOnly(['inBoundary', 'updatedAt'])
+                || incoming().diff(existing()).affectedKeys().hasOnly(['included', 'updatedAt'])
+                || incoming().diff(existing()).affectedKeys().hasOnly(['visitDate', 'updatedAt'])
+                || incoming().diff(existing()).affectedKeys().hasOnly(['visitStatus', 'updatedAt'])
+                || incoming().diff(existing()).affectedKeys().hasOnly(['manualOrder', 'updatedAt'])
+                || incoming().diff(existing()).affectedKeys().hasOnly(['visitDate', 'priestId', 'updatedAt'])
+                || incoming().diff(existing()).affectedKeys().hasOnly(['visitDate', 'priestId', 'included', 'updatedAt'])
+                || incoming().diff(existing()).affectedKeys().hasOnly(['visitDate', 'priestId', 'included', 'manualOrder', 'updatedAt'])
+                || incoming().diff(existing()).affectedKeys().hasOnly(['visitStatus', 'lastYearStatus', 'permanentDecline', 'visitDate', 'included', 'manualOrder', 'units', 'updatedAt'])
+                || incoming().diff(existing()).affectedKeys().hasOnly(['label', 'address', 'durationMinutes', 'priestId', 'inBoundary', 'included', 'visitDate', 'notes', 'isMultiUnit', 'unitsCount', 'minutesPerUnit', 'units', 'visitStatus', 'lastYearStatus', 'permanentDecline', 'manualOrder', 'updatedAt'])
+              ))
+            // Tier 2: Wikariusz (Collaborator) field-visit updates ONLY
+            || (isParishMember(parishId)
+              && (
+                incoming().diff(existing()).affectedKeys().hasOnly(['visitStatus', 'updatedAt'])
+                || incoming().diff(existing()).affectedKeys().hasOnly(['visitStatus', 'notes', 'updatedAt'])
+                || incoming().diff(existing()).affectedKeys().hasOnly(['units', 'updatedAt'])
+                || incoming().diff(existing()).affectedKeys().hasOnly(['units', 'visitStatus', 'notes', 'updatedAt'])
+                || incoming().diff(existing()).affectedKeys().hasOnly(['units', 'durationMinutes', 'updatedAt'])
+              ))
           );
         allow delete: if isVerifiedUser()
           && isValidId(parishId)
@@ -228,6 +312,63 @@ service cloud.firestore {
           && existing().ownerId == request.auth.uid
           && isParishOwner(parishId);
       }
+    }
+
+    match /parishInvites/{inviteId} {
+      allow get: if isVerifiedUser()
+        && isValidId(inviteId)
+        && (
+          resource == null
+          || existing().ownerId == request.auth.uid
+          || (request.auth.token.email is string && existing().invitedEmail == request.auth.token.email.lower())
+          || ('memberUid' in existing() && existing().memberUid == request.auth.uid)
+        );
+      allow list: if isVerifiedUser()
+        && (
+          existing().ownerId == request.auth.uid
+          || (request.auth.token.email is string && existing().invitedEmail == request.auth.token.email.lower())
+        );
+      allow create: if isVerifiedUser()
+        && isValidId(inviteId)
+        && isValidParishInvite(incoming())
+        && incoming().ownerId == request.auth.uid
+        && incoming().status == 'pending'
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && isParishOwner(incoming().parishId);
+      allow update: if isVerifiedUser()
+        && isValidId(inviteId)
+        && isValidParishInvite(incoming())
+        && incoming().ownerId == existing().ownerId
+        && incoming().parishId == existing().parishId
+        && incoming().invitedEmail == existing().invitedEmail
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          // Proboszcz revokes or updates slot/label on non-revoked invite
+          (existing().ownerId == request.auth.uid
+            && existing().status != 'revoked'
+            && (
+              (incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']) && incoming().status == 'revoked')
+              || incoming().diff(existing()).affectedKeys().hasOnly(['priestId', 'memberLabel', 'updatedAt'])
+            ))
+          // Verified invitee accepts pending invite
+          || (existing().status == 'pending'
+            && request.auth.token.email is string
+            && existing().invitedEmail == request.auth.token.email.lower()
+            && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'memberUid', 'updatedAt'])
+            && incoming().status == 'accepted'
+            && incoming().memberUid == request.auth.uid)
+          // Verified invitee declines pending invite or marks left
+          || ((existing().status == 'pending' || existing().status == 'accepted')
+            && request.auth.token.email is string
+            && existing().invitedEmail == request.auth.token.email.lower()
+            && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])
+            && incoming().status == 'revoked')
+        );
+      allow delete: if isVerifiedUser()
+        && isValidId(inviteId)
+        && existing().ownerId == request.auth.uid;
     }
   }
 }

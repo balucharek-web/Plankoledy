@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Calendar, Car, Footprints, HelpCircle, Smartphone } from 'lucide-react';
 import { PWAInstallButton } from './PWAInstallButton';
+import { ParishTeamPanel, ParishTeamPanelProps } from './ParishTeamPanel';
 import {
   PRIEST_PALETTE,
   PlanConfig,
@@ -19,6 +20,8 @@ interface SidebarSettingsProps {
   onChangeSeasonConfig: (next: SeasonPlanConfig) => void;
   onOpenGuide: () => void;
   onOpenSchedule?: () => void;
+  initialTab?: 'route' | 'season' | 'team';
+  teamPanelProps?: ParishTeamPanelProps;
 }
 
 export const SidebarSettings: React.FC<SidebarSettingsProps> = ({
@@ -28,50 +31,88 @@ export const SidebarSettings: React.FC<SidebarSettingsProps> = ({
   onChangeSeasonConfig,
   onOpenGuide,
   onOpenSchedule,
+  initialTab = 'route',
+  teamPanelProps,
 }) => {
-  const [settingsTab, setSettingsTab] = useState<'route' | 'season'>('route');
+  const [settingsTab, setSettingsTab] = useState<'route' | 'season' | 'team'>(
+    initialTab
+  );
+  useEffect(() => {
+    setSettingsTab(initialTab);
+  }, [initialTab]);
+
   const activeWeekdays = parseWeekdaysMask(seasonConfig.weekdaysMask);
+  const pendingInvitesCount =
+    teamPanelProps?.pendingIncomingInvites.length ?? 0;
+  const isCollaborator = teamPanelProps?.activeParishRole === 'wikariusz';
 
   return (
     <div>
-      {/* Compact 2-Tab Segmented Switcher */}
+      {/* Compact 3-Tab Segmented Switcher */}
       <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-slate-200 px-3 py-2.5">
         <div
           role="tablist"
           aria-label="Sekcje ustawień"
-          className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-slate-100"
+          className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-slate-100"
         >
           <button
             type="button"
             role="tab"
             aria-selected={settingsTab === 'route'}
             onClick={() => setSettingsTab('route')}
-            className={`min-h-[40px] px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+            className={`min-h-[40px] px-2 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
               settingsTab === 'route'
                 ? 'bg-white text-slate-900 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Księża i czas wizyty
+            Trasa
           </button>
           <button
             type="button"
             role="tab"
             aria-selected={settingsTab === 'season'}
             onClick={() => setSettingsTab('season')}
-            className={`min-h-[40px] px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+            className={`min-h-[40px] px-2 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
               settingsTab === 'season'
                 ? 'bg-white text-slate-900 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Kalendarz i aplikacja
+            Kalendarz
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={settingsTab === 'team'}
+            onClick={() => setSettingsTab('team')}
+            className={`min-h-[40px] px-2 py-1.5 rounded-lg text-xs font-semibold transition-colors inline-flex items-center justify-center gap-1 ${
+              settingsTab === 'team'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <span>Zespół</span>
+            {pendingInvitesCount > 0 && (
+              <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-emerald-600 text-white text-[10px] font-bold tabular-nums">
+                {pendingInvitesCount}
+              </span>
+            )}
           </button>
         </div>
       </div>
 
-      {settingsTab === 'route' ? (
+      {settingsTab === 'team' && teamPanelProps ? (
+        <ParishTeamPanel {...teamPanelProps} />
+      ) : settingsTab === 'route' ? (
         <section className="p-4 sm:p-5 space-y-5">
+          {isCollaborator && (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-[11px] text-emerald-950 leading-snug">
+              Pracujesz jako <strong>Wikariusz</strong>. Główne ustawienia
+              parafii zapisuje proboszcz — zmiany w tej zakładce służą wyłącznie
+              do lokalnego podglądu na Twoim urządzeniu.
+            </div>
+          )}
           <div>
             <h2 className="text-sm font-semibold text-slate-900">
               Ustawienia trasy dziennej

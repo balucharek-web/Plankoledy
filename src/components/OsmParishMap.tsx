@@ -109,7 +109,8 @@ function escapeHtml(value: string): string {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 export const OsmParishMap: React.FC<OsmParishMapProps> = ({
@@ -1583,7 +1584,7 @@ export const OsmParishMap: React.FC<OsmParishMapProps> = ({
             : appearance.showLabel
               ? '0 2px 5px rgba(15,23,42,0.28)'
               : '0 1px 2px rgba(15,23,42,0.22)'
-        };">${appearance.showLabel ? appearance.labelText : ''}</div></div>`,
+        };">${appearance.showLabel ? escapeHtml(appearance.labelText) : ''}</div></div>`,
         iconSize: [hitSize, hitSize],
         iconAnchor: [hitSize / 2, hitSize / 2],
       });

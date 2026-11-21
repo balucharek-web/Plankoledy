@@ -21,6 +21,8 @@ import {
   DayTimeWindow,
   LatLng,
   ParishCenter,
+  ParishInviteRecord,
+  ParishInviteStatus,
   PlanConfig,
   SavedParishRecord,
   SeasonPlanConfig,
@@ -372,45 +374,82 @@ function timestampToMs(val: unknown): number {
   return Date.now();
 }
 
+function mapParishDocToRecord(
+  uid: string,
+  docId: string,
+  d: Record<string, unknown>
+): SavedParishRecord {
+  const ownerId = typeof d.ownerId === 'string' ? d.ownerId : undefined;
+  const memberUids = Array.isArray(d.memberUids)
+    ? (d.memberUids.filter((v): v is string => typeof v === 'string') as string[])
+    : [];
+  const invitedEmails = Array.isArray(d.invitedEmails)
+    ? (d.invitedEmails.filter(
+        (v): v is string => typeof v === 'string'
+      ) as string[])
+    : [];
+  const loc = d.location as { lat?: unknown; lng?: unknown } | undefined;
+  return {
+    id: docId,
+    ownerId,
+    userRole: ownerId === uid ? 'proboszcz' : 'wikariusz',
+    memberUids,
+    invitedEmails,
+    parish: {
+      name: String(d.name ?? 'Parafia'),
+      address: String(d.address ?? ''),
+      placeId: d.placeId ? String(d.placeId) : undefined,
+      location: {
+        lat: Number(loc?.lat ?? 50.0614),
+        lng: Number(loc?.lng ?? 19.9366),
+      },
+    },
+    boundary: Array.isArray(d.boundary) ? sanitizeBoundary(d.boundary) : [],
+    config: d.config
+      ? sanitizeConfig(d.config as PlanConfig)
+      : DEFAULT_PLAN_CONFIG,
+    seasonConfig: d.seasonConfig
+      ? sanitizeSeasonConfig(d.seasonConfig as SeasonPlanConfig)
+      : DEFAULT_SEASON_CONFIG,
+    updatedAtMs: timestampToMs(d.updatedAt),
+  };
+}
+
 export function subscribeUserParishes(
   uid: string,
   onData: (parishes: SavedParishRecord[]) => void,
   onError?: (err: unknown) => void
 ): () => void {
   const path = 'parishes';
-  const q = query(collection(db, path), where('ownerId', '==', uid));
+  const ownedQuery = query(collection(db, path), where('ownerId', '==', uid));
+  const sharedQuery = query(
+    collection(db, path),
+    where('memberUids', 'array-contains', uid)
+  );
   let isActive = true;
+  let ownedRecords: SavedParishRecord[] = [];
+  let sharedRecords: SavedParishRecord[] = [];
+  let ownedLoaded = false;
 
-  const unsubscribe = onSnapshot(
-    q,
+  const emitMerged = () => {
+    if (!isActive) return;
+    const byId = new Map<string, SavedParishRecord>();
+    for (const rec of sharedRecords) byId.set(rec.id, rec);
+    for (const rec of ownedRecords) byId.set(rec.id, rec);
+    const merged = Array.from(byId.values());
+    merged.sort((a, b) => b.updatedAtMs - a.updatedAtMs);
+    onData(merged);
+  };
+
+  const unsubscribeOwned = onSnapshot(
+    ownedQuery,
     (snapshot) => {
       if (!isActive) return;
-      const list: SavedParishRecord[] = snapshot.docs.map((docSnap) => {
-        const d = docSnap.data();
-        return {
-          id: docSnap.id,
-          parish: {
-            name: String(d.name ?? 'Parafia'),
-            address: String(d.address ?? ''),
-            placeId: d.placeId ? String(d.placeId) : undefined,
-            location: {
-              lat: Number(d.location?.lat ?? 50.0614),
-              lng: Number(d.location?.lng ?? 19.9366),
-            },
-          },
-          boundary: Array.isArray(d.boundary) ? sanitizeBoundary(d.boundary) : [],
-          config: d.config
-            ? sanitizeConfig(d.config as PlanConfig)
-            : DEFAULT_PLAN_CONFIG,
-          seasonConfig: d.seasonConfig
-            ? sanitizeSeasonConfig(d.seasonConfig as SeasonPlanConfig)
-            : DEFAULT_SEASON_CONFIG,
-          updatedAtMs: timestampToMs(d.updatedAt),
-        };
-      });
-
-      list.sort((a, b) => b.updatedAtMs - a.updatedAtMs);
-      onData(list);
+      ownedLoaded = true;
+      ownedRecords = snapshot.docs.map((docSnap) =>
+        mapParishDocToRecord(uid, docSnap.id, docSnap.data())
+      );
+      emitMerged();
     },
     (error) => {
       if (!isActive) return;
@@ -423,9 +462,26 @@ export function subscribeUserParishes(
     }
   );
 
+  const unsubscribeShared = onSnapshot(
+    sharedQuery,
+    (snapshot) => {
+      if (!isActive) return;
+      sharedRecords = snapshot.docs.map((docSnap) =>
+        mapParishDocToRecord(uid, docSnap.id, docSnap.data())
+      );
+      if (ownedLoaded || sharedRecords.length > 0) {
+        emitMerged();
+      }
+    },
+    () => {
+      // Shared query may fail softly if user has no shared parishes yet
+    }
+  );
+
   return () => {
     isActive = false;
-    unsubscribe();
+    unsubscribeOwned();
+    unsubscribeShared();
   };
 }
 
@@ -433,11 +489,14 @@ export function subscribeParishStops(
   uid: string,
   parishId: string,
   onData: (stops: VisitStop[]) => void,
-  onError?: (err: unknown) => void
+  onError?: (err: unknown) => void,
+  isSharedMember = false
 ): () => void {
   const safeParishId = sanitizeDocId(parishId);
   const path = `parishes/${safeParishId}/stops`;
-  const q = query(collection(db, path), where('ownerId', '==', uid));
+  const q = isSharedMember
+    ? query(collection(db, path))
+    : query(collection(db, path), where('ownerId', '==', uid));
   let isActive = true;
 
   const unsubscribe = onSnapshot(
@@ -1025,4 +1084,333 @@ export function clearOfflineParishSnapshot(uid?: string): void {
     // Ignore storage issues
   }
 }
+
+// ---------- Multi-User Parish Collaboration (RBAC: Proboszcz & Wikariusz) ----------
+
+const VALID_INVITE_STATUSES = new Set<ParishInviteStatus>([
+  'pending',
+  'accepted',
+  'revoked',
+]);
+
+function mapInviteDoc(
+  id: string,
+  d: Record<string, unknown>
+): ParishInviteRecord {
+  const rawStatus = String(d.status ?? 'pending') as ParishInviteStatus;
+  return {
+    id,
+    ownerId: String(d.ownerId ?? ''),
+    ownerEmail: d.ownerEmail ? String(d.ownerEmail) : undefined,
+    parishId: String(d.parishId ?? ''),
+    parishName: String(d.parishName ?? 'Parafia'),
+    invitedEmail: String(d.invitedEmail ?? '').toLowerCase(),
+    role: 'wikariusz',
+    priestId: clampInt(Number(d.priestId ?? 2), 1, 4, 2),
+    memberLabel: d.memberLabel ? String(d.memberLabel) : undefined,
+    status: VALID_INVITE_STATUSES.has(rawStatus) ? rawStatus : 'pending',
+    memberUid: d.memberUid ? String(d.memberUid) : undefined,
+    createdAtMs: timestampToMs(d.createdAt),
+    updatedAtMs: timestampToMs(d.updatedAt),
+  };
+}
+
+export function subscribeParishInvitesForOwner(
+  ownerUid: string,
+  parishId: string,
+  onData: (invites: ParishInviteRecord[]) => void,
+  onError?: (err: unknown) => void
+): () => void {
+  const safeParishId = sanitizeDocId(parishId);
+  const path = 'parishInvites';
+  const q = query(collection(db, path), where('ownerId', '==', ownerUid));
+  let isActive = true;
+
+  const unsubscribe = onSnapshot(
+    q,
+    (snapshot) => {
+      if (!isActive) return;
+      const list = snapshot.docs
+        .map((docSnap) => mapInviteDoc(docSnap.id, docSnap.data()))
+        .filter((inv) => inv.parishId === safeParishId && inv.status !== 'revoked');
+      list.sort((a, b) => b.createdAtMs - a.createdAtMs);
+      onData(list);
+    },
+    (error) => {
+      if (!isActive) return;
+      if (onError) onError(error);
+      try {
+        handleFirestoreError(error, OperationType.LIST, path);
+      } catch {
+        // Already logged
+      }
+    }
+  );
+
+  return () => {
+    isActive = false;
+    unsubscribe();
+  };
+}
+
+export function subscribeIncomingParishInvites(
+  userEmail: string,
+  onData: (invites: ParishInviteRecord[]) => void,
+  onError?: (err: unknown) => void
+): () => void {
+  const normalizedEmail = cleanStr(userEmail, 200).toLowerCase();
+  if (!normalizedEmail) {
+    onData([]);
+    return () => {};
+  }
+  const path = 'parishInvites';
+  const q = query(
+    collection(db, path),
+    where('invitedEmail', '==', normalizedEmail)
+  );
+  let isActive = true;
+
+  const unsubscribe = onSnapshot(
+    q,
+    (snapshot) => {
+      if (!isActive) return;
+      const list = snapshot.docs
+        .map((docSnap) => mapInviteDoc(docSnap.id, docSnap.data()))
+        .filter((inv) => inv.status !== 'revoked');
+      list.sort((a, b) => b.createdAtMs - a.createdAtMs);
+      onData(list);
+    },
+    (error) => {
+      if (!isActive) return;
+      if (onError) onError(error);
+      try {
+        handleFirestoreError(error, OperationType.LIST, path);
+      } catch {
+        // Already logged
+      }
+    }
+  );
+
+  return () => {
+    isActive = false;
+    unsubscribe();
+  };
+}
+
+export async function createParishInviteInFirestore(params: {
+  ownerUid: string;
+  ownerEmail?: string | null;
+  parishId: string;
+  parishName: string;
+  currentInvitedEmails: string[];
+  invitedEmail: string;
+  priestId: number;
+  memberLabel?: string;
+}): Promise<string> {
+  const safeParishId = sanitizeDocId(params.parishId);
+  const cleanEmail = cleanStr(params.invitedEmail, 200).toLowerCase();
+  if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+    throw new Error('Podaj poprawny adres e-mail księdza.');
+  }
+
+  const nextInvitedEmails = Array.from(
+    new Set([
+      ...params.currentInvitedEmails
+        .map((e) => cleanStr(e, 200).toLowerCase())
+        .filter(Boolean),
+      cleanEmail,
+    ])
+  ).slice(0, 10);
+
+  if (
+    !nextInvitedEmails.includes(cleanEmail) &&
+    params.currentInvitedEmails.length >= 10
+  ) {
+    throw new Error('Osiągnięto maksymalny limit 10 zaproszonych księży.');
+  }
+
+  const inviteId = sanitizeDocId(
+    `inv_${safeParishId.slice(0, 32)}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`
+  );
+  const path = `parishInvites/${inviteId}`;
+
+  try {
+    const batch = writeBatch(db);
+    const payload: Record<string, unknown> = {
+      ownerId: params.ownerUid,
+      parishId: safeParishId,
+      parishName: cleanStr(params.parishName, 200) || 'Parafia',
+      invitedEmail: cleanEmail,
+      role: 'wikariusz',
+      priestId: clampInt(params.priestId, 1, 4, 2),
+      status: 'pending',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+    const cleanOwnerEmail = cleanStr(params.ownerEmail, 200).toLowerCase();
+    if (cleanOwnerEmail) payload.ownerEmail = cleanOwnerEmail;
+    const cleanLabel = cleanStr(params.memberLabel, 120);
+    if (cleanLabel) payload.memberLabel = cleanLabel;
+
+    batch.set(doc(db, 'parishInvites', inviteId), payload);
+    batch.update(doc(db, 'parishes', safeParishId), {
+      invitedEmails: nextInvitedEmails,
+      updatedAt: serverTimestamp(),
+    });
+    await batch.commit();
+    return inviteId;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, path);
+  }
+}
+
+export async function acceptParishInviteInFirestore(
+  uid: string,
+  invite: ParishInviteRecord
+): Promise<void> {
+  const safeParishId = sanitizeDocId(invite.parishId);
+  const safeInviteId = sanitizeDocId(invite.id);
+  const path = `parishes/${safeParishId}`;
+
+  try {
+    const parishSnap = await getDoc(doc(db, 'parishes', safeParishId));
+    const existingUids: string[] = Array.isArray(parishSnap.data()?.memberUids)
+      ? (parishSnap.data()?.memberUids as unknown[]).filter(
+          (v): v is string => typeof v === 'string'
+        )
+      : [];
+    const nextMemberUids = Array.from(new Set([...existingUids, uid])).slice(
+      0,
+      10
+    );
+
+    const batch = writeBatch(db);
+    batch.update(doc(db, 'parishInvites', safeInviteId), {
+      status: 'accepted',
+      memberUid: uid,
+      updatedAt: serverTimestamp(),
+    });
+    batch.update(doc(db, 'parishes', safeParishId), {
+      memberUids: nextMemberUids,
+      updatedAt: serverTimestamp(),
+    });
+    await batch.commit();
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
+  }
+}
+
+export async function revokeParishInviteInFirestore(
+  invite: ParishInviteRecord,
+  currentInvitedEmails: string[],
+  currentMemberUids: string[]
+): Promise<void> {
+  const safeParishId = sanitizeDocId(invite.parishId);
+  const safeInviteId = sanitizeDocId(invite.id);
+  const path = `parishInvites/${safeInviteId}`;
+
+  try {
+    const nextInvitedEmails = currentInvitedEmails.filter(
+      (e) => e.toLowerCase() !== invite.invitedEmail.toLowerCase()
+    );
+    const nextMemberUids = invite.memberUid
+      ? currentMemberUids.filter((id) => id !== invite.memberUid)
+      : currentMemberUids;
+
+    const batch = writeBatch(db);
+    batch.update(doc(db, 'parishInvites', safeInviteId), {
+      status: 'revoked',
+      updatedAt: serverTimestamp(),
+    });
+    batch.update(doc(db, 'parishes', safeParishId), {
+      invitedEmails: nextInvitedEmails,
+      memberUids: nextMemberUids,
+      updatedAt: serverTimestamp(),
+    });
+    await batch.commit();
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
+  }
+}
+
+export async function declineParishInviteInFirestore(
+  inviteId: string
+): Promise<void> {
+  const safeInviteId = sanitizeDocId(inviteId);
+  const path = `parishInvites/${safeInviteId}`;
+  try {
+    await updateDoc(doc(db, 'parishInvites', safeInviteId), {
+      status: 'revoked',
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
+  }
+}
+
+export async function leaveSharedParishInFirestore(
+  uid: string,
+  parishId: string,
+  currentMemberUids: string[],
+  inviteId?: string
+): Promise<void> {
+  const safeParishId = sanitizeDocId(parishId);
+  const path = `parishes/${safeParishId}`;
+  try {
+    const nextMemberUids = currentMemberUids.filter((id) => id !== uid);
+    const batch = writeBatch(db);
+    batch.update(doc(db, 'parishes', safeParishId), {
+      memberUids: nextMemberUids,
+      updatedAt: serverTimestamp(),
+    });
+    if (inviteId) {
+      batch.update(doc(db, 'parishInvites', sanitizeDocId(inviteId)), {
+        status: 'revoked',
+        updatedAt: serverTimestamp(),
+      });
+    }
+    await batch.commit();
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
+  }
+}
+
+/**
+ * Tier-2 collaborator-safe field update: only modifies visitStatus, notes, and/or units
+ * so an invited Wikariusz can check off visits live without full owner permissions.
+ */
+export async function updateStopFieldByCollaboratorInFirestore(
+  parishId: string,
+  stopId: string,
+  patch: {
+    visitStatus?: UnitVisitStatus;
+    notes?: string;
+    units?: BuildingUnit[];
+  }
+): Promise<void> {
+  const safeParishId = sanitizeDocId(parishId);
+  const safeStopId = sanitizeDocId(stopId);
+  const path = `parishes/${safeParishId}/stops/${safeStopId}`;
+  try {
+    const payload: Record<string, unknown> = {
+      updatedAt: serverTimestamp(),
+    };
+    if (patch.visitStatus && VALID_UNIT_STATUSES.has(patch.visitStatus)) {
+      payload.visitStatus = patch.visitStatus;
+    }
+    if (typeof patch.notes === 'string') {
+      payload.notes = cleanStr(patch.notes, 500);
+    }
+    if (Array.isArray(patch.units)) {
+      payload.units = sanitizeUnitsList(patch.units);
+    }
+    await updateDoc(
+      doc(db, 'parishes', safeParishId, 'stops', safeStopId),
+      payload
+    );
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
+  }
+}
+
 

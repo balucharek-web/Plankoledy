@@ -136,6 +136,19 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const MAX_CSV_BYTES = 5 * 1024 * 1024;
+    if (file.size > MAX_CSV_BYTES) {
+      setSummary({
+        enriched: 0,
+        added: 0,
+        mapOnlyCount: 0,
+        failedLines: [
+          `Plik „${file.name}” przekracza bezpieczny limit 5 MB. Podziel kartotekę na mniejsze pliki CSV.`,
+        ],
+      });
+      e.target.value = '';
+      return;
+    }
     const buffer = await file.arrayBuffer();
     let decoded = '';
     try {

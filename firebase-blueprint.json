@@ -46,6 +46,14 @@
           "type": "object",
           "description": "Multi-day season scheduling configuration { startDate, endDate, weekdayStartTime, saturdayStartTime, weekendStartTime, dailyEndTime, weekdaysMask, excludedDates, defaultBreaks, planningRules, dayTimeOverrides }."
         },
+        "memberUids": {
+          "type": "array",
+          "description": "Bounded list (max 10) of Firebase Auth UIDs of accepted collaborator priests (wikariusze) with field access to this parish."
+        },
+        "invitedEmails": {
+          "type": "array",
+          "description": "Bounded list (max 10) of lowercased e-mail addresses invited by the parish owner to collaborate."
+        },
         "createdAt": {
           "type": "string",
           "format": "date-time",
@@ -64,6 +72,92 @@
         "location",
         "boundary",
         "config",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ParishInvite": {
+      "title": "ParishInvite",
+      "description": "Invitation sent by a parish owner (Proboszcz) to a collaborator priest (Wikariusz) by verified e-mail address.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the parish owner (Proboszcz).",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerEmail": {
+          "type": "string",
+          "description": "Optional e-mail address of the parish owner.",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "parishId": {
+          "type": "string",
+          "description": "Target parish document ID.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "parishName": {
+          "type": "string",
+          "description": "Display name of the shared parish.",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "invitedEmail": {
+          "type": "string",
+          "description": "Lowercased e-mail address of the invited priest.",
+          "minLength": 3,
+          "maxLength": 200
+        },
+        "role": {
+          "type": "string",
+          "description": "Assigned collaborator role (least-privilege wikariusz).",
+          "enum": ["wikariusz"]
+        },
+        "priestId": {
+          "type": "number",
+          "description": "Assigned priest route slot (1 to 4)."
+        },
+        "memberLabel": {
+          "type": "string",
+          "description": "Optional friendly display name of the invited priest.",
+          "minLength": 0,
+          "maxLength": 120
+        },
+        "status": {
+          "type": "string",
+          "description": "Lifecycle state of the invitation.",
+          "enum": ["pending", "accepted", "revoked"]
+        },
+        "memberUid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the collaborator once the invite is accepted.",
+          "minLength": 0,
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the invite was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the invite was last updated."
+        }
+      },
+      "required": [
+        "ownerId",
+        "parishId",
+        "parishName",
+        "invitedEmail",
+        "role",
+        "priestId",
+        "status",
         "createdAt",
         "updatedAt"
       ]
@@ -203,13 +297,19 @@
       "schema": {
         "$ref": "#/entities/Parish"
       },
-      "description": "Saved parishes, boundaries, and planner configurations owned by the signed-in user."
+      "description": "Saved parishes, boundaries, planner configurations, and bounded team collaborator lists."
     },
     "/parishes/{parishId}/stops/{stopId}": {
       "schema": {
         "$ref": "#/entities/VisitStop"
       },
-      "description": "House visit stops belonging to a specific saved parish."
+      "description": "House visit stops belonging to a specific saved parish, readable by parish team members and updatable in field mode by collaborators."
+    },
+    "/parishInvites/{inviteId}": {
+      "schema": {
+        "$ref": "#/entities/ParishInvite"
+      },
+      "description": "Email-addressed invitations allowing verified collaborator priests (Wikariusze) to join a shared parish."
     }
   }
 }

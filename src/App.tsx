@@ -87,7 +87,9 @@ import {
   googleProvider,
 } from './firebase';
 import { useOsmRouteOptimizer } from './hooks/useOsmRouteOptimizer';
+import { useParishCollaboration } from './hooks/useParishCollaboration';
 import { useParishRouteOptimizer } from './hooks/useParishRouteOptimizer';
+import { useParishWorkspaceStats } from './hooks/useParishWorkspaceStats';
 import { fetchStreetRoadGeometry } from './services/osmSearchAndRouting';
 import {
   fetchStreetHousesAtLocation,
@@ -113,6 +115,7 @@ import {
   updateParishBoundaryInFirestore,
   updateParishConfigInFirestore,
   updateParishSeasonConfigInFirestore,
+  updateStopFieldByCollaboratorInFirestore,
   updateStopInFirestore,
 } from './services/parishStorage';
 import {
@@ -134,14 +137,12 @@ import {
 } from './types/parish';
 import {
   autoScheduleSeason,
-  buildSeasonDaySummaries,
   collectReturnVisitCandidates,
   computeManualOrderForStops,
   formatIsoDateLocal,
   formatPolishDateChip,
   formatPolishDateFull,
   getDayActiveBreaks,
-  getDayEndTime,
   getDayStartTime,
 } from './utils/seasonScheduler';
 import {
@@ -155,7 +156,6 @@ import {
   isPointInsideBoundary,
   partitionStopsBySector,
   scaleBoundaryFromCenter,
-  summarizeStreetStats,
 } from './utils/spatial';
 
 type MobilePane = 'panel' | 'map';
@@ -511,8 +511,26 @@ function ParishPlannerWorkspace({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser?.uid]);
 
+  const [settingsInitialTab, setSettingsInitialTab] = useState<
+    'route' | 'season' | 'team'
+  >('route');
+
+  const collaboration = useParishCollaboration({
+    authUser,
+    savedParishes,
+    activeParishId,
+    onSelectParishId: (parishId) => {
+      activeParishIdRef.current = parishId;
+      setActiveParishId(parishId);
+    },
+  });
+
+  const isCollaboratorRef = useRef(collaboration.isCollaborator);
+  isCollaboratorRef.current = collaboration.isCollaborator;
+
   // Subscribe to stops of the active parish when signed in
   const authUid = authUser?.uid ?? null;
+  const isSharedMember = collaboration.isCollaborator;
   useEffect(() => {
     if (!authUid || !activeParishId) return;
 
@@ -521,11 +539,13 @@ function ParishPlannerWorkspace({
       activeParishId,
       (cloudStops) => {
         setStops(cloudStops);
-      }
+      },
+      undefined,
+      isSharedMember
     );
 
     return () => unsubscribeStops();
-  }, [authUid, activeParishId]);
+  }, [authUid, activeParishId, isSharedMember]);
 
   // Save lightweight offline snapshot for signed-in user so field checklist works offline
   useEffect(() => {
@@ -842,7 +862,7 @@ function ParishPlannerWorkspace({
       setConfig(nextConfig);
       clearRoutes();
       const currentId = activeParishIdRef.current;
-      if (authUser && currentId) {
+      if (authUser && currentId && !isCollaboratorRef.current) {
         setSavedParishes((prev) =>
           prev.map((r) =>
             r.id === currentId
@@ -862,7 +882,7 @@ function ParishPlannerWorkspace({
     (nextSeason: SeasonPlanConfig) => {
       setSeasonConfig(nextSeason);
       const currentId = activeParishIdRef.current;
-      if (authUser && currentId) {
+      if (authUser && currentId && !isCollaboratorRef.current) {
         setSavedParishes((prev) =>
           prev.map((r) =>
             r.id === currentId
@@ -1277,7 +1297,31 @@ function ParishPlannerWorkspace({
       clearRoutes();
 
       if (authUser && currentId && updatedStop) {
-        void updateStopInFirestore(currentId, updatedStop).catch(() => {});
+        if (isCollaboratorRef.current) {
+          const collabPatch: {
+            visitStatus?: UnitVisitStatus;
+            notes?: string;
+            units?: VisitStop['units'];
+          } = {};
+          if (patch.visitStatus !== undefined) {
+            collabPatch.visitStatus = patch.visitStatus;
+          }
+          if (patch.notes !== undefined) {
+            collabPatch.notes = patch.notes;
+          }
+          if (patch.units !== undefined) {
+            collabPatch.units = patch.units;
+          }
+          if (Object.keys(collabPatch).length > 0) {
+            void updateStopFieldByCollaboratorInFirestore(
+              currentId,
+              id,
+              collabPatch
+            ).catch(() => {});
+          }
+        } else {
+          void updateStopInFirestore(currentId, updatedStop).catch(() => {});
+        }
       }
     },
     [authUser, clearRoutes]
@@ -1964,44 +2008,39 @@ function ParishPlannerWorkspace({
     [showStreetFeedback]
   );
 
-  const outsideBoundaryCount = useMemo(
-    () =>
-      boundary.length < 3
-        ? 0
-        : stops.filter((s) => s.inBoundary === false).length,
-    [boundary.length, stops]
-  );
-
-  const validLassoSelectedIds = useMemo(() => {
-    if (lassoSelectedStopIds.length === 0) return [];
-    const existing = new Set(stops.map((s) => s.id));
-    return lassoSelectedStopIds.filter((id) => existing.has(id));
-  }, [lassoSelectedStopIds, stops]);
-
-  const activeStopsCount = stops.filter((s) => s.included !== false).length;
-
-  const exactRoutesOnlyByDay = useMemo(() => {
-    const out: Record<string, PriestRouteResult[]> = {};
-    for (const [key, entry] of Object.entries(exactRoutesCache)) {
-      if (key !== 'current') out[key] = entry.routes;
-    }
-    return out;
-  }, [exactRoutesCache]);
-
-  const seasonSummary = useMemo(
-    () =>
-      buildSeasonDaySummaries(
-        stops,
-        parish,
-        config,
-        seasonConfig,
-        exactRoutesOnlyByDay
-      ),
-    [stops, parish, config, seasonConfig, exactRoutesOnlyByDay]
-  );
-
-  const plannedDays = seasonSummary.days;
-  const unscheduledStops = seasonSummary.unscheduledStops;
+  const {
+    outsideBoundaryCount,
+    validLassoSelectedIds,
+    activeStopsCount,
+    seasonSummary,
+    plannedDays,
+    unscheduledStops,
+    selectedDaySummary,
+    activeDayStreetNames,
+    inspectedStreetSummary,
+    activeRouteCacheKey,
+    isExactRoute,
+    displayedRoutes,
+    nearestPlannedDayDate,
+    blockNextStopCandidate,
+    displayedRouteObjects,
+    exactDayKeys,
+    effectiveStartTime,
+    effectiveEndTime,
+    availableMapStreets,
+  } = useParishWorkspaceStats({
+    stops,
+    parish,
+    boundary,
+    config,
+    seasonConfig,
+    selectedDate,
+    focusedPriestId,
+    inspectedStreet,
+    editingBlockStopId,
+    lassoSelectedStopIds,
+    exactRoutesCache,
+  });
 
   // Auto-select the active/nearest/latest planned kolęda day ONCE on initial parish load
   // so the big map immediately displays the day's route (with 1-click switch to whole parish)
@@ -2031,22 +2070,6 @@ function ParishPlannerWorkspace({
       setSelectedDate(plannedDays[0]?.date ?? null);
     }
   }, [plannedDays, selectedDate]);
-
-  const selectedDaySummary = useMemo(
-    () => plannedDays.find((d) => d.date === selectedDate) ?? null,
-    [plannedDays, selectedDate]
-  );
-
-  const activeDayStreetNames = useMemo(
-    () => selectedDaySummary?.streetNames ?? [],
-    [selectedDaySummary]
-  );
-
-  const inspectedStreetSummary = useMemo(() => {
-    if (!inspectedStreet) return null;
-    const summary = summarizeStreetStats(inspectedStreet, stops);
-    return summary.totalBuildings > 0 ? summary : null;
-  }, [inspectedStreet, stops]);
 
   // Snap the clicked street's Google-Maps-blue highlight onto actual OSRM road geometry in the background
   useEffect(() => {
@@ -2084,29 +2107,6 @@ function ParishPlannerWorkspace({
     setInspectedStreet(null);
   }, [activeParishId]);
 
-  const activeRouteCacheKey = selectedDate ?? 'current';
-  const cachedExact = exactRoutesCache[activeRouteCacheKey];
-  const isExactRoute = Boolean(cachedExact && cachedExact.routes.length > 0);
-  const displayedRoutes = useMemo(() => {
-    if (cachedExact && cachedExact.routes.length > 0) {
-      return cachedExact.routes;
-    }
-    if (selectedDaySummary) {
-      return selectedDaySummary.estimatedRoutes;
-    }
-    return [];
-  }, [cachedExact, selectedDaySummary]);
-
-  const nearestPlannedDayDate = useMemo(() => {
-    if (plannedDays.length === 0) return null;
-    const todayIso = formatIsoDateLocal(new Date());
-    const exact = plannedDays.find((d) => d.date === todayIso);
-    if (exact) return exact.date;
-    const upcoming = plannedDays.find((d) => d.date > todayIso);
-    if (upcoming) return upcoming.date;
-    return plannedDays[plannedDays.length - 1].date;
-  }, [plannedDays]);
-
   useEffect(() => {
     if (displayedRoutes.length === 0) {
       setFieldModeOnMap(false);
@@ -2116,60 +2116,6 @@ function ParishPlannerWorkspace({
       setFieldPriestId(displayedRoutes[0].priestId);
     }
   }, [displayedRoutes, fieldPriestId]);
-
-  const blockNextStopCandidate = useMemo(() => {
-    if (!editingBlockStopId || displayedRoutes.length === 0) return null;
-    for (const r of displayedRoutes) {
-      const idx = r.orderedStops.findIndex(
-        (i) => i.stop.id === editingBlockStopId
-      );
-      if (idx >= 0) {
-        return r.orderedStops[idx + 1]?.stop ?? null;
-      }
-    }
-    return null;
-  }, [editingBlockStopId, displayedRoutes]);
-
-  const displayedRouteObjects = useMemo(
-    () => (cachedExact ? cachedExact.routeObjects : []),
-    [cachedExact]
-  );
-
-  const exactDayKeys = useMemo(() => {
-    const out: Record<string, boolean> = {};
-    for (const [k, v] of Object.entries(exactRoutesCache)) {
-      if (v.routes.length > 0) out[k] = true;
-    }
-    return out;
-  }, [exactRoutesCache]);
-
-  const effectiveStartTime = useMemo(
-    () => getDayStartTime(selectedDate, seasonConfig, config.startTime),
-    [selectedDate, seasonConfig, config.startTime]
-  );
-
-  const effectiveEndTime = useMemo(
-    () => getDayEndTime(selectedDate, seasonConfig),
-    [selectedDate, seasonConfig]
-  );
-
-  const availableMapStreets = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const stop of stops) {
-      const isActive = selectedDate
-        ? (stop.visitDate ?? '').trim() === selectedDate
-        : stop.included !== false;
-      if (!isActive) continue;
-      if (focusedPriestId !== null && stop.priestId !== focusedPriestId) {
-        continue;
-      }
-      const street = extractStreetName(stop);
-      counts.set(street, (counts.get(street) ?? 0) + 1);
-    }
-    return Array.from(counts.entries())
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'pl'));
-  }, [stops, selectedDate, focusedPriestId]);
 
   useEffect(() => {
     if (
@@ -2196,11 +2142,17 @@ function ParishPlannerWorkspace({
       );
 
       if (authUser && currentId && updatedStop) {
-        void batchUpdateStopFieldInFirestore(
-          currentId,
-          [updatedStop],
-          'visitStatus'
-        ).catch(() => {});
+        if (isCollaboratorRef.current) {
+          void updateStopFieldByCollaboratorInFirestore(currentId, stopId, {
+            visitStatus: status,
+          }).catch(() => {});
+        } else {
+          void batchUpdateStopFieldInFirestore(
+            currentId,
+            [updatedStop],
+            'visitStatus'
+          ).catch(() => {});
+        }
       }
 
       if (prevStatus !== status) {
@@ -2224,11 +2176,19 @@ function ParishPlannerWorkspace({
               })
             );
             if (authUser && currentId && revertedStop) {
-              void batchUpdateStopFieldInFirestore(
-                currentId,
-                [revertedStop],
-                'visitStatus'
-              ).catch(() => {});
+              if (isCollaboratorRef.current) {
+                void updateStopFieldByCollaboratorInFirestore(
+                  currentId,
+                  stopId,
+                  { visitStatus: prevStatus }
+                ).catch(() => {});
+              } else {
+                void batchUpdateStopFieldInFirestore(
+                  currentId,
+                  [revertedStop],
+                  'visitStatus'
+                ).catch(() => {});
+              }
             }
           }
         );
@@ -2955,6 +2915,68 @@ function ParishPlannerWorkspace({
         </div>
       )}
 
+      {/* Pending Parish Invitation Banner (for invited Wikariusz) */}
+      {authUser && collaboration.pendingIncomingInvites.length > 0 && (
+        <div className="no-print bg-emerald-50 border-b border-emerald-200 px-3 sm:px-5 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-950 shrink-0">
+          <span className="min-w-0 truncate">
+            Zaproszenie do wspólnej parafii:{' '}
+            <strong>{collaboration.pendingIncomingInvites[0].parishName}</strong>{' '}
+            (Wikariusz · Ksiądz{' '}
+            {collaboration.pendingIncomingInvites[0].priestId})
+          </span>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              disabled={collaboration.collabBusy}
+              onClick={() =>
+                void collaboration.acceptInvite(
+                  collaboration.pendingIncomingInvites[0]
+                )
+              }
+              className="px-2.5 py-1 text-[11px] font-semibold bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg whitespace-nowrap disabled:opacity-50"
+            >
+              Dołącz do parafii
+            </button>
+            <button
+              type="button"
+              disabled={collaboration.collabBusy}
+              onClick={() =>
+                void collaboration.declineInvite(
+                  collaboration.pendingIncomingInvites[0].id
+                )
+              }
+              className="px-2 py-1 text-[11px] font-medium bg-white border border-emerald-300 text-emerald-900 hover:bg-emerald-100 rounded-lg whitespace-nowrap disabled:opacity-50"
+            >
+              Odrzuć
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Active Shared Parish Role Indicator (Wikariusz) */}
+      {authUser && collaboration.isCollaborator && parish && activeSection !== 'schedule' && (
+        <div className="no-print bg-slate-100 border-b border-slate-200 px-3 sm:px-5 py-1.5 flex items-center justify-between gap-2 text-[11px] text-slate-700 shrink-0">
+          <span className="truncate">
+            Wspólna parafia · Rola:{' '}
+            <strong className="text-emerald-800">Wikariusz</strong>
+            {collaboration.assignedPriestId
+              ? ` (Ksiądz ${collaboration.assignedPriestId})`
+              : ''}{' '}
+            — odhaczanie wizyt i notatek synchronizuje się na żywo.
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setSettingsInitialTab('team');
+              navigateToSection('settings');
+            }}
+            className="px-2 py-0.5 text-[11px] font-semibold text-slate-800 bg-white border border-slate-200 hover:bg-slate-50 rounded-md whitespace-nowrap shrink-0"
+          >
+            Zespół
+          </button>
+        </div>
+      )}
+
       {/* Main App Body: Desktop Left Menu Rail + Panel + Map */}
       <div className="flex-1 min-h-0 flex overflow-hidden print-reset">
         {/* Desktop App Sidebar Menu */}
@@ -3319,6 +3341,28 @@ function ParishPlannerWorkspace({
                     onChangeSeasonConfig={handleChangeSeasonConfig}
                     onOpenGuide={() => setGuideOpen(true)}
                     onOpenSchedule={() => navigateToSection('schedule')}
+                    initialTab={settingsInitialTab}
+                    teamPanelProps={{
+                      isAuthenticated: Boolean(authUser),
+                      userEmail: authUser?.email ?? null,
+                      parishName: parish?.name ?? null,
+                      activeParishRole: collaboration.activeParishRole,
+                      assignedPriestId: collaboration.assignedPriestId,
+                      priestCount: config.priestCount,
+                      outgoingInvites: collaboration.outgoingInvites,
+                      pendingIncomingInvites:
+                        collaboration.pendingIncomingInvites,
+                      busy: collaboration.collabBusy,
+                      error: collaboration.collabError,
+                      success: collaboration.collabSuccess,
+                      onClearMessages: collaboration.clearCollabMessages,
+                      onInviteCollaborator: collaboration.inviteCollaborator,
+                      onAcceptInvite: collaboration.acceptInvite,
+                      onDeclineInvite: collaboration.declineInvite,
+                      onRevokeInvite: collaboration.revokeInvite,
+                      onLeaveSharedParish: collaboration.leaveSharedParish,
+                      onOpenAuth: onSignInGoogle,
+                    }}
                   />
                 )}
               </div>

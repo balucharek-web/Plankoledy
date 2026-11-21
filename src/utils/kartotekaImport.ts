@@ -950,7 +950,7 @@ export function parseAndAggregateKartotekaCsv(
 }
 
 function extractHouseNumFromStop(stop: VisitStop): string {
-  const src = (stop.label || stop.address.split(',')[0] || '').trim();
+  const src = ((stop.label || stop.address || '').split(',')[0] || '').trim();
   const match = src.match(/(\d+\s*[a-zA-Z]?(?:\/\d+[a-zA-Z]?)?)\s*$/);
   if (match) return normalizeBuildingNumber(match[1]);
   return '';
