@@ -8,6 +8,40 @@ if (typeof window !== 'undefined') {
     event.preventDefault();
     triggerSingleChunkRecoveryReload();
   });
+
+  const recoverFromFirestoreAssertion = (message: string) => {
+    if (!message.includes('INTERNAL ASSERTION FAILED')) return false;
+    const key = 'pk_firestore_assert_reload_ts';
+    try {
+      const now = Date.now();
+      const last = Number(window.sessionStorage.getItem(key) ?? '0');
+      if (Number.isFinite(last) && now - last < 30_000) return false;
+      window.sessionStorage.setItem(key, String(now));
+      window.location.reload();
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  window.addEventListener('error', (event) => {
+    const msg =
+      event.error instanceof Error
+        ? event.error.message
+        : String(event.message ?? '');
+    if (recoverFromFirestoreAssertion(msg)) {
+      event.preventDefault();
+    }
+  });
+
+  window.addEventListener('unhandledrejection', (event) => {
+    const reason = event.reason;
+    const msg =
+      reason instanceof Error ? reason.message : String(reason ?? '');
+    if (recoverFromFirestoreAssertion(msg)) {
+      event.preventDefault();
+    }
+  });
 }
 
 // Tier 1 Demo Key quota and auth monitoring

@@ -482,6 +482,7 @@ function ParishPlannerWorkspace({
           cloudList.find((r) => r.id === currentId) ?? cloudList[0] ?? null;
 
         if (matched && matched.id !== currentId) {
+          activeParishIdRef.current = matched.id;
           setActiveParishId(matched.id);
           setParish(matched.parish);
           setBoundary(matched.boundary);
@@ -493,6 +494,7 @@ function ParishPlannerWorkspace({
           setConfig(matched.config);
           setSeasonConfig(matched.seasonConfig ?? DEFAULT_SEASON_CONFIG);
         } else {
+          activeParishIdRef.current = null;
           setActiveParishId(null);
           setParish(null);
           setBoundary([]);
@@ -510,11 +512,12 @@ function ParishPlannerWorkspace({
   }, [authUser?.uid]);
 
   // Subscribe to stops of the active parish when signed in
+  const authUid = authUser?.uid ?? null;
   useEffect(() => {
-    if (!authUser || !activeParishId) return;
+    if (!authUid || !activeParishId) return;
 
     const unsubscribeStops = subscribeParishStops(
-      authUser.uid,
+      authUid,
       activeParishId,
       (cloudStops) => {
         setStops(cloudStops);
@@ -522,7 +525,7 @@ function ParishPlannerWorkspace({
     );
 
     return () => unsubscribeStops();
-  }, [authUser, activeParishId]);
+  }, [authUid, activeParishId]);
 
   // Save lightweight offline snapshot for signed-in user so field checklist works offline
   useEffect(() => {
@@ -4538,7 +4541,7 @@ export default function App() {
   return (
     <div className="h-full flex flex-col bg-slate-50 print-reset">
       {mapsQuotaExceeded && (
-        <div className="bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2.5 text-xs md:text-sm text-center sticky top-0 z-50 shadow-sm">
+        <div className="no-print bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2.5 text-xs md:text-sm text-center sticky top-0 z-50 shadow-sm">
           <span>
             Google Maps Platform quota reached. If you are the app owner, visit{' '}
             <a
@@ -4555,7 +4558,7 @@ export default function App() {
       )}
 
       {firebaseQuotaExceeded && (
-        <div className="bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2.5 text-xs md:text-sm text-center sticky top-0 z-50 shadow-sm">
+        <div className="no-print bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2.5 text-xs md:text-sm text-center sticky top-0 z-50 shadow-sm">
           <span>
             Dzienny limit bezpłatnych operacji w bazie Firestore został
             przekroczony (zresetuje się jutro). Szczegóły i opcje planu Spark /
@@ -4574,7 +4577,7 @@ export default function App() {
       )}
 
       {authError && (
-        <div className="bg-red-50 border-b border-red-200 text-red-800 px-4 py-2 text-xs text-center flex items-center justify-center gap-3">
+        <div className="no-print bg-red-50 border-b border-red-200 text-red-800 px-4 py-2 text-xs text-center flex items-center justify-center gap-3">
           <span>{authError}</span>
           <button
             type="button"

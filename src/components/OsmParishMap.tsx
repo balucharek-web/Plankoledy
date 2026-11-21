@@ -165,6 +165,7 @@ export const OsmParishMap: React.FC<OsmParishMapProps> = ({
   const markersByStopIdRef = useRef<Record<string, L.Marker>>({});
   const lastParishKeyRef = useRef<string>('');
   const lastBoundaryFitKeyRef = useRef<string>('');
+  const prevSelectedDateForBoundaryRef = useRef<string | null>(selectedDate);
   const lastFittedKeyRef = useRef<string>('');
   const hasCenteredGpsRef = useRef<boolean>(false);
 
@@ -1154,19 +1155,31 @@ export const OsmParishMap: React.FC<OsmParishMapProps> = ({
       interactive: false,
     }).addTo(layer);
 
-    // Frame the full parish boundary neatly on initial load when no route is active
+    // Frame the full parish boundary neatly on initial load AND whenever switching from day view to whole-parish view
     const map = mapRef.current;
+    const prevDate = prevSelectedDateForBoundaryRef.current;
+    prevSelectedDateForBoundaryRef.current = selectedDate;
+    const switchedFromDay = prevDate !== null && selectedDate === null;
     const boundarySig = `${boundary.length}:${boundary[0].lat.toFixed(4)},${boundary[0].lng.toFixed(4)}`;
     if (
       map &&
       !isActivelyEditing &&
+      selectedDate === null &&
       routes.length === 0 &&
-      lastBoundaryFitKeyRef.current !== boundarySig
+      (switchedFromDay || lastBoundaryFitKeyRef.current !== boundarySig)
     ) {
       lastBoundaryFitKeyRef.current = boundarySig;
       const b = L.latLngBounds(latLngs);
+      if (parish) {
+        b.extend([parish.location.lat, parish.location.lng]);
+      }
       if (b.isValid()) {
-        map.fitBounds(b, { padding: [38, 64], maxZoom: 16 });
+        const isNarrow = map.getSize().x < 640;
+        map.fitBounds(b, {
+          paddingTopLeft: isNarrow ? [24, 72] : [40, 56],
+          paddingBottomRight: isNarrow ? [24, 185] : [48, 155],
+          maxZoom: 16,
+        });
       }
     }
 
@@ -1288,7 +1301,7 @@ export const OsmParishMap: React.FC<OsmParishMapProps> = ({
         });
       });
     }
-  }, [boundary, interactionMode, canEditBoundary, selectedVertexIdx, selectedDate, routes.length]);
+  }, [boundary, parish, interactionMode, canEditBoundary, selectedVertexIdx, selectedDate, routes.length]);
 
   useEffect(() => {
     const layer = draftLayerRef.current;
@@ -1970,8 +1983,10 @@ export const OsmParishMap: React.FC<OsmParishMapProps> = ({
     if (!map || !layer) return;
     layer.clearLayers();
 
-    if (!showRouteLines) return;
-    if (routeCorridors.length === 0) return;
+    if (!showRouteLines || routeCorridors.length === 0) {
+      lastFittedKeyRef.current = '';
+      return;
+    }
 
     const routeSignature = `${selectedDate ?? 'all'}:${isExactRoute ? 'exact' : 'est'}:${travelMode}:${returnTarget}:${routeCorridors
       .map(

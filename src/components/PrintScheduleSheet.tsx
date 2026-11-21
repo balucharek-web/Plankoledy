@@ -622,14 +622,16 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-4 sm:p-6 md:p-8 print:px-1.5 print:py-0 print:max-w-none space-y-6 print:space-y-3">
+    <div className="print-sheet max-w-5xl mx-auto p-4 sm:p-6 md:p-8 print:max-w-none space-y-6 print:space-y-3">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5 print:pb-2.5">
-        <div>
-          <h1 className="text-lg sm:text-xl font-bold text-slate-900">
-            Harmonogram odwiedzin duszpasterskich
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 print:border-slate-300 pb-5 print:pb-2.5 print-break-avoid">
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-xl print:text-base font-bold text-slate-900 leading-tight">
+            {effectiveViewMode === 'day'
+              ? 'Plan dnia kolędy'
+              : 'Harmonogram odwiedzin duszpasterskich'}
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1 tabular-nums">
+          <p className="text-xs sm:text-sm print:text-[11px] text-slate-600 mt-1 tabular-nums">
             {parish ? parish.name : 'Parafia'} · Tryb:{' '}
             {config.travelMode === 'WALKING' ? 'Pieszo' : 'Samochodem'} ·{' '}
             {config.priestCount}{' '}
@@ -1049,24 +1051,28 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
               </div>
 
               {/* Desktop Full-Season Table */}
-              <div className="hidden md:block print:block bg-white border border-slate-200 rounded-xl overflow-hidden print:overflow-visible print:border-slate-300">
-                <table className="w-full text-left border-collapse text-sm print:text-[11px] print:table-fixed">
-                  <colgroup>
-                    <col className="w-[104px] print:w-[88px]" />
-                    <col className="w-[106px] print:w-[86px]" />
-                    <col />
-                    <col className="w-[160px] print:w-[126px]" />
-                    <col className="w-[110px] print:w-[86px]" />
-                    <col className="w-[116px] no-print" />
-                  </colgroup>
+              <div className="hidden md:block print:block bg-white border border-slate-200 rounded-xl overflow-hidden print:overflow-visible print:rounded-none print:border-0">
+                <table className="w-full text-left border-collapse text-sm print:text-[10.5px] print:table-fixed print:border print:border-slate-300">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50/70 text-xs font-semibold text-slate-600">
-                      <th className="py-3 px-4 print:py-1.5 print:px-2">Data</th>
-                      <th className="py-3 px-4 print:py-1.5 print:px-2">Godziny</th>
-                      <th className="py-3 px-4 print:py-1.5 print:px-2">Ulice i rejony</th>
-                      <th className="py-3 px-4 print:py-1.5 print:px-2">Księża</th>
-                      <th className="py-3 px-4 print:py-1.5 print:px-2 text-right">Domy / Dystans</th>
-                      <th className="py-3 px-4 text-right no-print">Akcje</th>
+                    <tr className="border-b border-slate-200 print:border-slate-300 bg-slate-50/70 print:bg-slate-100 text-xs print:text-[10px] font-semibold text-slate-700">
+                      <th className="py-3 px-4 print:py-2 print:px-2 w-[108px] print:w-[15%]">
+                        Data
+                      </th>
+                      <th className="py-3 px-4 print:py-2 print:px-2 w-[112px] print:w-[16%]">
+                        Godziny
+                      </th>
+                      <th className="py-3 px-4 print:py-2 print:px-2 print:w-[35%]">
+                        Ulice i rejony
+                      </th>
+                      <th className="py-3 px-4 print:py-2 print:px-2 w-[160px] print:w-[19%]">
+                        Księża
+                      </th>
+                      <th className="py-3 px-4 print:py-2 print:px-2 text-right w-[114px] print:w-[15%]">
+                        Domy / Dystans
+                      </th>
+                      <th className="py-3 px-4 text-right w-[116px] no-print">
+                        Akcje
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -1841,6 +1847,82 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
             }
           />
 
+          {/* Compact Route Summary on Page 1 right beneath the map */}
+          <div
+            className={`grid gap-2.5 print-break-avoid ${
+              routes.length === 1
+                ? 'grid-cols-1'
+                : 'grid-cols-1 sm:grid-cols-2 print:grid-cols-2'
+            }`}
+          >
+            {routes.map((route) => {
+              const firstStop = route.orderedStops[0]?.stop;
+              const lastStop =
+                route.orderedStops[route.orderedStops.length - 1]?.stop;
+              return (
+                <div
+                  key={`summary-${route.priestId}`}
+                  className="bg-white border border-slate-200 print:border-slate-300 rounded-xl print:rounded-lg px-3.5 py-2.5 text-xs space-y-1.5"
+                >
+                  <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-1.5">
+                    <span className="inline-flex items-center gap-1.5 font-bold text-slate-900">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
+                        style={{ backgroundColor: route.color }}
+                      />
+                      <span>{route.priestName}</span>
+                    </span>
+                    <span className="font-mono font-semibold text-slate-800 tabular-nums">
+                      {route.orderedStops.length} domów · koniec ok.{' '}
+                      {route.endTime}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-[11px] text-slate-600 tabular-nums">
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">
+                        Dystans
+                      </span>
+                      <strong className="font-mono text-slate-900">
+                        {formatDistance(route.totalDistanceMeters)}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">
+                        {config.travelMode === 'WALKING'
+                          ? 'Przejście'
+                          : 'Przejazd'}
+                      </span>
+                      <strong className="font-mono text-slate-900">
+                        {formatDurationMillis(route.totalTravelDurationMillis)}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">
+                        Wizyty
+                      </span>
+                      <strong className="font-mono text-slate-900">
+                        {formatMinutesLabel(route.totalVisitMinutes)}
+                      </strong>
+                    </div>
+                  </div>
+                  {firstStop && (
+                    <div className="text-[11px] text-slate-600 pt-0.5 truncate">
+                      <strong className="text-emerald-800">START:</strong>{' '}
+                      {firstStop.address || firstStop.label}
+                      {lastStop && route.orderedStops.length > 1 && (
+                        <>
+                          {' · '}
+                          <strong className="text-slate-900">KONIEC:</strong>{' '}
+                          {lastStop.address || lastStop.label}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
           {routes.map((route) => {
             const firstItem = route.orderedStops[0];
             const routeStreets = Array.from(
@@ -1860,22 +1942,22 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
             return (
               <section
                 key={route.priestId}
-                className="print-break-before-page bg-white border border-slate-200 rounded-xl overflow-hidden print:overflow-visible print:border-slate-300"
+                className="print-break-before-page bg-white border border-slate-200 rounded-xl overflow-hidden print:overflow-visible print:rounded-none print:border-0"
               >
-                <div className="px-4 sm:px-5 py-3.5 print:px-3 print:py-2.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50/70 print-break-after-avoid">
-                  <div className="space-y-0.5">
+                <div className="px-4 sm:px-5 py-3.5 print:px-3 print:py-2.5 border-b border-slate-200 print:border print:border-b-0 print:border-slate-300 flex flex-wrap items-center justify-between gap-3 bg-slate-50/70 print:bg-slate-100 print-break-after-avoid">
+                  <div className="space-y-0.5 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span
                         className="w-3 h-3 rounded-full shrink-0"
                         style={{ backgroundColor: route.color }}
                       />
-                      <h2 className="text-base print:text-sm font-semibold text-slate-900">
+                      <h2 className="text-base print:text-[13px] font-bold text-slate-900 leading-snug">
                         Lista domów — {route.priestName}
                         {selectedDate
                           ? ` · ${formatPolishDateFull(selectedDate)}`
                           : ''}
                       </h2>
-                      <span className="text-xs font-mono text-slate-600 tabular-nums">
+                      <span className="text-xs print:text-[11px] font-mono text-slate-600 tabular-nums">
                         ({route.orderedStops.length}{' '}
                         {route.orderedStops.length === 1
                           ? 'punkt'
@@ -1885,7 +1967,7 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                         )
                       </span>
                     </div>
-                    <p className="text-xs text-slate-600 tabular-nums">
+                    <p className="text-xs print:text-[10.5px] text-slate-600 tabular-nums leading-snug">
                       {firstItem && (
                         <>
                           <span className="font-semibold text-emerald-800">
@@ -1895,8 +1977,9 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                         </>
                       )}
                       Ulice: {routeStreets.join(', ')} · Dystans:{' '}
-                      {formatDistance(route.totalDistanceMeters)} · Przejście:{' '}
-                      {formatDurationMillis(route.totalTravelDurationMillis)} ·
+                      {formatDistance(route.totalDistanceMeters)} ·{' '}
+                      {config.travelMode === 'WALKING' ? 'Przejście' : 'Przejazd'}
+                      : {formatDurationMillis(route.totalTravelDurationMillis)} ·
                       Wizyty: {formatMinutesLabel(route.totalVisitMinutes)} ·
                       Koniec ok. {route.endTime}
                     </p>
@@ -1960,33 +2043,25 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                 )}
 
                 <div className="overflow-x-auto print:overflow-visible">
-                  <table className="w-full text-left border-collapse text-sm print:text-xs print:table-fixed">
-                    <colgroup>
-                      <col className="w-[30px] print:w-[24px]" />
-                      <col className="w-[42px] print:w-[34px]" />
-                      <col className="w-[54px] print:w-[46px]" />
-                      <col />
-                      <col className="hidden sm:table-cell print:table-cell w-[28%] print:w-[27%]" />
-                      <col className="w-[56px] print:w-[46px]" />
-                    </colgroup>
+                  <table className="w-full text-left border-collapse text-sm print:text-[10.5px] print:table-fixed print:border print:border-slate-300">
                     <thead>
-                      <tr className="border-b border-slate-200 bg-slate-50/50 text-xs font-semibold text-slate-600">
-                        <th className="py-2.5 print:py-1.5 px-2 print:px-1 text-center whitespace-nowrap">
+                      <tr className="border-b border-slate-200 print:border-slate-300 bg-slate-50/70 print:bg-slate-100 text-xs print:text-[10px] font-semibold text-slate-700">
+                        <th className="py-2.5 print:py-2 px-2 print:px-1.5 text-center whitespace-nowrap w-[34px] print:w-[5%]">
                           ✓
                         </th>
-                        <th className="py-2.5 print:py-1.5 px-2 print:px-1 whitespace-nowrap">
+                        <th className="py-2.5 print:py-2 px-2 print:px-1 text-center whitespace-nowrap w-[42px] print:w-[6%]">
                           Nr
                         </th>
-                        <th className="py-2.5 print:py-1.5 px-2 print:px-1 whitespace-nowrap">
+                        <th className="py-2.5 print:py-2 px-2 print:px-1.5 whitespace-nowrap w-[58px] print:w-[10%]">
                           Godz.
                         </th>
-                        <th className="py-2.5 print:py-1.5 px-2.5 print:px-1.5">
+                        <th className="py-2.5 print:py-2 px-2.5 print:px-2 print:w-[40%]">
                           Adres domu
                         </th>
-                        <th className="py-2.5 print:py-1.5 px-2.5 print:px-1.5 hidden sm:table-cell print:table-cell">
-                          Rodzina / Notatki w terenie
+                        <th className="py-2.5 print:py-2 px-2.5 print:px-2 hidden sm:table-cell print:table-cell w-[28%] print:w-[29%] whitespace-nowrap">
+                          Notatki w terenie
                         </th>
-                        <th className="py-2.5 print:py-1.5 px-2.5 print:px-1.5 text-right whitespace-nowrap">
+                        <th className="py-2.5 print:py-2 px-2.5 print:px-2 text-right whitespace-nowrap w-[62px] print:w-[10%]">
                           Czas
                         </th>
                       </tr>
@@ -2036,19 +2111,21 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                             key={item.stop.id}
                             className={
                               isStart
-                                ? 'bg-emerald-50/40'
-                                : 'hover:bg-slate-50/60'
+                                ? 'bg-emerald-50/50 print:bg-emerald-50/40'
+                                : idx % 2 === 1
+                                  ? 'hover:bg-slate-50/60 print:bg-slate-50/40'
+                                  : 'hover:bg-slate-50/60'
                             }
                           >
-                            <td className="py-2 print:py-1.5 px-2 print:px-1 text-center align-top whitespace-nowrap">
+                            <td className="py-2 print:py-1.5 px-2 print:px-1.5 text-center align-middle whitespace-nowrap">
                               <span
                                 aria-hidden="true"
-                                className="inline-block w-4 h-4 mt-0.5 rounded border border-slate-400 bg-white"
+                                className="inline-block w-3.5 h-3.5 rounded-[3px] border-[1.25px] border-slate-500 bg-white align-middle"
                               />
                             </td>
-                            <td className="py-2 print:py-1.5 px-2 print:px-1 align-top whitespace-nowrap">
+                            <td className="py-2 print:py-1.5 px-2 print:px-1 text-center align-middle whitespace-nowrap">
                               <span
-                                className={`w-5 h-5 text-[11px] font-mono font-bold text-white inline-flex items-center justify-center shrink-0 tabular-nums ${
+                                className={`w-5 h-5 text-[10px] font-mono font-bold text-white inline-flex items-center justify-center shrink-0 tabular-nums ${
                                   isBlock ? 'rounded-md' : 'rounded-full'
                                 }`}
                                 style={{
@@ -2060,25 +2137,25 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                 {item.orderIndex}
                               </span>
                             </td>
-                            <td className="py-2 print:py-1.5 px-2 print:px-1 font-mono text-xs font-semibold text-slate-900 tabular-nums whitespace-nowrap align-top">
+                            <td className="py-2 print:py-1.5 px-2 print:px-1.5 font-mono text-xs print:text-[10.5px] font-semibold text-slate-900 tabular-nums whitespace-nowrap align-middle">
                               {item.arrivalTime}
                             </td>
-                            <td className="py-2 print:py-1.5 px-2.5 print:px-1.5 text-xs sm:text-sm print:text-xs font-semibold text-slate-900 align-top leading-snug">
+                            <td className="py-2 print:py-1.5 px-2.5 print:px-2 text-xs sm:text-sm print:text-[10.5px] font-semibold text-slate-900 align-middle leading-snug">
                               <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
                                 {isStart && (
-                                  <span className="px-1 py-0.5 rounded bg-emerald-700 text-white text-[9px] font-extrabold uppercase tracking-wide whitespace-nowrap">
+                                  <span className="px-1 py-0.5 rounded bg-emerald-700 text-white text-[8.5px] font-extrabold uppercase tracking-wide whitespace-nowrap">
                                     START
                                   </span>
                                 )}
                                 <span>{houseAddress}</span>
                                 {isBlock && (
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px] font-semibold tabular-nums whitespace-nowrap">
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[9.5px] font-semibold tabular-nums whitespace-nowrap">
                                     {blockLabel}
                                   </span>
                                 )}
                               </div>
                               {unitsSummary && (
-                                <div className="text-[11px] font-normal text-slate-600 mt-0.5 leading-snug">
+                                <div className="text-[10px] font-normal text-slate-600 mt-0.5 leading-snug">
                                   Lokale: {unitsSummary}
                                 </div>
                               )}
@@ -2088,17 +2165,17 @@ export const PrintScheduleSheet: React.FC<PrintScheduleSheetProps> = ({
                                 </div>
                               )}
                             </td>
-                            <td className="py-2 print:py-1.5 px-2.5 print:px-1.5 text-xs text-slate-600 hidden sm:table-cell print:table-cell align-top leading-snug">
+                            <td className="py-2 print:py-1.5 px-2.5 print:px-2 text-xs print:text-[10px] text-slate-700 hidden sm:table-cell print:table-cell align-middle leading-snug">
                               {secondaryParts.length > 0 ? (
                                 <span>{secondaryParts.join(' · ')}</span>
                               ) : (
                                 <div
                                   aria-hidden="true"
-                                  className="h-4 border-b border-dotted border-slate-300 w-full"
+                                  className="h-3.5 border-b border-dotted border-slate-400 w-full"
                                 />
                               )}
                             </td>
-                            <td className="py-2 print:py-1.5 px-2.5 print:px-1.5 text-right font-mono text-xs text-slate-600 tabular-nums whitespace-nowrap align-top">
+                            <td className="py-2 print:py-1.5 px-2.5 print:px-2 text-right font-mono text-xs print:text-[10px] text-slate-700 tabular-nums whitespace-nowrap align-middle">
                               {item.stop.durationMinutes} min
                             </td>
                           </tr>

@@ -53,9 +53,9 @@ function separateDenseMarkers(
 
   const minDist = 23;
   const maxAnchorShift = 28;
-  const marginX = 24;
-  const marginTop = 34;
-  const marginBottom = 26;
+  const marginX = 34;
+  const marginTop = 38;
+  const marginBottom = 32;
 
   for (let iter = 0; iter < 32; iter++) {
     for (let i = 0; i < n; i++) {
@@ -156,16 +156,24 @@ export const PrintableRouteMap: React.FC<PrintableRouteMapProps> = ({
     const refSpanY = Math.max(12, refMaxY - refMinY);
     const geoRatio = refSpanY / refSpanX;
 
-    // Adaptive height for A4 portrait: tall streets get up to 840px height, wide streets ~580px
+    // Adaptive height for A4 portrait: keeps header + map + legend + summary cleanly on Page 1
     const viewW = VIEW_W;
     const viewH =
       fitPoints.length <= 1
-        ? 560
-        : Math.round(Math.max(580, Math.min(840, viewW * Math.max(0.72, Math.min(1.05, geoRatio * 1.05)))));
+        ? 480
+        : Math.round(
+            Math.max(
+              480,
+              Math.min(
+                620,
+                viewW * Math.max(0.6, Math.min(0.78, geoRatio * 0.96))
+              )
+            )
+          );
 
-    // Continuous zoom calculation so the route spans ~78% of the map viewport
-    const usableW = viewW * 0.78;
-    const usableH = viewH * 0.76;
+    // Continuous zoom calculation so the route spans ~76% of the map viewport
+    const usableW = viewW * 0.76;
+    const usableH = viewH * 0.74;
     const idealScaleFactorFromRef =
       fitPoints.length <= 1
         ? 2.0 // Zoom 17 equivalent
@@ -462,20 +470,20 @@ export const PrintableRouteMap: React.FC<PrintableRouteMapProps> = ({
                 points={polylineStr}
                 fill="none"
                 stroke="#FFFFFF"
-                strokeWidth="7"
+                strokeWidth="7.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                opacity="0.94"
+                opacity="0.96"
               />
               <polyline
                 points={polylineStr}
                 fill="none"
                 stroke={route.color}
-                strokeWidth="3.6"
+                strokeWidth="3.8"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeDasharray={isExactRoute ? undefined : '8 5'}
-                opacity="0.96"
+                opacity="0.98"
               />
               {arrows.map((arr, aIdx) => (
                 <g
@@ -659,7 +667,7 @@ export const PrintableRouteMap: React.FC<PrintableRouteMapProps> = ({
           )}
         </svg>
 
-        <div className="absolute bottom-1.5 right-2 z-20 px-1.5 py-0.5 bg-white/90 rounded text-[9px] text-slate-600">
+        <div className="absolute bottom-2 right-2.5 z-20 px-1.5 py-0.5 bg-white/95 border border-slate-200/80 rounded text-[9px] text-slate-600">
           © OpenStreetMap
         </div>
       </div>

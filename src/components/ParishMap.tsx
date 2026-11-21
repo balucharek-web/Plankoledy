@@ -608,7 +608,10 @@ const RoutePolylinesLayer: React.FC<{
     polylinesRef.current.forEach((p) => p.setMap(null));
     polylinesRef.current = [];
 
-    if (!showRouteLines) return;
+    if (!showRouteLines || routes.length === 0) {
+      lastFittedKeyRef.current = '';
+      return;
+    }
 
     const created: google.maps.Polyline[] = [];
     const bounds = new google.maps.LatLngBounds();
@@ -1652,16 +1655,56 @@ const UserGpsMarkerLayer: React.FC<{
     }
   }, [recenterSignal]);
 
-  // Fit parish boundary neatly on initial load when no route is active
+  const prevSelectedDateRef = useRef<string | null>(selectedDate);
+
+  // Fit full parish boundary neatly on initial load AND whenever switching from day view back to whole-parish view
   useEffect(() => {
-    if (!map || boundary.length < 3 || routes.length > 0) return;
-    const sig = `${boundary.length}:${boundary[0].lat.toFixed(4)},${boundary[0].lng.toFixed(4)}`;
-    if (lastBoundaryFitKeyRef.current === sig) return;
+    const prevDate = prevSelectedDateRef.current;
+    prevSelectedDateRef.current = selectedDate;
+
+    if (!map || selectedDate !== null || routes.length > 0) return;
+
+    const switchedFromDay = prevDate !== null;
+    const sig =
+      boundary.length >= 3
+        ? `b:${boundary.length}:${boundary[0].lat.toFixed(4)},${boundary[0].lng.toFixed(4)}`
+        : parish
+          ? `p:${parish.location.lat.toFixed(4)},${parish.location.lng.toFixed(4)}`
+          : '';
+    if (!sig) return;
+    if (!switchedFromDay && lastBoundaryFitKeyRef.current === sig) return;
     lastBoundaryFitKeyRef.current = sig;
+
     const b = new google.maps.LatLngBounds();
-    boundary.forEach((pt) => b.extend(pt));
-    map.fitBounds(b, { top: 48, right: 48, bottom: 72, left: 48 });
-  }, [map, boundary, routes.length]);
+    let hasBounds = false;
+    if (boundary.length >= 3) {
+      boundary.forEach((pt) => {
+        b.extend(pt);
+        hasBounds = true;
+      });
+      if (parish) b.extend(parish.location);
+    } else if (stops.length > 0) {
+      stops.forEach((s) => {
+        b.extend(s.location);
+        hasBounds = true;
+      });
+      if (parish) b.extend(parish.location);
+    }
+
+    if (hasBounds) {
+      const isNarrow =
+        typeof window !== 'undefined' && window.innerWidth < 640;
+      map.fitBounds(
+        b,
+        isNarrow
+          ? { top: 72, right: 24, bottom: 185, left: 24 }
+          : { top: 52, right: 56, bottom: 150, left: 36 }
+      );
+    } else if (parish) {
+      map.panTo(parish.location);
+      map.setZoom(14);
+    }
+  }, [map, boundary, parish, stops, selectedDate, routes.length]);
 
   const stopsLookupRef = useRef(stops);
   stopsLookupRef.current = stops;

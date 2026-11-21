@@ -52,7 +52,7 @@
   position: fixed;
   left: -99999px;
   top: 0;
-  width: 794px;
+  width: 672px;
   visibility: hidden;
   pointer-events: none;
   z-index: -1;
@@ -60,7 +60,7 @@
 
 @page {
   size: A4 portrait;
-  margin: 12mm 13mm 14mm 13mm;
+  margin: 12mm;
 }
 
 @media print {
@@ -82,15 +82,19 @@
     padding: 0 !important;
     overflow: visible !important;
     background: #ffffff !important;
+    color: #0f172a !important;
     color-adjust: exact;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    font-size: 11px !important;
+    font-size: 10.5px !important;
+    line-height: 1.35 !important;
   }
 
   header,
   nav,
-  .no-print {
+  .no-print,
+  .leaflet-container,
+  .gm-style {
     display: none !important;
   }
 
@@ -103,6 +107,7 @@
     min-height: 0 !important;
     max-height: none !important;
     margin: 0 !important;
+    padding: 0 !important;
     overflow: visible !important;
     background: #ffffff !important;
   }
@@ -115,9 +120,21 @@
     top: auto !important;
     width: 100% !important;
     max-width: 100% !important;
+    height: auto !important;
     visibility: visible !important;
     pointer-events: auto !important;
     z-index: auto !important;
+  }
+
+  /* Centered safe A4 sheet frame: prevents hardware-margin clipping even if the
+     user's printer dialog overrides @page margins to Minimum/None */
+  .print-sheet {
+    width: 100% !important;
+    max-width: 178mm !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding: 5mm 5mm 6mm 5mm !important;
+    background: #ffffff !important;
   }
 
   table {
@@ -136,7 +153,7 @@
   }
 
   thead {
-    display: table-header-group;
+    display: table-header-group !important;
   }
 
   tbody {
@@ -145,17 +162,19 @@
 
   tr,
   .print-break-avoid {
-    break-inside: avoid;
-    page-break-inside: avoid;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
   .print-break-after-avoid {
-    break-after: avoid;
-    page-break-after: avoid;
+    break-after: avoid !important;
+    page-break-after: avoid !important;
   }
 
   .print-break-before-page {
-    break-before: page;
-    page-break-before: always;
+    break-before: page !important;
+    page-break-before: always !important;
+    padding-top: 4mm !important;
   }
 }
+

@@ -379,10 +379,12 @@ export function subscribeUserParishes(
 ): () => void {
   const path = 'parishes';
   const q = query(collection(db, path), where('ownerId', '==', uid));
+  let isActive = true;
 
-  return onSnapshot(
+  const unsubscribe = onSnapshot(
     q,
     (snapshot) => {
+      if (!isActive) return;
       const list: SavedParishRecord[] = snapshot.docs.map((docSnap) => {
         const d = docSnap.data();
         return {
@@ -411,6 +413,7 @@ export function subscribeUserParishes(
       onData(list);
     },
     (error) => {
+      if (!isActive) return;
       if (onError) onError(error);
       try {
         handleFirestoreError(error, OperationType.LIST, path);
@@ -419,6 +422,11 @@ export function subscribeUserParishes(
       }
     }
   );
+
+  return () => {
+    isActive = false;
+    unsubscribe();
+  };
 }
 
 export function subscribeParishStops(
@@ -430,10 +438,12 @@ export function subscribeParishStops(
   const safeParishId = sanitizeDocId(parishId);
   const path = `parishes/${safeParishId}/stops`;
   const q = query(collection(db, path), where('ownerId', '==', uid));
+  let isActive = true;
 
-  return onSnapshot(
+  const unsubscribe = onSnapshot(
     q,
     (snapshot) => {
+      if (!isActive) return;
       const items: Array<{ stop: VisitStop; createdMs: number }> =
         snapshot.docs.map((docSnap) => {
           const d = docSnap.data();
@@ -488,6 +498,7 @@ export function subscribeParishStops(
       onData(items.map((x) => x.stop));
     },
     (error) => {
+      if (!isActive) return;
       if (onError) onError(error);
       try {
         handleFirestoreError(error, OperationType.LIST, path);
@@ -496,6 +507,11 @@ export function subscribeParishStops(
       }
     }
   );
+
+  return () => {
+    isActive = false;
+    unsubscribe();
+  };
 }
 
 export async function saveParishToFirestore(
