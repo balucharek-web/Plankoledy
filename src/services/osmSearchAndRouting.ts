@@ -1039,11 +1039,77 @@ export async function fetchStreetRoadGeometry(
   return null;
 }
 
+export interface RoadLegResult {
+  path: LatLng[];
+  distanceMeters: number;
+  durationMillis: number;
+}
+
 const dayCorridorRoadCache = new Map<string, LatLng[] | null>();
+const roadLegMetricsCache = new Map<string, RoadLegResult | null>();
+
+async function tryGoogleRoutePath(
+  waypoints: LatLng[],
+  travelMode: TravelModeOption
+): Promise<RoadLegResult | null> {
+  if (
+    waypoints.length < 2 ||
+    typeof window === 'undefined' ||
+    !(window as any).google?.maps?.importLibrary
+  ) {
+    return null;
+  }
+
+  try {
+    const routesLib = (await (window as any).google.maps.importLibrary(
+      'routes'
+    )) as google.maps.RoutesLibrary;
+    if (!routesLib?.Route || typeof (routesLib.Route as any).computeRoutes !== 'function') {
+      return null;
+    }
+
+    const origin = waypoints[0];
+    const destination = waypoints[waypoints.length - 1];
+    const intermediates = waypoints.slice(1, -1).map((loc) => ({ location: loc }));
+
+    const request: Record<string, unknown> = {
+      origin,
+      destination,
+      travelMode,
+      language: 'pl',
+      region: 'pl',
+      fields: ['path', 'distanceMeters', 'durationMillis'],
+    };
+    if (intermediates.length > 0) {
+      request.intermediates = intermediates;
+    }
+
+    const response = await (routesLib.Route as any).computeRoutes(request);
+    const primary = response?.routes?.[0];
+    if (!primary) return null;
+
+    const rawPath = primary.path as Array<google.maps.LatLng | LatLng> | undefined;
+    if (!rawPath || rawPath.length < 2) return null;
+
+    const path: LatLng[] = rawPath.map((pt: any) =>
+      typeof pt.lat === 'function'
+        ? { lat: pt.lat(), lng: pt.lng() }
+        : { lat: Number(pt.lat), lng: Number(pt.lng) }
+    );
+
+    return {
+      path,
+      distanceMeters: Number(primary.distanceMeters ?? 0),
+      durationMillis: Number(primary.durationMillis ?? 0),
+    };
+  } catch {
+    return null;
+  }
+}
 
 /**
- * Snaps a clean day corridor (already free of house-to-house zig-zags) onto actual
- * OSM roads via OSRM so mobile and desktop previews immediately follow real streets.
+ * Snaps a clean day street corridor (already free of house-to-house zig-zags) onto actual
+ * streets (Google Routes primary when available, OSRM fallback) so the kolęda route hugs real streets.
  */
 export async function fetchDayCorridorRoadGeometry(
   corridorPoints: LatLng[],
@@ -1051,15 +1117,18 @@ export async function fetchDayCorridorRoadGeometry(
 ): Promise<LatLng[] | null> {
   if (corridorPoints.length < 2) return null;
 
+  // Along the visited street itself, houses are visited along both sides — walking path hugs the street cleanly
+  // without forcing multi-kilometer highway loops on dual carriageways.
+  const corridorMode: TravelModeOption = 'WALKING';
   const first = corridorPoints[0];
   const last = corridorPoints[corridorPoints.length - 1];
-  const cacheKey = `${travelMode}:${corridorPoints.length}:${first.lat.toFixed(5)},${first.lng.toFixed(5)}:${last.lat.toFixed(5)},${last.lng.toFixed(5)}`;
+  const cacheKey = `${corridorMode}:${travelMode}:${corridorPoints.length}:${first.lat.toFixed(5)},${first.lng.toFixed(5)}:${last.lat.toFixed(5)},${last.lng.toFixed(5)}`;
   if (dayCorridorRoadCache.has(cacheKey)) {
     return dayCorridorRoadCache.get(cacheKey) ?? null;
   }
 
-  // Pick up to 10 evenly spaced anchors along the smoothed corridor
-  const maxAnchors = 10;
+  // Pick up to 8 evenly spaced anchors along the smoothed corridor
+  const maxAnchors = 8;
   const anchors: LatLng[] = [];
   if (corridorPoints.length <= maxAnchors) {
     anchors.push(...corridorPoints);
@@ -1076,28 +1145,35 @@ export async function fetchDayCorridorRoadGeometry(
   for (let i = 0; i < anchors.length - 1; i++) {
     directLenMeters += haversineMeters(anchors[i], anchors[i + 1]);
   }
-  if (directLenMeters < 30) {
+  if (directLenMeters < 25) {
     dayCorridorRoadCache.set(cacheKey, null);
     return null;
   }
 
+  // 1. Prefer Google Routes API when Google Maps JS is active (pixel-perfect alignment with Google tiles)
+  const googleRes = await tryGoogleRoutePath(anchors, corridorMode);
+  if (
+    googleRes &&
+    googleRes.path.length >= 2 &&
+    (googleRes.distanceMeters === 0 ||
+      googleRes.distanceMeters <= directLenMeters * 3.5 + 700)
+  ) {
+    dayCorridorRoadCache.set(cacheKey, googleRes.path);
+    return googleRes.path;
+  }
+
+  // 2. Fallback to public OSRM foot routing
   const coordStr = anchors
     .map((p) => `${p.lng.toFixed(6)},${p.lat.toFixed(6)}`)
     .join(';');
-  const isDriving = travelMode === 'DRIVING';
-  const urls = isDriving
-    ? [
-        `https://routing.openstreetmap.de/routed-car/route/v1/driving/${coordStr}?overview=full&geometries=geojson&steps=false`,
-        `https://router.project-osrm.org/route/v1/driving/${coordStr}?overview=full&geometries=geojson&steps=false`,
-      ]
-    : [
-        `https://routing.openstreetmap.de/routed-foot/route/v1/foot/${coordStr}?overview=full&geometries=geojson&steps=false`,
-        `https://router.project-osrm.org/route/v1/foot/${coordStr}?overview=full&geometries=geojson&steps=false`,
-      ];
+  const urls = [
+    `https://routing.openstreetmap.de/routed-foot/route/v1/foot/${coordStr}?overview=full&geometries=geojson&steps=false`,
+    `https://router.project-osrm.org/route/v1/foot/${coordStr}?overview=full&geometries=geojson&steps=false`,
+  ];
 
   for (const url of urls) {
     const controller = new AbortController();
-    const timer = window.setTimeout(() => controller.abort(), 4500);
+    const timer = window.setTimeout(() => controller.abort(), 5000);
     try {
       const res = await fetch(url, { signal: controller.signal });
       if (!res.ok) continue;
@@ -1107,9 +1183,8 @@ export async function fetchDayCorridorRoadGeometry(
         continue;
       }
 
-      // Guard against unreasonable detours
       const routeDist = route.distance ?? 0;
-      if (routeDist > directLenMeters * 2.45 + 280) {
+      if (routeDist > directLenMeters * 3.5 + 700) {
         continue;
       }
 
@@ -1131,4 +1206,117 @@ export async function fetchDayCorridorRoadGeometry(
   dayCorridorRoadCache.set(cacheKey, null);
   return null;
 }
+
+/**
+ * Fetches real road/footpath geometry AND real distance/duration between two points
+ * (e.g. Church -> START or META -> START / Church) using Google Routes API first and OSRM fallback.
+ * Generously allows legitimate highway interchanges and one-way turnarounds in DRIVING mode.
+ */
+export async function fetchRoadLegWithMetrics(
+  from: LatLng,
+  to: LatLng,
+  travelMode: TravelModeOption = 'WALKING'
+): Promise<RoadLegResult | null> {
+  const directMeters = haversineMeters(from, to);
+  if (directMeters < 20) return null;
+
+  const cacheKey = `${travelMode}:${from.lat.toFixed(5)},${from.lng.toFixed(5)}->${to.lat.toFixed(5)},${to.lng.toFixed(5)}`;
+  if (roadLegMetricsCache.has(cacheKey)) {
+    return roadLegMetricsCache.get(cacheKey) ?? null;
+  }
+
+  const isDriving = travelMode === 'DRIVING';
+  const maxSaneDistance = isDriving
+    ? directMeters * 12 + 4500
+    : directMeters * 6 + 1500;
+
+  // 1. Prefer Google Routes API when Google Maps JS is active
+  const googleRes = await tryGoogleRoutePath([from, to], travelMode);
+  if (
+    googleRes &&
+    googleRes.path.length >= 2 &&
+    (googleRes.distanceMeters === 0 || googleRes.distanceMeters <= maxSaneDistance)
+  ) {
+    const dist =
+      googleRes.distanceMeters > 0
+        ? googleRes.distanceMeters
+        : Math.round(directMeters * 1.3);
+    const dur =
+      googleRes.durationMillis > 0
+        ? googleRes.durationMillis
+        : Math.round((dist / (isDriving ? 8.5 : 1.25)) * 1000);
+    const normalized: RoadLegResult = {
+      path: googleRes.path,
+      distanceMeters: dist,
+      durationMillis: dur,
+    };
+    roadLegMetricsCache.set(cacheKey, normalized);
+    return normalized;
+  }
+
+  // 2. Fallback to OSRM car/foot mirrors
+  const coordStr = `${from.lng.toFixed(6)},${from.lat.toFixed(6)};${to.lng.toFixed(6)},${to.lat.toFixed(6)}`;
+  const urls = isDriving
+    ? [
+        `https://routing.openstreetmap.de/routed-car/route/v1/driving/${coordStr}?overview=full&geometries=geojson&steps=false`,
+        `https://router.project-osrm.org/route/v1/driving/${coordStr}?overview=full&geometries=geojson&steps=false`,
+      ]
+    : [
+        `https://routing.openstreetmap.de/routed-foot/route/v1/foot/${coordStr}?overview=full&geometries=geojson&steps=false`,
+        `https://router.project-osrm.org/route/v1/foot/${coordStr}?overview=full&geometries=geojson&steps=false`,
+      ];
+
+  for (const url of urls) {
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 5000);
+    try {
+      const res = await fetch(url, { signal: controller.signal });
+      if (!res.ok) continue;
+      const data = (await res.json()) as OsrmRouteResponse;
+      const route = data.routes?.[0];
+      if (!route || data.code !== 'Ok' || !route.geometry?.coordinates?.length) {
+        continue;
+      }
+
+      const routeDist = Math.round(route.distance ?? 0);
+      if (routeDist > maxSaneDistance) {
+        continue;
+      }
+
+      const path: LatLng[] = route.geometry.coordinates.map(([lng, lat]) => ({
+        lat,
+        lng,
+      }));
+      if (path.length >= 2) {
+        const result: RoadLegResult = {
+          path,
+          distanceMeters: routeDist || Math.round(directMeters * 1.3),
+          durationMillis:
+            route.duration != null
+              ? Math.round(route.duration * 1000)
+              : Math.round((routeDist / (isDriving ? 8.5 : 1.25)) * 1000),
+        };
+        roadLegMetricsCache.set(cacheKey, result);
+        return result;
+      }
+    } catch {
+      // Try next mirror
+    } finally {
+      window.clearTimeout(timer);
+    }
+  }
+
+  return null;
+}
+
+export async function fetchApproachRoadGeometry(
+  from: LatLng,
+  to: LatLng,
+  travelMode: TravelModeOption = 'WALKING'
+): Promise<LatLng[] | null> {
+  const res = await fetchRoadLegWithMetrics(from, to, travelMode);
+  return res?.path ?? null;
+}
+
+
 

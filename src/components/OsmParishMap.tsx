@@ -32,10 +32,17 @@ import {
   PRIEST_PALETTE,
   ParishCenter,
   PriestRouteResult,
+  ReturnRouteTarget,
+  RoadLegsLiveMetrics,
   StreetPickFeedback,
+  TravelModeOption,
   VisitStop,
 } from '../types/parish';
-import { fetchDayCorridorRoadGeometry } from '../services/osmSearchAndRouting';
+import {
+  RoadLegResult,
+  fetchDayCorridorRoadGeometry,
+  fetchRoadLegWithMetrics,
+} from '../services/osmSearchAndRouting';
 import {
   buildCleanRouteCorridor,
   buildRouteStopLookup,
@@ -60,6 +67,9 @@ interface OsmParishMapProps {
   stops: VisitStop[];
   routes: PriestRouteResult[];
   isExactRoute: boolean;
+  travelMode?: TravelModeOption;
+  returnTarget?: ReturnRouteTarget;
+  onRoadLegsMetrics?: (metrics: RoadLegsLiveMetrics | null) => void;
   selectedDate: string | null;
   focusedPriestId: number | null;
   canEditBoundary?: boolean;
@@ -108,6 +118,9 @@ export const OsmParishMap: React.FC<OsmParishMapProps> = ({
   stops,
   routes,
   isExactRoute,
+  travelMode = 'WALKING',
+  returnTarget = 'start',
+  onRoadLegsMetrics,
   selectedDate,
   focusedPriestId,
   canEditBoundary = true,
@@ -286,6 +299,7 @@ export const OsmParishMap: React.FC<OsmParishMapProps> = ({
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
       maxZoom: 19,
+      keepBuffer: 4,
     }).addTo(map);
 
     routesLayerRef.current = L.layerGroup().addTo(map);
@@ -1756,9 +1770,19 @@ export const OsmParishMap: React.FC<OsmParishMapProps> = ({
     }
   }, [recenterSignal]);
 
+  const onRoadLegsMetricsRef = useRef(onRoadLegsMetrics);
+  onRoadLegsMetricsRef.current = onRoadLegsMetrics;
+
   const [snappedDayPaths, setSnappedDayPaths] = useState<
     Record<string, LatLng[]>
   >({});
+  const [snappedApproachLegs, setSnappedApproachLegs] = useState<
+    Record<string, RoadLegResult>
+  >({});
+  const [snappedReturnLegs, setSnappedReturnLegs] = useState<
+    Record<string, RoadLegResult>
+  >({});
+  const [isLoadingLegs, setIsLoadingLegs] = useState(false);
 
   // Compute clean, zero-zigzag road corridors for all active day routes
   const routeCorridors = useMemo(() => {
@@ -1768,39 +1792,177 @@ export const OsmParishMap: React.FC<OsmParishMapProps> = ({
       const corridor = buildCleanRouteCorridor(
         orderedStops,
         parish?.location ?? null,
-        route.returnLegDistanceMeters > 0
+        false
       );
-      const corridorKey = `${selectedDate ?? 'all'}:${route.priestId}:${orderedStops[0]?.id ?? ''}:${orderedStops[orderedStops.length - 1]?.id ?? ''}:${orderedStops.length}`;
-      return { route, corridor, corridorKey };
-    });
-  }, [routes, parish?.location, selectedDate]);
+      const firstLoc = orderedStops[0].location;
+      const lastLoc = orderedStops[orderedStops.length - 1].location;
+      const corridorKey = `${selectedDate ?? 'all'}:${travelMode}:${route.priestId}:${orderedStops[0]?.id ?? ''}:${orderedStops[orderedStops.length - 1]?.id ?? ''}:${orderedStops.length}`;
 
-  // Automatically snap preview corridors onto real OSM roads in the background
+      const approachEndpoints = corridor.approachLeg;
+      const approachKey = approachEndpoints
+        ? `${travelMode}:${approachEndpoints[0].lat.toFixed(5)},${approachEndpoints[0].lng.toFixed(5)}->${approachEndpoints[1].lat.toFixed(5)},${approachEndpoints[1].lng.toFixed(5)}`
+        : '';
+
+      let returnEndpoints: [LatLng, LatLng] | null = null;
+      if (returnTarget === 'start' && orderedStops.length >= 2) {
+        returnEndpoints = [lastLoc, firstLoc];
+      } else if (returnTarget === 'parish' && parish?.location) {
+        returnEndpoints = [lastLoc, parish.location];
+      }
+      const returnKey = returnEndpoints
+        ? `${returnTarget}:${travelMode}:${returnEndpoints[0].lat.toFixed(5)},${returnEndpoints[0].lng.toFixed(5)}->${returnEndpoints[1].lat.toFixed(5)},${returnEndpoints[1].lng.toFixed(5)}`
+        : '';
+
+      return {
+        route,
+        corridor,
+        corridorKey,
+        approachEndpoints,
+        approachKey,
+        returnEndpoints,
+        returnKey,
+      };
+    });
+  }, [routes, parish?.location, selectedDate, travelMode, returnTarget]);
+
+  // Automatically snap preview corridors, church approach legs, and return legs onto real roads/footpaths
   useEffect(() => {
-    if (isExactRoute || !showRouteLines || routeCorridors.length === 0) return;
+    if (!showRouteLines || routeCorridors.length === 0) {
+      setIsLoadingLegs(false);
+      return;
+    }
 
     let cancelled = false;
-    void Promise.all(
-      routeCorridors.map(async ({ corridor, corridorKey }) => {
-        if (corridor.mainCorridorPoints.length < 2) return;
-        const snapped = await fetchDayCorridorRoadGeometry(
-          corridor.mainCorridorPoints,
-          'WALKING'
-        );
-        if (!cancelled && snapped && snapped.length >= 2) {
-          setSnappedDayPaths((prev) =>
-            prev[corridorKey] === snapped
-              ? prev
-              : { ...prev, [corridorKey]: snapped }
-          );
-        }
-      })
+    const needsAnyFetch = routeCorridors.some(
+      ({ approachEndpoints, returnEndpoints }) =>
+        Boolean(approachEndpoints) || Boolean(returnEndpoints)
     );
+    if (needsAnyFetch) setIsLoadingLegs(true);
+
+    void Promise.all(
+      routeCorridors.map(
+        async ({
+          corridor,
+          corridorKey,
+          approachEndpoints,
+          approachKey,
+          returnEndpoints,
+          returnKey,
+        }) => {
+          const tasks: Promise<void>[] = [];
+
+          if (!isExactRoute && corridor.mainCorridorPoints.length >= 2) {
+            tasks.push(
+              fetchDayCorridorRoadGeometry(
+                corridor.mainCorridorPoints,
+                travelMode
+              ).then((snapped) => {
+                if (!cancelled && snapped && snapped.length >= 2) {
+                  setSnappedDayPaths((prev) =>
+                    prev[corridorKey] === snapped
+                      ? prev
+                      : { ...prev, [corridorKey]: snapped }
+                  );
+                }
+              })
+            );
+          }
+
+          if (!isExactRoute && approachEndpoints && approachKey) {
+            tasks.push(
+              fetchRoadLegWithMetrics(
+                approachEndpoints[0],
+                approachEndpoints[1],
+                travelMode
+              ).then((res) => {
+                if (!cancelled && res && res.path.length >= 2) {
+                  setSnappedApproachLegs((prev) =>
+                    prev[approachKey] === res
+                      ? prev
+                      : { ...prev, [approachKey]: res }
+                  );
+                }
+              })
+            );
+          }
+
+          if (
+            returnEndpoints &&
+            returnKey &&
+            (!isExactRoute || returnTarget === 'start')
+          ) {
+            tasks.push(
+              fetchRoadLegWithMetrics(
+                returnEndpoints[0],
+                returnEndpoints[1],
+                travelMode
+              ).then((res) => {
+                if (!cancelled && res && res.path.length >= 2) {
+                  setSnappedReturnLegs((prev) =>
+                    prev[returnKey] === res
+                      ? prev
+                      : { ...prev, [returnKey]: res }
+                  );
+                }
+              })
+            );
+          }
+
+          await Promise.all(tasks);
+        }
+      )
+    ).finally(() => {
+      if (!cancelled) setIsLoadingLegs(false);
+    });
 
     return () => {
       cancelled = true;
     };
-  }, [isExactRoute, showRouteLines, routeCorridors]);
+  }, [isExactRoute, showRouteLines, routeCorridors, travelMode, returnTarget]);
+
+  // Report live road metrics for the focused route back to MapDayRouteBar
+  useEffect(() => {
+    if (!onRoadLegsMetricsRef.current) return;
+    if (!showRouteLines || routeCorridors.length === 0) {
+      onRoadLegsMetricsRef.current(null);
+      return;
+    }
+
+    const primary =
+      (focusedPriestId !== null
+        ? routeCorridors.find((c) => c.route.priestId === focusedPriestId)
+        : routeCorridors[0]) ?? routeCorridors[0];
+
+    const approachRes = primary.approachKey
+      ? snappedApproachLegs[primary.approachKey]
+      : undefined;
+    const returnRes = primary.returnKey
+      ? snappedReturnLegs[primary.returnKey]
+      : undefined;
+
+    onRoadLegsMetricsRef.current({
+      approach: approachRes
+        ? {
+            distanceMeters: approachRes.distanceMeters,
+            durationMillis: approachRes.durationMillis,
+          }
+        : undefined,
+      returnLeg: returnRes
+        ? {
+            distanceMeters: returnRes.distanceMeters,
+            durationMillis: returnRes.durationMillis,
+          }
+        : undefined,
+      isLoading: isLoadingLegs,
+    });
+  }, [
+    showRouteLines,
+    routeCorridors,
+    focusedPriestId,
+    snappedApproachLegs,
+    snappedReturnLegs,
+    isLoadingLegs,
+  ]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -1811,7 +1973,7 @@ export const OsmParishMap: React.FC<OsmParishMapProps> = ({
     if (!showRouteLines) return;
     if (routeCorridors.length === 0) return;
 
-    const routeSignature = `${selectedDate ?? 'all'}:${isExactRoute ? 'exact' : 'est'}:${routeCorridors
+    const routeSignature = `${selectedDate ?? 'all'}:${isExactRoute ? 'exact' : 'est'}:${travelMode}:${returnTarget}:${routeCorridors
       .map(
         ({ route }) =>
           `${route.priestId}:${route.orderedStops[0]?.stop.id ?? ''}:${route.orderedStops[route.orderedStops.length - 1]?.stop.id ?? ''}:${route.orderedStops.length}:${Math.round(route.totalDistanceMeters)}`
@@ -1820,105 +1982,208 @@ export const OsmParishMap: React.FC<OsmParishMapProps> = ({
 
     const bounds = L.latLngBounds([]);
     let hasBounds = false;
+    const isDriving = travelMode === 'DRIVING';
+    const approachColor = isDriving ? '#B45309' : '#0F766E';
+    const returnColor = '#7C3AED';
 
-    routeCorridors.forEach(({ route, corridor, corridorKey }) => {
-      const isFocused =
-        focusedPriestId === null || focusedPriestId === route.priestId;
+    routeCorridors.forEach(
+      ({
+        route,
+        corridor,
+        corridorKey,
+        approachEndpoints,
+        approachKey,
+        returnKey,
+      }) => {
+        const isFocused =
+          focusedPriestId === null || focusedPriestId === route.priestId;
 
-      const activeMainPath: LatLng[] = isExactRoute
-        ? route.encodedPathPoints.length >= 2
-          ? route.encodedPathPoints
-          : corridor.mainCorridorPoints
-        : snappedDayPaths[corridorKey] ?? corridor.mainCorridorPoints;
+        const activeMainPath: LatLng[] = isExactRoute
+          ? route.encodedPathPoints.length >= 2
+            ? route.encodedPathPoints
+            : corridor.mainCorridorPoints
+          : snappedDayPaths[corridorKey] ?? corridor.mainCorridorPoints;
 
-      // Subtle, unobtrusive dotted church approach/return connectors (never clutter the street)
-      if (!isExactRoute && isFocused) {
-        if (corridor.approachLeg) {
-          L.polyline(
-            corridor.approachLeg.map((p) => [p.lat, p.lng] as [number, number]),
-            {
-              color: route.color,
-              weight: 2,
-              opacity: 0.36,
-              dashArray: '4, 6',
-              lineCap: 'round',
-              interactive: false,
-            }
-          ).addTo(layer);
-        }
-        if (corridor.returnLeg) {
-          L.polyline(
-            corridor.returnLeg.map((p) => [p.lat, p.lng] as [number, number]),
-            {
-              color: route.color,
-              weight: 1.75,
-              opacity: 0.28,
-              dashArray: '3, 7',
-              lineCap: 'round',
-              interactive: false,
-            }
-          ).addTo(layer);
-        }
-      }
+        const snappedApproachPath = approachKey
+          ? snappedApproachLegs[approachKey]?.path
+          : undefined;
+        const snappedReturnPath = returnKey
+          ? snappedReturnLegs[returnKey]?.path
+          : undefined;
 
-      if (activeMainPath.length >= 2) {
-        const latLngs = activeMainPath.map(
-          (p) => [p.lat, p.lng] as [number, number]
-        );
+        // 1. Road-snapped church approach leg (STRICTLY real roads — never straight lines)
+        if (
+          !isExactRoute &&
+          isFocused &&
+          snappedApproachPath &&
+          snappedApproachPath.length >= 2
+        ) {
+          const appLatLngs = snappedApproachPath.map(
+            (p) => [p.lat, p.lng] as [number, number]
+          );
+          L.polyline(appLatLngs, {
+            color: '#FFFFFF',
+            weight: isDriving ? 7.5 : 6.5,
+            opacity: 0.86,
+            lineCap: 'round',
+            lineJoin: 'round',
+            interactive: false,
+          }).addTo(layer);
 
-        // Soft outer glow for high contrast against bright OSM road tiles
-        L.polyline(latLngs, {
-          color: '#FFFFFF',
-          weight: isFocused ? 9.5 : 4.5,
-          opacity: isFocused ? 0.92 : 0.24,
-          lineCap: 'round',
-          lineJoin: 'round',
-          interactive: false,
-        }).addTo(layer);
+          L.polyline(appLatLngs, {
+            color: approachColor,
+            weight: isDriving ? 3.8 : 3.2,
+            opacity: 0.94,
+            dashArray: isDriving ? '9, 7' : '2, 8',
+            lineCap: 'round',
+            lineJoin: 'round',
+            interactive: false,
+          }).addTo(layer);
 
-        // Clean continuous Google-Maps-style route ribbon
-        L.polyline(latLngs, {
-          color: route.color,
-          weight: isFocused ? 5.2 : 2.4,
-          opacity: isFocused ? 0.94 : 0.26,
-          lineCap: 'round',
-          lineJoin: 'round',
-          interactive: false,
-        }).addTo(layer);
-
-        // Crisp direction chevrons along the focused corridor (START -> META)
-        if (isFocused) {
-          const arrows = sampleRouteDirectionArrows(activeMainPath, 5);
-          arrows.forEach((arrow) => {
+          const appArrows = sampleRouteDirectionArrows(snappedApproachPath, 2);
+          appArrows.forEach((arrow) => {
             const arrowIcon = L.divIcon({
               className: '',
-              html: `<div style="width:16px;height:16px;border-radius:9999px;background:${route.color};border:1.8px solid #FFFFFF;box-shadow:0 1px 4px rgba(15,23,42,0.35);display:flex;align-items:center;justify-content:center;transform:rotate(${Math.round(arrow.bearingDeg)}deg);pointer-events:none;"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 8L6 3.5L9.5 8" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`,
-              iconSize: [16, 16],
-              iconAnchor: [8, 8],
+              html: `<div style="width:14px;height:14px;border-radius:9999px;background:${approachColor};border:1.5px solid #FFFFFF;box-shadow:0 1px 3px rgba(15,23,42,0.32);display:flex;align-items:center;justify-content:center;transform:rotate(${Math.round(arrow.bearingDeg)}deg);pointer-events:none;"><svg width="8" height="8" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 8L6 3.5L9.5 8" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`,
+              iconSize: [14, 14],
+              iconAnchor: [7, 7],
             });
             L.marker([arrow.lat, arrow.lng], {
               icon: arrowIcon,
               interactive: false,
-              zIndexOffset: 240,
+              zIndexOffset: 220,
             }).addTo(layer);
           });
         }
-      }
 
-      // Frame tightly on the visited street & houses (not pulled out by a distant church)
-      if (isFocused) {
-        route.orderedStops.forEach((item) => {
-          bounds.extend([item.stop.location.lat, item.stop.location.lng]);
-          hasBounds = true;
-        });
-        if (!isExactRoute && activeMainPath.length >= 2) {
-          activeMainPath.forEach((p) => {
-            bounds.extend([p.lat, p.lng]);
-            hasBounds = true;
+        // 2. Return white halo underneath the main kolęda ribbon (so shared streets stay cleanly readable)
+        if (
+          isFocused &&
+          snappedReturnPath &&
+          snappedReturnPath.length >= 2 &&
+          (!isExactRoute || returnTarget === 'start')
+        ) {
+          const retLatLngs = snappedReturnPath.map(
+            (p) => [p.lat, p.lng] as [number, number]
+          );
+          L.polyline(retLatLngs, {
+            color: '#FFFFFF',
+            weight: 6.5,
+            opacity: 0.85,
+            lineCap: 'round',
+            lineJoin: 'round',
+            interactive: false,
+          }).addTo(layer);
+        }
+
+        // 3. Main kolęda corridor ribbon (START -> META)
+        if (activeMainPath.length >= 2) {
+          const latLngs = activeMainPath.map(
+            (p) => [p.lat, p.lng] as [number, number]
+          );
+
+          L.polyline(latLngs, {
+            color: '#FFFFFF',
+            weight: isFocused ? 9.5 : 4.5,
+            opacity: isFocused ? 0.92 : 0.24,
+            lineCap: 'round',
+            lineJoin: 'round',
+            interactive: false,
+          }).addTo(layer);
+
+          L.polyline(latLngs, {
+            color: route.color,
+            weight: isFocused ? 5.2 : 2.4,
+            opacity: isFocused ? 0.94 : 0.26,
+            lineCap: 'round',
+            lineJoin: 'round',
+            interactive: false,
+          }).addTo(layer);
+
+          if (isFocused) {
+            const arrows = sampleRouteDirectionArrows(activeMainPath, 5);
+            arrows.forEach((arrow) => {
+              const arrowIcon = L.divIcon({
+                className: '',
+                html: `<div style="width:16px;height:16px;border-radius:9999px;background:${route.color};border:1.8px solid #FFFFFF;box-shadow:0 1px 4px rgba(15,23,42,0.35);display:flex;align-items:center;justify-content:center;transform:rotate(${Math.round(arrow.bearingDeg)}deg);pointer-events:none;"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 8L6 3.5L9.5 8" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`,
+                iconSize: [16, 16],
+                iconAnchor: [8, 8],
+              });
+              L.marker([arrow.lat, arrow.lng], {
+                icon: arrowIcon,
+                interactive: false,
+                zIndexOffset: 240,
+              }).addTo(layer);
+            });
+          }
+        }
+
+        // 4. Road-snapped return dashed line (META -> START or META -> Church) on top so shared segments show both directions
+        if (
+          isFocused &&
+          snappedReturnPath &&
+          snappedReturnPath.length >= 2 &&
+          (!isExactRoute || returnTarget === 'start')
+        ) {
+          const retLatLngs = snappedReturnPath.map(
+            (p) => [p.lat, p.lng] as [number, number]
+          );
+          L.polyline(retLatLngs, {
+            color: returnColor,
+            weight: 3.3,
+            opacity: 0.92,
+            dashArray: '7, 8',
+            lineCap: 'round',
+            lineJoin: 'round',
+            interactive: false,
+          }).addTo(layer);
+
+          const retArrows = sampleRouteDirectionArrows(snappedReturnPath, 3);
+          retArrows.forEach((arrow) => {
+            const arrowIcon = L.divIcon({
+              className: '',
+              html: `<div style="width:14px;height:14px;border-radius:9999px;background:${returnColor};border:1.5px solid #FFFFFF;box-shadow:0 1px 3px rgba(15,23,42,0.32);display:flex;align-items:center;justify-content:center;transform:rotate(${Math.round(arrow.bearingDeg)}deg);pointer-events:none;"><svg width="8" height="8" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.5 8L6 3.5L9.5 8" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`,
+              iconSize: [14, 14],
+              iconAnchor: [7, 7],
+            });
+            L.marker([arrow.lat, arrow.lng], {
+              icon: arrowIcon,
+              interactive: false,
+              zIndexOffset: 255,
+            }).addTo(layer);
           });
         }
+
+        if (isFocused) {
+          route.orderedStops.forEach((item) => {
+            bounds.extend([item.stop.location.lat, item.stop.location.lng]);
+            hasBounds = true;
+          });
+          if (!isExactRoute && activeMainPath.length >= 2) {
+            activeMainPath.forEach((p) => {
+              bounds.extend([p.lat, p.lng]);
+              hasBounds = true;
+            });
+          }
+          if (approachEndpoints) {
+            bounds.extend([approachEndpoints[0].lat, approachEndpoints[0].lng]);
+            hasBounds = true;
+          }
+          if (!isExactRoute && snappedApproachPath && snappedApproachPath.length >= 2) {
+            snappedApproachPath.forEach((p) => {
+              bounds.extend([p.lat, p.lng]);
+              hasBounds = true;
+            });
+          }
+          if (snappedReturnPath && snappedReturnPath.length >= 2) {
+            snappedReturnPath.forEach((p) => {
+              bounds.extend([p.lat, p.lng]);
+              hasBounds = true;
+            });
+          }
+        }
       }
-    });
+    );
 
     if (
       hasBounds &&
@@ -1928,15 +2193,19 @@ export const OsmParishMap: React.FC<OsmParishMapProps> = ({
       lastFittedKeyRef.current = routeSignature;
       const isNarrow = map.getSize().x < 640;
       map.fitBounds(bounds, {
-        paddingTopLeft: isNarrow ? [22, 54] : [40, 64],
-        paddingBottomRight: isNarrow ? [22, 162] : [48, 140],
+        paddingTopLeft: isNarrow ? [22, 68] : [40, 64],
+        paddingBottomRight: isNarrow ? [22, 235] : [48, 185],
         maxZoom: 17,
       });
     }
   }, [
     routeCorridors,
     snappedDayPaths,
+    snappedApproachLegs,
+    snappedReturnLegs,
     isExactRoute,
+    travelMode,
+    returnTarget,
     selectedDate,
     focusedPriestId,
     showRouteLines,

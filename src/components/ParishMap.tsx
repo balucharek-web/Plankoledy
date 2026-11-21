@@ -41,9 +41,17 @@ import {
   PRIEST_PALETTE,
   ParishCenter,
   PriestRouteResult,
+  ReturnRouteTarget,
+  RoadLegsLiveMetrics,
   StreetPickFeedback,
+  TravelModeOption,
   VisitStop,
 } from '../types/parish';
+import {
+  RoadLegResult,
+  fetchDayCorridorRoadGeometry,
+  fetchRoadLegWithMetrics,
+} from '../services/osmSearchAndRouting';
 import {
   RouteStopMeta,
   StopMapCluster,
@@ -74,6 +82,10 @@ interface ParishMapProps {
   routes: PriestRouteResult[];
   routeObjects: RoutePolylineEntry[];
   isExactRoute: boolean;
+  travelMode?: TravelModeOption;
+  returnTarget?: ReturnRouteTarget;
+  onRoadLegsMetrics?: (metrics: RoadLegsLiveMetrics | null) => void;
+  isVisible?: boolean;
   selectedDate: string | null;
   focusedPriestId: number | null;
   canEditBoundary?: boolean;
@@ -374,6 +386,10 @@ const RoutePolylinesLayer: React.FC<{
   routes: PriestRouteResult[];
   parishLocation: LatLng | null;
   isExactRoute: boolean;
+  travelMode: TravelModeOption;
+  returnTarget: ReturnRouteTarget;
+  onRoadLegsMetrics?: (metrics: RoadLegsLiveMetrics | null) => void;
+  isVisible: boolean;
   selectedDate: string | null;
   focusedPriestId: number | null;
   showRouteLines: boolean;
@@ -382,6 +398,10 @@ const RoutePolylinesLayer: React.FC<{
   routes,
   parishLocation,
   isExactRoute,
+  travelMode,
+  returnTarget,
+  onRoadLegsMetrics,
+  isVisible,
   selectedDate,
   focusedPriestId,
   showRouteLines,
@@ -389,6 +409,198 @@ const RoutePolylinesLayer: React.FC<{
   const map = useMap();
   const polylinesRef = useRef<google.maps.Polyline[]>([]);
   const lastFittedKeyRef = useRef<string>('');
+  const onRoadLegsMetricsRef = useRef(onRoadLegsMetrics);
+  onRoadLegsMetricsRef.current = onRoadLegsMetrics;
+
+  const [snappedDayPaths, setSnappedDayPaths] = useState<
+    Record<string, LatLng[]>
+  >({});
+  const [snappedApproachLegs, setSnappedApproachLegs] = useState<
+    Record<string, RoadLegResult>
+  >({});
+  const [snappedReturnLegs, setSnappedReturnLegs] = useState<
+    Record<string, RoadLegResult>
+  >({});
+  const [isLoadingLegs, setIsLoadingLegs] = useState(false);
+
+  const routeCorridors = useMemo(() => {
+    const routesWithStops = routes.filter((r) => r.orderedStops.length > 0);
+    return routesWithStops.map((route) => {
+      const orderedStops = route.orderedStops.map((item) => item.stop);
+      const corridor = buildCleanRouteCorridor(
+        orderedStops,
+        parishLocation,
+        false
+      );
+      const firstLoc = orderedStops[0].location;
+      const lastLoc = orderedStops[orderedStops.length - 1].location;
+      const baseKey = `${selectedDate ?? 'all'}:${travelMode}:${route.priestId}:${orderedStops[0]?.id ?? ''}:${orderedStops[orderedStops.length - 1]?.id ?? ''}:${orderedStops.length}`;
+
+      const approachEndpoints: [LatLng, LatLng] | null = corridor.approachLeg;
+      const approachKey = approachEndpoints
+        ? `${travelMode}:${approachEndpoints[0].lat.toFixed(5)},${approachEndpoints[0].lng.toFixed(5)}->${approachEndpoints[1].lat.toFixed(5)},${approachEndpoints[1].lng.toFixed(5)}`
+        : '';
+
+      let returnEndpoints: [LatLng, LatLng] | null = null;
+      if (returnTarget === 'start' && orderedStops.length >= 2) {
+        returnEndpoints = [lastLoc, firstLoc];
+      } else if (returnTarget === 'parish' && parishLocation) {
+        returnEndpoints = [lastLoc, parishLocation];
+      }
+      const returnKey = returnEndpoints
+        ? `${returnTarget}:${travelMode}:${returnEndpoints[0].lat.toFixed(5)},${returnEndpoints[0].lng.toFixed(5)}->${returnEndpoints[1].lat.toFixed(5)},${returnEndpoints[1].lng.toFixed(5)}`
+        : '';
+
+      return {
+        route,
+        corridor,
+        baseKey,
+        approachEndpoints,
+        approachKey,
+        returnEndpoints,
+        returnKey,
+      };
+    });
+  }, [routes, parishLocation, selectedDate, travelMode, returnTarget]);
+
+  // Fetch real road geometry & real metrics for street corridor, church->START approach, and META->START/church return
+  useEffect(() => {
+    if (!showRouteLines || routeCorridors.length === 0) {
+      setIsLoadingLegs(false);
+      return;
+    }
+
+    let cancelled = false;
+    const needsAnyFetch = routeCorridors.some(
+      ({ approachEndpoints, returnEndpoints }) =>
+        Boolean(approachEndpoints) || Boolean(returnEndpoints)
+    );
+    if (needsAnyFetch) setIsLoadingLegs(true);
+
+    void Promise.all(
+      routeCorridors.map(
+        async ({
+          corridor,
+          baseKey,
+          approachEndpoints,
+          approachKey,
+          returnEndpoints,
+          returnKey,
+        }) => {
+          const tasks: Promise<void>[] = [];
+
+          if (!isExactRoute && corridor.mainCorridorPoints.length >= 2) {
+            tasks.push(
+              fetchDayCorridorRoadGeometry(
+                corridor.mainCorridorPoints,
+                travelMode
+              ).then((snapped) => {
+                if (!cancelled && snapped && snapped.length >= 2) {
+                  setSnappedDayPaths((prev) =>
+                    prev[baseKey] === snapped
+                      ? prev
+                      : { ...prev, [baseKey]: snapped }
+                  );
+                }
+              })
+            );
+          }
+
+          if (!isExactRoute && approachEndpoints && approachKey) {
+            tasks.push(
+              fetchRoadLegWithMetrics(
+                approachEndpoints[0],
+                approachEndpoints[1],
+                travelMode
+              ).then((res) => {
+                if (!cancelled && res && res.path.length >= 2) {
+                  setSnappedApproachLegs((prev) =>
+                    prev[approachKey] === res
+                      ? prev
+                      : { ...prev, [approachKey]: res }
+                  );
+                }
+              })
+            );
+          }
+
+          if (
+            returnEndpoints &&
+            returnKey &&
+            (!isExactRoute || returnTarget === 'start')
+          ) {
+            tasks.push(
+              fetchRoadLegWithMetrics(
+                returnEndpoints[0],
+                returnEndpoints[1],
+                travelMode
+              ).then((res) => {
+                if (!cancelled && res && res.path.length >= 2) {
+                  setSnappedReturnLegs((prev) =>
+                    prev[returnKey] === res
+                      ? prev
+                      : { ...prev, [returnKey]: res }
+                  );
+                }
+              })
+            );
+          }
+
+          await Promise.all(tasks);
+        }
+      )
+    ).finally(() => {
+      if (!cancelled) setIsLoadingLegs(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isExactRoute, showRouteLines, routeCorridors, travelMode, returnTarget]);
+
+  // Emit live road-computed approach & return metrics for the primary focused route
+  useEffect(() => {
+    if (!onRoadLegsMetricsRef.current) return;
+    if (!showRouteLines || routeCorridors.length === 0) {
+      onRoadLegsMetricsRef.current(null);
+      return;
+    }
+
+    const primary =
+      (focusedPriestId !== null
+        ? routeCorridors.find((c) => c.route.priestId === focusedPriestId)
+        : routeCorridors[0]) ?? routeCorridors[0];
+
+    const approachRes = primary.approachKey
+      ? snappedApproachLegs[primary.approachKey]
+      : undefined;
+    const returnRes = primary.returnKey
+      ? snappedReturnLegs[primary.returnKey]
+      : undefined;
+
+    onRoadLegsMetricsRef.current({
+      approach: approachRes
+        ? {
+            distanceMeters: approachRes.distanceMeters,
+            durationMillis: approachRes.durationMillis,
+          }
+        : undefined,
+      returnLeg: returnRes
+        ? {
+            distanceMeters: returnRes.distanceMeters,
+            durationMillis: returnRes.durationMillis,
+          }
+        : undefined,
+      isLoading: isLoadingLegs,
+    });
+  }, [
+    showRouteLines,
+    routeCorridors,
+    focusedPriestId,
+    snappedApproachLegs,
+    snappedReturnLegs,
+    isLoadingLegs,
+  ]);
 
   useEffect(() => {
     if (!map) return;
@@ -402,12 +614,67 @@ const RoutePolylinesLayer: React.FC<{
     const bounds = new google.maps.LatLngBounds();
     let hasBounds = false;
 
-    const routeSignature = `${selectedDate ?? 'all'}:${isExactRoute ? 'exact' : 'est'}:${routes
+    const routeSignature = `${selectedDate ?? 'all'}:${isExactRoute ? 'exact' : 'est'}:${travelMode}:${returnTarget}:${routes
       .map(
         (r) =>
           `${r.priestId}:${r.orderedStops[0]?.stop.id ?? ''}:${r.orderedStops[r.orderedStops.length - 1]?.stop.id ?? ''}:${r.orderedStops.length}:${Math.round(r.totalDistanceMeters)}`
       )
       .join(',')}:${focusedPriestId ?? 'all'}`;
+
+    const isDriving = travelMode === 'DRIVING';
+    const approachColor = isDriving ? '#B45309' : '#0F766E';
+    const returnColor = '#7C3AED';
+
+    const drawReturnPolyline = (path: LatLng[], priestId: number) => {
+      // Halo sits below the forward blue ribbon (44 < 65) so shared street segments stay blue with crisp violet return dashes on top
+      created.push(
+        new google.maps.Polyline({
+          path,
+          strokeColor: '#FFFFFF',
+          strokeWeight: 6.5,
+          strokeOpacity: 0.85,
+          clickable: false,
+          zIndex: 44 + priestId,
+          map,
+        })
+      );
+      created.push(
+        new google.maps.Polyline({
+          path,
+          strokeColor: returnColor,
+          strokeOpacity: 0,
+          icons: [
+            {
+              icon: {
+                path: 'M 0,-1.7 0,1.7',
+                strokeColor: returnColor,
+                strokeOpacity: 0.92,
+                strokeWeight: 3.2,
+                scale: 1,
+              },
+              offset: '0',
+              repeat: '14px',
+            },
+            {
+              icon: {
+                path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                scale: 2.1,
+                fillColor: '#FFFFFF',
+                fillOpacity: 1,
+                strokeColor: returnColor,
+                strokeOpacity: 1,
+                strokeWeight: 1.5,
+              },
+              offset: '70px',
+              repeat: '160px',
+            },
+          ],
+          clickable: false,
+          zIndex: 68 + priestId,
+          map,
+        })
+      );
+    };
 
     if (routeObjects.length > 0 && isExactRoute) {
       for (const entry of routeObjects) {
@@ -426,7 +693,6 @@ const RoutePolylinesLayer: React.FC<{
           });
           created.push(halo);
 
-          // Strip Google's chunky dotted walking bead icons and render clean, slim navigation lines
           pl.setOptions({
             strokeColor: entry.color,
             strokeWeight: isFocused ? 4 : 2,
@@ -459,80 +725,127 @@ const RoutePolylinesLayer: React.FC<{
             });
           }
         });
+
+        // Also show real road-snapped META -> START return path when selected in exact mode
+        if (isFocused && returnTarget === 'start') {
+          const matchedCorridor = routeCorridors.find(
+            (c) => c.route.priestId === entry.priestId
+          );
+          const returnPath = matchedCorridor?.returnKey
+            ? snappedReturnLegs[matchedCorridor.returnKey]?.path
+            : undefined;
+          if (returnPath && returnPath.length >= 2) {
+            drawReturnPolyline(returnPath, entry.priestId);
+            returnPath.forEach((pt) => {
+              bounds.extend(pt);
+              hasBounds = true;
+            });
+          }
+        }
       }
-    } else if (routes.length > 0) {
-      for (const route of routes) {
-        const orderedStops = route.orderedStops.map((item) => item.stop);
-        const corridor = buildCleanRouteCorridor(
-          orderedStops,
-          parishLocation,
-          route.returnLegDistanceMeters > 0
-        );
+    } else if (routeCorridors.length > 0) {
+      for (const {
+        route,
+        corridor,
+        baseKey,
+        approachEndpoints,
+        approachKey,
+        returnKey,
+      } of routeCorridors) {
         const isFocused =
           focusedPriestId === null || focusedPriestId === route.priestId;
 
-        if (isFocused && corridor.approachLeg) {
+        // STRICTLY road-snapped approach leg (NEVER draw straight line across buildings/interchanges)
+        const snappedApproachPath = approachKey
+          ? snappedApproachLegs[approachKey]?.path
+          : undefined;
+
+        if (
+          isFocused &&
+          snappedApproachPath &&
+          snappedApproachPath.length >= 2
+        ) {
           created.push(
             new google.maps.Polyline({
-              path: corridor.approachLeg,
-              strokeColor: route.color,
-              strokeOpacity: 0,
-              icons: [
-                {
-                  icon: {
-                    path: 'M 0,-1 0,1',
-                    strokeOpacity: 0.36,
-                    strokeWeight: 2,
-                    scale: 1,
-                  },
-                  offset: '0',
-                  repeat: '10px',
-                },
-              ],
+              path: snappedApproachPath,
+              strokeColor: '#FFFFFF',
+              strokeWeight: isDriving ? 7.5 : 6.5,
+              strokeOpacity: 0.86,
               clickable: false,
-              zIndex: 35 + route.priestId,
+              zIndex: 40 + route.priestId,
               map,
             })
           );
-        }
-        if (isFocused && corridor.returnLeg) {
           created.push(
             new google.maps.Polyline({
-              path: corridor.returnLeg,
-              strokeColor: route.color,
+              path: snappedApproachPath,
+              strokeColor: approachColor,
               strokeOpacity: 0,
               icons: [
                 {
-                  icon: {
-                    path: 'M 0,-1 0,1',
-                    strokeOpacity: 0.28,
-                    strokeWeight: 1.75,
-                    scale: 1,
-                  },
+                  icon: isDriving
+                    ? {
+                        path: 'M 0,-1.8 0,1.8',
+                        strokeColor: approachColor,
+                        strokeOpacity: 0.94,
+                        strokeWeight: 3.6,
+                        scale: 1,
+                      }
+                    : {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        fillColor: approachColor,
+                        fillOpacity: 0.94,
+                        strokeColor: '#FFFFFF',
+                        strokeWeight: 0.9,
+                        scale: 2.6,
+                      },
                   offset: '0',
-                  repeat: '11px',
+                  repeat: isDriving ? '13px' : '9px',
+                },
+                {
+                  icon: {
+                    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                    scale: 2.1,
+                    fillColor: '#FFFFFF',
+                    fillOpacity: 1,
+                    strokeColor: approachColor,
+                    strokeOpacity: 1,
+                    strokeWeight: 1.5,
+                  },
+                  offset: '60px',
+                  repeat: '150px',
                 },
               ],
               clickable: false,
-              zIndex: 34 + route.priestId,
+              zIndex: 56 + route.priestId,
               map,
             })
           );
         }
 
+        // STRICTLY road-snapped return leg (META -> START or META -> Church)
+        const snappedReturnPath = returnKey
+          ? snappedReturnLegs[returnKey]?.path
+          : undefined;
+
+        if (isFocused && snappedReturnPath && snappedReturnPath.length >= 2) {
+          drawReturnPolyline(snappedReturnPath, route.priestId);
+        }
+
         const displayPath =
-          corridor.mainCorridorPoints.length >= 2
+          snappedDayPaths[baseKey] ??
+          (corridor.mainCorridorPoints.length >= 2
             ? corridor.mainCorridorPoints
-            : route.encodedPathPoints;
+            : route.encodedPathPoints);
 
         if (displayPath.length >= 2) {
           const halo = new google.maps.Polyline({
             path: displayPath,
             strokeColor: '#FFFFFF',
             strokeWeight: isFocused ? 8.5 : 4,
-            strokeOpacity: isFocused ? 0.9 : 0.22,
+            strokeOpacity: isFocused ? 0.92 : 0.22,
             clickable: false,
-            zIndex: isFocused ? 45 + route.priestId : 15 + route.priestId,
+            zIndex: isFocused ? 48 + route.priestId : 15 + route.priestId,
             map,
           });
           created.push(halo);
@@ -575,21 +888,46 @@ const RoutePolylinesLayer: React.FC<{
             bounds.extend(pt);
             hasBounds = true;
           });
+          if (approachEndpoints) {
+            bounds.extend(approachEndpoints[0]);
+            hasBounds = true;
+          }
+          if (snappedApproachPath && snappedApproachPath.length >= 2) {
+            snappedApproachPath.forEach((pt) => {
+              bounds.extend(pt);
+              hasBounds = true;
+            });
+          }
+          if (snappedReturnPath && snappedReturnPath.length >= 2) {
+            snappedReturnPath.forEach((pt) => {
+              bounds.extend(pt);
+              hasBounds = true;
+            });
+          }
         }
       }
     }
 
     polylinesRef.current = created;
 
-    if (hasBounds && lastFittedKeyRef.current !== routeSignature) {
+    const mapDiv = map.getDiv?.();
+    const hasLayoutSize =
+      !mapDiv || (mapDiv.clientWidth > 60 && mapDiv.clientHeight > 60);
+
+    if (
+      isVisible &&
+      hasLayoutSize &&
+      hasBounds &&
+      lastFittedKeyRef.current !== routeSignature
+    ) {
       lastFittedKeyRef.current = routeSignature;
       const isNarrow =
         typeof window !== 'undefined' && window.innerWidth < 640;
       map.fitBounds(
         bounds,
         isNarrow
-          ? { top: 54, right: 22, bottom: 162, left: 22 }
-          : { top: 64, right: 56, bottom: 140, left: 32 }
+          ? { top: 68, right: 24, bottom: 235, left: 24 }
+          : { top: 64, right: 56, bottom: 185, left: 32 }
       );
     }
 
@@ -601,8 +939,15 @@ const RoutePolylinesLayer: React.FC<{
     map,
     routeObjects,
     routes,
+    routeCorridors,
+    snappedDayPaths,
+    snappedApproachLegs,
+    snappedReturnLegs,
     parishLocation,
     isExactRoute,
+    travelMode,
+    returnTarget,
+    isVisible,
     selectedDate,
     focusedPriestId,
     showRouteLines,
@@ -899,6 +1244,36 @@ const MapControllerLayer: React.FC<{
     const listener = map.addListener('zoom_changed', syncZoom);
     return () => google.maps.event.removeListener(listener);
   }, [map, onZoomChange]);
+
+  // Force Google Maps to recalculate tile canvas dimensions whenever container resizes or reveals on mobile
+  useEffect(() => {
+    if (!map) return;
+    const div = map.getDiv?.();
+    if (!div) return;
+
+    let rafId: number | null = null;
+    const syncViewport = () => {
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+      rafId = window.requestAnimationFrame(() => {
+        if (div.clientWidth > 0 && div.clientHeight > 0) {
+          const center = map.getCenter();
+          google.maps.event.trigger(map, 'resize');
+          if (center) map.setCenter(center);
+        }
+      });
+    };
+
+    const observer = new ResizeObserver(() => {
+      syncViewport();
+    });
+    observer.observe(div);
+    syncViewport();
+
+    return () => {
+      observer.disconnect();
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+    };
+  }, [map]);
 
   useEffect(() => {
     if (!map || !parish) return;
@@ -1359,7 +1734,7 @@ const UserGpsMarkerLayer: React.FC<{
       )}
 
       <MapControl position={ControlPosition.RIGHT_TOP}>
-        <div className="no-print mr-2.5 mt-1 flex flex-col items-end gap-1.5">
+        <div className="no-print mr-2.5 mt-[62px] lg:mt-1 flex flex-col items-end gap-1.5">
           <div className="flex items-center gap-1.5">
             {gps.active && gps.position && (
               <button
@@ -1531,6 +1906,10 @@ export const ParishMap: React.FC<ParishMapProps> = ({
   routes,
   routeObjects,
   isExactRoute,
+  travelMode = 'WALKING',
+  returnTarget = 'start',
+  onRoadLegsMetrics,
+  isVisible = true,
   selectedDate,
   focusedPriestId,
   canEditBoundary = true,
@@ -1701,6 +2080,9 @@ export const ParishMap: React.FC<ParishMapProps> = ({
     suppressStopPopup,
   ]);
 
+  const isNarrowScreen =
+    typeof window !== 'undefined' && window.innerWidth < 640;
+
   return (
     <div className="relative w-full h-full min-h-[340px] bg-slate-100">
       <GoogleMap
@@ -1714,9 +2096,10 @@ export const ParishMap: React.FC<ParishMapProps> = ({
             ? 'none'
             : 'greedy'
         }
-        mapTypeControl={true}
+        zoomControl={!isNarrowScreen}
+        mapTypeControl={!isNarrowScreen}
         streetViewControl={false}
-        fullscreenControl={true}
+        fullscreenControl={!isNarrowScreen}
         internalUsageAttributionIds={['gmp_mcp_codeassist_v1_aistudio']}
         className="w-full h-full"
         onClick={(ev) => {
@@ -1780,6 +2163,10 @@ export const ParishMap: React.FC<ParishMapProps> = ({
           routes={routes}
           parishLocation={parish?.location ?? null}
           isExactRoute={isExactRoute}
+          travelMode={travelMode}
+          returnTarget={returnTarget}
+          onRoadLegsMetrics={onRoadLegsMetrics}
+          isVisible={isVisible}
           selectedDate={selectedDate}
           focusedPriestId={focusedPriestId}
           showRouteLines={showRouteLines}

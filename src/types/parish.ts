@@ -12,6 +12,19 @@ export interface ParishCenter {
 
 export type TravelModeOption = 'WALKING' | 'DRIVING';
 
+export type ReturnRouteTarget = 'start' | 'parish' | 'none';
+
+export interface RoadLegMetric {
+  distanceMeters: number;
+  durationMillis: number;
+}
+
+export interface RoadLegsLiveMetrics {
+  approach?: RoadLegMetric;
+  returnLeg?: RoadLegMetric;
+  isLoading?: boolean;
+}
+
 export interface PriestProfile {
   id: number;
   name: string;

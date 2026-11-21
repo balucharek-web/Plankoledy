@@ -407,20 +407,36 @@ export function haversineMeters(a: LatLng, b: LatLng): number {
 function estimateLegMetrics(
   from: LatLng,
   to: LatLng,
-  travelMode: PlanConfig['travelMode']
+  travelMode: PlanConfig['travelMode'],
+  isChurchLeg = false
 ): { distanceMeters: number; durationMillis: number } {
   const straightMeters = haversineMeters(from, to);
-  const roadMeters = Math.round(straightMeters * 1.3);
   if (travelMode === 'DRIVING') {
-    const speedMetersPerSec = (28 * 1000) / 3600;
-    const bufferSec = roadMeters > 40 ? 35 : 8;
-    const durationSec = roadMeters / speedMetersPerSec + bufferSec;
+    const roadMeters = Math.round(straightMeters * (isChurchLeg ? 1.32 : 1.24));
+    if (isChurchLeg || straightMeters > 220) {
+      // Driving from parish to street or transferring between distant streets (~32 km/h + parking buffer)
+      const speedMetersPerSec = (32 * 1000) / 3600;
+      const parkBufferSec = isChurchLeg
+        ? roadMeters > 80
+          ? 90
+          : 20
+        : 45;
+      const durationSec = roadMeters / speedMetersPerSec + parkBufferSec;
+      return {
+        distanceMeters: roadMeters,
+        durationMillis: Math.round(durationSec * 1000),
+      };
+    }
+    // Short hop along the same street (walking/pulling forward to neighbor)
+    const speedMetersPerSec = (5.2 * 1000) / 3600;
+    const durationSec = roadMeters / speedMetersPerSec + 10;
     return {
       distanceMeters: roadMeters,
       durationMillis: Math.round(durationSec * 1000),
     };
   }
-  const speedMetersPerSec = (4.2 * 1000) / 3600;
+  const roadMeters = Math.round(straightMeters * (isChurchLeg ? 1.25 : 1.22));
+  const speedMetersPerSec = ((isChurchLeg ? 4.5 : 4.2) * 1000) / 3600;
   const durationSec = roadMeters / speedMetersPerSec;
   return {
     distanceMeters: roadMeters,
@@ -556,7 +572,7 @@ export function estimateDayRoutes(
     // Pre-compute raw legs and detect exaggerated intra-street zig-zagging (e.g. strict 1,2,3,4 numbering across side branches)
     const rawLegs = ordered.map((stop, idx) => {
       const fromPt = idx === 0 ? parish.location : ordered[idx - 1].location;
-      return estimateLegMetrics(fromPt, stop.location, config.travelMode);
+      return estimateLegMetrics(fromPt, stop.location, config.travelMode, idx === 0);
     });
 
     let interStopScale = 1;
@@ -648,7 +664,8 @@ export function estimateDayRoutes(
       const ret = estimateLegMetrics(
         prevPoint,
         parish.location,
-        config.travelMode
+        config.travelMode,
+        true
       );
       returnLegDistanceMeters = ret.distanceMeters;
       returnLegDurationMillis = ret.durationMillis;

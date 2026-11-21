@@ -1244,7 +1244,7 @@ export const SidebarRoutes: React.FC<SidebarRoutesProps> = ({
                                   onSetRouteStartStop(route.priestId, item.stop.id)
                                 }
                                 title="Zacznij trasę od tego domu (ustaw jako START)"
-                                className="px-1.5 py-1 text-[10px] font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-md whitespace-nowrap"
+                                className="hidden lg:inline-flex px-1.5 py-1 text-[10px] font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-md whitespace-nowrap"
                               >
                                 Start
                               </button>

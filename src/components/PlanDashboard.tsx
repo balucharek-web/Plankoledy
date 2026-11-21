@@ -67,6 +67,7 @@ interface PlanDashboardProps {
   onNavigateSection: (section: WorkspaceSection) => void;
   onOpenDayRoute: (date: string) => void;
   onViewDayOnMap: (date: string) => void;
+  onViewWholeParish?: () => void;
   onEditDay: (date: string) => void;
 }
 
@@ -92,6 +93,7 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
   onNavigateSection,
   onOpenDayRoute,
   onViewDayOnMap,
+  onViewWholeParish,
   onEditDay,
 }) => {
   const [gpsLoading, setGpsLoading] = useState(false);
@@ -508,23 +510,46 @@ export const PlanDashboard: React.FC<PlanDashboardProps> = ({
               </div>
             </div>
 
-            {/* Clean cartographic preview of this day's kolęda */}
-            <DayRouteMiniPreview
-              parish={parish}
-              boundary={boundary}
-              day={currentDayPlan.day}
-              onOpenMap={() => onViewDayOnMap(currentDayPlan.day.date)}
-            />
+            {/* Compact schematic preview on mobile only (desktop displays the full interactive map side-by-side) */}
+            <div className="lg:hidden">
+              <DayRouteMiniPreview
+                parish={parish}
+                boundary={boundary}
+                day={currentDayPlan.day}
+                onOpenMap={() => onViewDayOnMap(currentDayPlan.day.date)}
+              />
+            </div>
 
             <div className="grid grid-cols-3 gap-2 pt-0.5">
-              <button
-                type="button"
-                onClick={() => onViewDayOnMap(currentDayPlan.day.date)}
-                className="min-h-[44px] sm:min-h-[40px] px-2.5 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
-              >
-                <MapIcon className="w-3.5 h-3.5 shrink-0" />
-                <span>Mapa dnia</span>
-              </button>
+              {selectedDate === currentDayPlan.day.date && onViewWholeParish ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => onViewDayOnMap(currentDayPlan.day.date)}
+                    className="lg:hidden min-h-[44px] sm:min-h-[40px] px-2.5 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+                  >
+                    <MapIcon className="w-3.5 h-3.5 shrink-0" />
+                    <span>Mapa dnia</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onViewWholeParish}
+                    className="hidden lg:inline-flex min-h-[40px] px-2.5 py-2 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-950 text-xs font-semibold items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+                  >
+                    <Church className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                    <span>Cała parafia</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onViewDayOnMap(currentDayPlan.day.date)}
+                  className="min-h-[44px] sm:min-h-[40px] px-2.5 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+                >
+                  <MapIcon className="w-3.5 h-3.5 shrink-0" />
+                  <span>Mapa dnia</span>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => onOpenDayRoute(currentDayPlan.day.date)}

@@ -5,10 +5,12 @@ import {
   ArrowUp,
   Building2,
   CalendarPlus,
+  Car,
   Check,
   ChevronDown,
   ChevronRight,
   Compass,
+  Footprints,
   Home,
   MapPin,
   Plus,
@@ -24,6 +26,7 @@ import {
   ParishCenter,
   PlanConfig,
   SeasonPlanConfig,
+  TravelModeOption,
   VisitStop,
 } from '../types/parish';
 import {
@@ -76,6 +79,7 @@ interface SidebarStopsProps {
   onSelectDate: (date: string | null) => void;
   onSelectStop: (id: string) => void;
   onPlanCustomDay: (payload: CustomDayPlanPayload) => void;
+  onChangeTravelMode?: (mode: TravelModeOption) => void;
   onDeleteDayPlan?: (date: string) => void;
   onAddMissingOnStreet?: (streetName: string) => void;
   onGoToSetup: () => void;
@@ -128,6 +132,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
   onSelectDate,
   onSelectStop,
   onPlanCustomDay,
+  onChangeTravelMode,
   onDeleteDayPlan,
   onAddMissingOnStreet,
   onGoToSetup,
@@ -804,6 +809,46 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                       </option>
                     ))}
                   </select>
+                </div>
+              )}
+
+              {onChangeTravelMode && (
+                <div>
+                  <span className="block text-[11px] font-medium text-slate-600 mb-1">
+                    Dotarcie z kościoła na ulicę
+                  </span>
+                  <div
+                    role="group"
+                    aria-label="Sposób dotarcia z kościoła na ulicę"
+                    className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-xl"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => onChangeTravelMode('WALKING')}
+                      aria-pressed={config.travelMode === 'WALKING'}
+                      className={`min-h-[38px] px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors ${
+                        config.travelMode === 'WALKING'
+                          ? 'bg-white text-slate-900 shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <Footprints className="w-3.5 h-3.5 text-teal-700 shrink-0" />
+                      <span>Piechotą</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onChangeTravelMode('DRIVING')}
+                      aria-pressed={config.travelMode === 'DRIVING'}
+                      className={`min-h-[38px] px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors ${
+                        config.travelMode === 'DRIVING'
+                          ? 'bg-white text-slate-900 shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <Car className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                      <span>Samochodem</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </section>

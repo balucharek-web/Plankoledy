@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   ArrowRight,
   CalendarDays,
+  Car,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -10,6 +11,7 @@ import {
   ClipboardCheck,
   Eye,
   EyeOff,
+  Footprints,
   Home,
   ListOrdered,
   Navigation,
@@ -19,6 +21,9 @@ import {
   DayPlanSummary,
   MarkerLabelMode,
   PriestRouteResult,
+  ReturnRouteTarget,
+  RoadLegsLiveMetrics,
+  TravelModeOption,
 } from '../types/parish';
 import {
   formatPolishDateChip,
@@ -34,6 +39,11 @@ interface MapDayRouteBarProps {
   routes: PriestRouteResult[];
   isExactRoute: boolean;
   isComputingExact: boolean;
+  travelMode: TravelModeOption;
+  onChangeTravelMode: (mode: TravelModeOption) => void;
+  returnTarget: ReturnRouteTarget;
+  onChangeReturnTarget: (target: ReturnRouteTarget) => void;
+  liveRoadMetrics?: RoadLegsLiveMetrics | null;
   focusedPriestId: number | null;
   availableStreets: Array<{ name: string; count: number }>;
   focusedStreet: string | null;
@@ -67,6 +77,16 @@ function formatHousesLabel(count: number): string {
   return `${count} domów`;
 }
 
+function shiftTimeMinutes(hhmm: string, deltaMinutes: number): string {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(hhmm.trim());
+  if (!match) return hhmm;
+  const baseMin = parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
+  const nextMin = ((baseMin + deltaMinutes) % (24 * 60) + 24 * 60) % (24 * 60);
+  const h = Math.floor(nextMin / 60);
+  const m = nextMin % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
 export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
   plannedDays,
   selectedDate,
@@ -75,6 +95,11 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
   routes,
   isExactRoute,
   isComputingExact,
+  travelMode,
+  onChangeTravelMode,
+  returnTarget,
+  onChangeReturnTarget,
+  liveRoadMetrics = null,
   focusedPriestId,
   availableStreets,
   focusedStreet,
@@ -128,11 +153,12 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
     0
   );
 
-  const primaryStartStop = visibleRoutes[0]?.orderedStops[0]?.stop ?? null;
+  const primaryRoute = visibleRoutes[0] ?? null;
+  const primaryFirstItem = primaryRoute?.orderedStops[0] ?? null;
+  const primaryStartStop = primaryFirstItem?.stop ?? null;
   const primaryEndStop =
-    visibleRoutes[0] && visibleRoutes[0].orderedStops.length > 1
-      ? visibleRoutes[0].orderedStops[visibleRoutes[0].orderedStops.length - 1]
-          .stop
+    primaryRoute && primaryRoute.orderedStops.length > 1
+      ? primaryRoute.orderedStops[primaryRoute.orderedStops.length - 1].stop
       : null;
 
   const activeStartAddress = primaryStartStop
@@ -141,6 +167,45 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
   const activeEndAddress = primaryEndStop
     ? shortAddress(primaryEndStop.address, primaryEndStop.label)
     : '';
+
+  const estApproachMeters = primaryFirstItem?.legDistanceMeters ?? 0;
+  const estApproachMs = primaryFirstItem?.legDurationMillis ?? 0;
+  const approachMeters =
+    liveRoadMetrics?.approach?.distanceMeters ?? estApproachMeters;
+  const approachMs =
+    liveRoadMetrics?.approach?.durationMillis ?? estApproachMs;
+  const approachMinutes =
+    approachMeters >= 30 ? Math.max(1, Math.round(approachMs / 60000)) : 0;
+
+  const estReturnMeters = primaryRoute?.returnLegDistanceMeters ?? 0;
+  const estReturnMs = primaryRoute?.returnLegDurationMillis ?? 0;
+  const returnMeters =
+    returnTarget === 'none'
+      ? 0
+      : liveRoadMetrics?.returnLeg?.distanceMeters ??
+        (returnTarget === 'parish' ? estReturnMeters : 0);
+  const returnMs =
+    returnTarget === 'none'
+      ? 0
+      : liveRoadMetrics?.returnLeg?.durationMillis ??
+        (returnTarget === 'parish' ? estReturnMs : 0);
+  const returnMinutes =
+    returnMeters >= 30 ? Math.max(1, Math.round(returnMs / 60000)) : 0;
+
+  const distDeltaMeters =
+    (approachMeters - estApproachMeters) + (returnMeters - estReturnMeters);
+  const adjustedTotalDistMeters = Math.max(
+    0,
+    totalDistMeters + distDeltaMeters
+  );
+  const durationDeltaMinutes = Math.round(
+    (approachMs - estApproachMs + (returnMs - estReturnMs)) / 60000
+  );
+
+  const hasLiveRoadGeometry = Boolean(
+    isExactRoute || liveRoadMetrics?.approach || liveRoadMetrics?.returnLeg
+  );
+  const firstArrivalTime = primaryFirstItem?.arrivalTime ?? '';
 
   const streetHeadline = selectedDaySummary
     ? selectedDaySummary.streetNames.length > 0
@@ -152,10 +217,18 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
       : 'Wybrane punkty'
     : 'Cały teren parafii';
 
+  const rawEndTime =
+    primaryRoute?.endTime ||
+    selectedDaySummary?.estimatedEndTime ||
+    selectedDaySummary?.plannedEndTime ||
+    '';
+  const adjustedEndTime =
+    rawEndTime && durationDeltaMinutes !== 0
+      ? shiftTimeMinutes(rawEndTime, durationDeltaMinutes)
+      : rawEndTime;
+
   const displayTimeWindow = selectedDaySummary
-    ? `${selectedDaySummary.startTime}–${
-        selectedDaySummary.plannedEndTime || selectedDaySummary.estimatedEndTime
-      }`
+    ? `${selectedDaySummary.startTime}–${adjustedEndTime}`
     : '';
 
   if (minimized) {
@@ -183,9 +256,9 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
   }
 
   return (
-    <div className="no-print absolute bottom-2.5 left-2.5 right-2.5 sm:bottom-4 sm:left-4 sm:right-auto sm:w-[460px] lg:w-[490px] z-[460]">
+    <div className="no-print absolute bottom-2.5 left-2.5 right-2.5 sm:bottom-4 sm:left-4 sm:right-auto sm:w-[468px] lg:w-[500px] z-[460]">
       <div className="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-xl overflow-hidden">
-        {/* Clean Drag-Handle Affordance (toggles options drawer) */}
+        {/* Clean Drag-Handle Affordance */}
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
@@ -195,8 +268,88 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
           <span className="w-9 h-1 rounded-full bg-slate-300 group-hover:bg-slate-400 transition-colors" />
         </button>
 
+        {/* Instant 1-Click Map View Switcher: Mapa dnia <-> Cała parafia */}
+        {plannedDays.length > 0 && (
+          <div className="px-3.5 pb-2 flex items-center justify-between gap-2">
+            <div
+              role="group"
+              aria-label="Tryb widoku mapy"
+              className="inline-flex items-center rounded-xl bg-slate-100 p-0.5 flex-1 sm:flex-initial"
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  if (!selectedDate) {
+                    onSelectDate(nearestDayDate ?? plannedDays[0].date);
+                    onFocusPriest(null);
+                  }
+                }}
+                aria-pressed={Boolean(selectedDate)}
+                className={`flex-1 sm:flex-initial min-h-[32px] px-3 py-1 rounded-lg text-[11px] font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap ${
+                  selectedDate
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-500 hover:text-slate-900'
+                }`}
+              >
+                <CalendarDays className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                <span>Mapa dnia</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onSelectDate(null);
+                  onFocusPriest(null);
+                  onFocusStreet(null);
+                }}
+                aria-pressed={!selectedDate}
+                className={`flex-1 sm:flex-initial min-h-[32px] px-3 py-1 rounded-lg text-[11px] font-semibold inline-flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap ${
+                  !selectedDate
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-500 hover:text-slate-900'
+                }`}
+              >
+                <Church className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                <span>Cała parafia</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1 shrink-0">
+              {hasMultipleDays && selectedDate && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => stepDay(-1)}
+                    aria-label="Poprzedni dzień kolędy"
+                    className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-xl text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => stepDay(1)}
+                    aria-label="Następny dzień kolędy"
+                    className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-xl text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setMinimized(true)}
+                aria-label="Zwiń kartę podglądu"
+                title="Zwiń kartę podglądu"
+                className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+              >
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Clean Non-Truncated Summary Header */}
-        <div className="px-3.5 pb-2.5 flex items-start justify-between gap-2">
+        <div className="px-3.5 pb-2 flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             {selectedDaySummary ? (
               <>
@@ -222,7 +375,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                 </div>
 
                 <div className="mt-0.5 text-xs text-slate-600 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 tabular-nums">
-                  <span className="font-medium text-slate-800 truncate max-w-[200px] sm:max-w-[240px]">
+                  <span className="font-medium text-slate-800 truncate max-w-[190px] sm:max-w-[230px]">
                     {streetHeadline}
                   </span>
                   <span aria-hidden="true" className="text-slate-300">
@@ -233,12 +386,12 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                       totalStopsOnRoutes || selectedDaySummary.stops.length
                     )}
                   </span>
-                  {totalDistMeters > 0 && (
+                  {adjustedTotalDistMeters > 0 && (
                     <>
                       <span aria-hidden="true" className="text-slate-300">
                         ·
                       </span>
-                      <span>{formatDistance(totalDistMeters)}</span>
+                      <span>{formatDistance(adjustedTotalDistMeters)}</span>
                     </>
                   )}
                 </div>
@@ -255,45 +408,152 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
             )}
           </div>
 
-          <div className="flex items-center gap-1 shrink-0">
-            {hasMultipleDays && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => stepDay(-1)}
-                  aria-label="Poprzedni dzień kolędy"
-                  className="min-w-[38px] min-h-[38px] sm:min-w-[34px] sm:min-h-[34px] inline-flex items-center justify-center rounded-xl text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => stepDay(1)}
-                  aria-label="Następny dzień kolędy"
-                  className="min-w-[38px] min-h-[38px] sm:min-w-[34px] sm:min-h-[34px] inline-flex items-center justify-center rounded-xl text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </>
-            )}
-
+          {plannedDays.length === 0 && (
             <button
               type="button"
               onClick={() => setMinimized(true)}
               aria-label="Zwiń kartę podglądu"
               title="Zwiń kartę podglądu"
-              className="min-w-[38px] min-h-[38px] sm:min-w-[34px] sm:min-h-[34px] inline-flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+              className="min-w-[34px] min-h-[34px] inline-flex items-center justify-center rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors shrink-0"
             >
               <ChevronDown className="w-4 h-4" />
             </button>
-          </div>
+          )}
         </div>
 
-        {/* Clean START -> META Strip & Multi-Priest Switcher */}
+        {/* Travel Mode Switcher (Piechotą vs Autem) + Approach Time from Church + START -> META */}
         {routes.length > 0 && (
           <div className="px-3.5 pb-2.5 space-y-2">
+            {/* Compact Travel Mode & Approach Readout Row */}
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+              <div
+                role="group"
+                aria-label="Sposób dotarcia na kolędę"
+                className="inline-flex items-center rounded-xl bg-slate-100 p-0.5 shrink-0"
+              >
+                <button
+                  type="button"
+                  onClick={() => onChangeTravelMode('WALKING')}
+                  aria-pressed={travelMode === 'WALKING'}
+                  className={`min-h-[32px] px-2.5 py-1 rounded-lg text-[11px] font-semibold inline-flex items-center gap-1 transition-colors whitespace-nowrap ${
+                    travelMode === 'WALKING'
+                      ? 'bg-white text-slate-900 shadow-xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  <Footprints className="w-3.5 h-3.5 text-teal-700 shrink-0" />
+                  <span>Piechotą</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onChangeTravelMode('DRIVING')}
+                  aria-pressed={travelMode === 'DRIVING'}
+                  className={`min-h-[32px] px-2.5 py-1 rounded-lg text-[11px] font-semibold inline-flex items-center gap-1 transition-colors whitespace-nowrap ${
+                    travelMode === 'DRIVING'
+                      ? 'bg-white text-slate-900 shadow-xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  <Car className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                  <span>Autem</span>
+                </button>
+              </div>
+
+              <div className="min-w-0 text-right text-[11px] text-slate-600 tabular-nums truncate">
+                {approachMeters >= 30 ? (
+                  <span className="inline-flex items-center justify-end gap-1.5">
+                    <span
+                      aria-hidden="true"
+                      className={`w-2 h-2 rounded-full shrink-0 ${
+                        travelMode === 'DRIVING'
+                          ? 'bg-amber-600'
+                          : 'bg-teal-600'
+                      }`}
+                    />
+                    <span>
+                      {travelMode === 'DRIVING' ? 'Dojazd' : 'Dojście'}:{' '}
+                      <strong className="font-semibold text-slate-900">
+                        {approachMinutes} min
+                      </strong>
+                      <span className="text-slate-400">
+                        {' '}
+                        ({formatDistance(approachMeters)})
+                      </span>
+                    </span>
+                  </span>
+                ) : liveRoadMetrics?.isLoading ? (
+                  <span className="text-slate-400">Wyznaczanie drogi...</span>
+                ) : firstArrivalTime ? (
+                  <span>
+                    Start pod domem:{' '}
+                    <strong className="font-semibold text-slate-900">
+                      {firstArrivalTime}
+                    </strong>
+                  </span>
+                ) : null}
+              </div>
+            </div>
+
+            {/* Return Route Selector (META -> START / Kościół / Brak) + Real Road Metrics */}
+            <div className="flex items-center justify-between gap-2">
+              <div
+                role="group"
+                aria-label="Trasa powrotna z mety"
+                className="inline-flex items-center rounded-xl bg-slate-100 p-0.5 shrink-0"
+              >
+                {(
+                  [
+                    { id: 'start', label: 'Na START' },
+                    { id: 'parish', label: 'Kościół' },
+                    { id: 'none', label: 'Brak' },
+                  ] as const
+                ).map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => onChangeReturnTarget(opt.id)}
+                    aria-pressed={returnTarget === opt.id}
+                    className={`min-h-[30px] px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap ${
+                      returnTarget === opt.id
+                        ? 'bg-white text-slate-900 shadow-xs'
+                        : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="min-w-0 text-right text-[11px] text-slate-600 tabular-nums truncate">
+                {returnTarget === 'none' ? (
+                  <span className="text-slate-400">Bez powrotu</span>
+                ) : returnMeters >= 30 ? (
+                  <span className="inline-flex items-center justify-end gap-1.5">
+                    <span
+                      aria-hidden="true"
+                      className="w-2 h-2 rounded-full bg-violet-600 shrink-0"
+                    />
+                    <span>
+                      Powrót:{' '}
+                      <strong className="font-semibold text-slate-900">
+                        {returnMinutes} min
+                      </strong>
+                      <span className="text-slate-400">
+                        {' '}
+                        ({formatDistance(returnMeters)})
+                      </span>
+                    </span>
+                  </span>
+                ) : liveRoadMetrics?.isLoading ? (
+                  <span className="text-slate-400">Liczenie powrotu...</span>
+                ) : (
+                  <span className="text-slate-400">Powrót po drogach</span>
+                )}
+              </div>
+            </div>
+
             {activeStartAddress && (
-              <div className="flex items-center justify-between gap-2 text-[11px] text-slate-600 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-between gap-2 text-[11px] text-slate-600">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span className="w-2 h-2 rounded-full bg-emerald-600 shrink-0" />
                   <span className="font-semibold text-slate-900 truncate">
@@ -311,10 +571,14 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                 </div>
                 <span
                   className={`shrink-0 font-medium ${
-                    isExactRoute ? 'text-emerald-700' : 'text-slate-400'
+                    hasLiveRoadGeometry ? 'text-emerald-700' : 'text-slate-400'
                   }`}
                 >
-                  {isExactRoute ? 'Po drogach' : 'Szacunkowo'}
+                  {hasLiveRoadGeometry
+                    ? 'Po drogach'
+                    : liveRoadMetrics?.isLoading
+                      ? 'Trasa...'
+                      : 'Szacunkowo'}
                 </span>
               </div>
             )}
@@ -429,7 +693,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
           </div>
         )}
 
-        {/* Expandable Options Drawer (Day Switcher, Exact Road Routing, Houses, Labels, Lines, Street Filter) */}
+        {/* Expandable Options Drawer */}
         {expanded && (
           <div className="px-3.5 py-3 bg-slate-50/95 border-t border-slate-200 space-y-2.5">
             {plannedDays.length > 0 && (
@@ -447,7 +711,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                     <option key={d.date} value={d.date}>
                       {hasMultipleDays ? `${idx + 1}/${plannedDays.length} · ` : ''}
                       {formatPolishDateChip(d.date)} ({d.startTime}–
-                      {d.plannedEndTime || d.estimatedEndTime}) ·{' '}
+                      {d.estimatedEndTime || d.plannedEndTime}) ·{' '}
                       {formatHousesLabel(d.stops.length)}
                     </option>
                   ))}
@@ -483,7 +747,9 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                   <span>
                     {isComputingExact
                       ? 'Liczenie trasy...'
-                      : 'Wyznacz dokładnie po drogach'}
+                      : `Wyznacz po drogach (${
+                          travelMode === 'DRIVING' ? 'auto' : 'pieszo'
+                        })`}
                   </span>
                 </button>
               )}

@@ -124,6 +124,8 @@ import {
   ParishCenter,
   PlanConfig,
   PriestRouteResult,
+  ReturnRouteTarget,
+  RoadLegsLiveMetrics,
   SavedParishRecord,
   SeasonPlanConfig,
   StreetPickFeedback,
@@ -232,6 +234,10 @@ function ParishPlannerWorkspace({
     useState<MarkerLabelMode>('auto');
   const [showRouteLines, setShowRouteLines] = useState<boolean>(true);
   const [showHousesOnMap, setShowHousesOnMap] = useState<boolean>(false);
+  const [mapReturnTarget, setMapReturnTarget] =
+    useState<ReturnRouteTarget>('start');
+  const [liveRoadMetrics, setLiveRoadMetrics] =
+    useState<RoadLegsLiveMetrics | null>(null);
   const [focusedStreet, setFocusedStreet] = useState<string | null>(null);
   const [inspectedStreet, setInspectedStreet] = useState<string | null>(null);
   const [inspectedStreetRoadPath, setInspectedStreetRoadPath] = useState<
@@ -1994,15 +2000,22 @@ function ParishPlannerWorkspace({
   const plannedDays = seasonSummary.days;
   const unscheduledStops = seasonSummary.unscheduledStops;
 
-  // Auto-select today's kolęda date ONCE on initial parish load if today is scheduled
+  // Auto-select the active/nearest/latest planned kolęda day ONCE on initial parish load
+  // so the big map immediately displays the day's route (with 1-click switch to whole parish)
   useEffect(() => {
     const parishKey = activeParishId ?? parish?.name ?? null;
     if (!parishKey || plannedDays.length === 0) return;
     if (hasAutoSelectedTodayRef.current === parishKey) return;
     hasAutoSelectedTodayRef.current = parishKey;
-    const todayIso = formatIsoDateLocal(new Date());
-    if (!selectedDate && plannedDays.some((d) => d.date === todayIso)) {
-      setSelectedDate(todayIso);
+    if (!selectedDate) {
+      const todayIso = formatIsoDateLocal(new Date());
+      const targetDay =
+        plannedDays.find((d) => d.date === todayIso) ??
+        plannedDays.find((d) => d.date > todayIso) ??
+        plannedDays[plannedDays.length - 1];
+      if (targetDay) {
+        setSelectedDate(targetDay.date);
+      }
     }
   }, [activeParishId, parish?.name, plannedDays, selectedDate]);
 
@@ -3117,6 +3130,11 @@ function ParishPlannerWorkspace({
                       navigateToSection('routes');
                     }}
                     onViewDayOnMap={handleViewDayOnMap}
+                    onViewWholeParish={() => {
+                      setSelectedDate(null);
+                      setFocusedPriestId(null);
+                      setFocusedStreet(null);
+                    }}
                     onEditDay={handleEditDayInPlanner}
                   />
                 )}
@@ -3230,6 +3248,9 @@ function ParishPlannerWorkspace({
                     }}
                     onAddMissingOnStreet={handleAddMissingOnStreet}
                     onPlanCustomDay={handlePlanCustomDay}
+                    onChangeTravelMode={(mode) =>
+                      handleChangeConfig({ ...config, travelMode: mode })
+                    }
                     onDeleteDayPlan={handleDeleteDayPlan}
                     onGoToSetup={() => navigateToSetupTab('streets')}
                     onGoToSchedule={() => navigateToSection('schedule')}
@@ -3596,7 +3617,8 @@ function ParishPlannerWorkspace({
                   </div>
                 )}
 
-              {useGoogleMaps ? (
+              {(!isMobileViewport || mobilePane === 'map') && (
+                useGoogleMaps ? (
                 <ParishMap
                   parish={parish}
                   boundary={boundary}
@@ -3604,6 +3626,10 @@ function ParishPlannerWorkspace({
                   routes={displayedRoutes}
                   routeObjects={displayedRouteObjects}
                   isExactRoute={isExactRoute}
+                  travelMode={config.travelMode}
+                  returnTarget={mapReturnTarget}
+                  onRoadLegsMetrics={setLiveRoadMetrics}
+                  isVisible={!isMobileViewport || mobilePane === 'map'}
                   selectedDate={selectedDate}
                   focusedPriestId={focusedPriestId}
                   canEditBoundary={Boolean(parish)}
@@ -3656,6 +3682,9 @@ function ParishPlannerWorkspace({
                   stops={stops}
                   routes={displayedRoutes}
                   isExactRoute={isExactRoute}
+                  travelMode={config.travelMode}
+                  returnTarget={mapReturnTarget}
+                  onRoadLegsMetrics={setLiveRoadMetrics}
                   selectedDate={selectedDate}
                   focusedPriestId={focusedPriestId}
                   canEditBoundary={Boolean(parish)}
@@ -3701,7 +3730,7 @@ function ParishPlannerWorkspace({
                   onLassoSelectStops={handleLassoSelectStops}
                   onSelectStreetOverlay={handleSelectStreetOverlay}
                 />
-              )}
+              ))}
 
               {/* Post-Boundary 1-Step Banner */}
               {interactionMode === 'pan' &&
@@ -3933,6 +3962,13 @@ function ParishPlannerWorkspace({
                     routes={displayedRoutes}
                     isExactRoute={isExactRoute}
                     isComputingExact={isComputing}
+                    travelMode={config.travelMode}
+                    onChangeTravelMode={(mode) =>
+                      handleChangeConfig({ ...config, travelMode: mode })
+                    }
+                    returnTarget={mapReturnTarget}
+                    onChangeReturnTarget={setMapReturnTarget}
+                    liveRoadMetrics={liveRoadMetrics}
                     focusedPriestId={focusedPriestId}
                     availableStreets={availableMapStreets}
                     focusedStreet={focusedStreet}
