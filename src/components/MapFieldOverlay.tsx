@@ -8,10 +8,10 @@ import {
   CheckCircle2,
   Crosshair,
   ExternalLink,
-  Moon,
+  List,
   RotateCcw,
+  Search,
   StickyNote,
-  Sun,
   UserX,
   X,
 } from 'lucide-react';
@@ -32,10 +32,8 @@ interface MapFieldOverlayProps {
   routes: PriestRouteResult[];
   fieldPriestId: number;
   activeFieldStopId: string | null;
-  nightMode: boolean;
   onChangePriest: (priestId: number) => void;
   onSelectActiveStop: (stopId: string) => void;
-  onToggleNightMode: () => void;
   onUpdateStopStatus: (stopId: string, status: UnitVisitStatus) => void;
   onUpdateStopDetails: (stopId: string, patch: Partial<VisitStop>) => void;
   onOpenBlockUnits: (stopId: string) => void;
@@ -59,10 +57,8 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
   routes,
   fieldPriestId,
   activeFieldStopId,
-  nightMode,
   onChangePriest,
   onSelectActiveStop,
-  onToggleNightMode,
   onUpdateStopStatus,
   onUpdateStopDetails,
   onOpenBlockUnits,
@@ -71,6 +67,8 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
 }) => {
   const [noteOpen, setNoteOpen] = useState(false);
   const [draftNote, setDraftNote] = useState('');
+  const [jumpListOpen, setJumpListOpen] = useState(false);
+  const [jumpQuery, setJumpQuery] = useState('');
 
   const activeRoute = useMemo(
     () =>
@@ -105,6 +103,17 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
     if (!activeRoute) return 0;
     return activeRoute.orderedStops.filter(isStopCompletedInField).length;
   }, [activeRoute]);
+
+  const filteredJumpStops = useMemo(() => {
+    if (!activeRoute) return [];
+    const q = jumpQuery.trim().toLowerCase();
+    if (!q) return activeRoute.orderedStops;
+    return activeRoute.orderedStops.filter((item) => {
+      const hay =
+        `#${item.orderIndex} ${item.stop.address || ''} ${item.stop.label || ''} ${item.stop.notes || ''}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [activeRoute, jumpQuery]);
 
   if (!activeRoute || !activeItem) return null;
 
@@ -157,19 +166,9 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
   };
 
   return (
-    <div
-      className={`no-print absolute bottom-3 left-2.5 right-2.5 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[440px] sm:max-w-[calc(100%-24px)] z-[490] rounded-2xl border shadow-2xl backdrop-blur-md transition-colors ${
-        nightMode
-          ? 'bg-slate-950/95 border-slate-700 text-slate-100'
-          : 'bg-white/95 dark:bg-slate-950/95 border-amber-300 dark:border-slate-700 text-slate-900 dark:text-slate-100'
-      }`}
-    >
-      {/* Top strip: Priest tabs + progress + Night toggle + Close */}
-      <div
-        className={`px-3 py-2 border-b flex items-center justify-between gap-2 ${
-          nightMode ? 'border-slate-800' : 'border-slate-200 dark:border-slate-800'
-        }`}
-      >
+    <div className="no-print absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-2.5 right-2.5 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[448px] sm:max-w-[calc(100%-24px)] z-[490] rounded-2xl border border-amber-300 dark:border-slate-700 bg-white/95 dark:bg-slate-950/95 text-slate-900 dark:text-slate-100 shadow-2xl backdrop-blur-md transition-colors overflow-hidden">
+      {/* Top strip: Priest tabs + progress + Quick Jump List + Close */}
+      <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0 overflow-x-auto">
           {routes.length > 1 ? (
             routes.map((r) => {
@@ -181,12 +180,8 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
                   onClick={() => onChangePriest(r.priestId)}
                   className={`min-h-[30px] px-2.5 py-0.5 rounded-lg text-[11px] font-semibold inline-flex items-center gap-1 whitespace-nowrap shrink-0 transition-colors ${
                     active
-                      ? nightMode
-                        ? 'bg-amber-600 text-white'
-                        : 'bg-slate-900 dark:bg-amber-600 text-white'
-                      : nightMode
-                        ? 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      ? 'bg-slate-900 dark:bg-amber-600 text-white'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   <span
@@ -198,19 +193,11 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               );
             })
           ) : (
-            <span
-              className={`text-[11px] font-semibold uppercase tracking-wide ${
-                nightMode ? 'text-amber-400' : 'text-amber-800 dark:text-amber-400'
-              }`}
-            >
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-400">
               Kolęda w terenie
             </span>
           )}
-          <span
-            className={`text-[11px] font-mono tabular-nums whitespace-nowrap ${
-              nightMode ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'
-            }`}
-          >
+          <span className="text-[11px] font-mono tabular-nums whitespace-nowrap text-slate-500 dark:text-slate-400">
             {completedCount}/{totalStops}
           </span>
         </div>
@@ -218,35 +205,113 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
         <div className="flex items-center gap-1 shrink-0">
           <button
             type="button"
-            onClick={onToggleNightMode}
-            title={nightMode ? 'Tryb dzienny' : 'Tryb wieczorny (ciemny)'}
-            aria-label={nightMode ? 'Tryb dzienny' : 'Tryb wieczorny'}
-            className={`min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg transition-colors ${
-              nightMode
-                ? 'bg-slate-800 text-amber-300 hover:bg-slate-700'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-amber-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+            onClick={() => {
+              setJumpListOpen((v) => !v);
+              setNoteOpen(false);
+            }}
+            aria-expanded={jumpListOpen}
+            title="Skocz do adresu lub numeru domu"
+            className={`min-h-[32px] px-2 py-1 inline-flex items-center gap-1 rounded-lg text-[11px] font-semibold transition-colors ${
+              jumpListOpen
+                ? 'bg-slate-900 dark:bg-amber-600 text-white'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
-            {nightMode ? (
-              <Sun className="w-3.5 h-3.5" />
-            ) : (
-              <Moon className="w-3.5 h-3.5" />
-            )}
+            <List className="w-3.5 h-3.5" />
+            <span>Szukaj</span>
           </button>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Zamknij kartę terenową"
-            className={`min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg transition-colors ${
-              nightMode
-                ? 'text-slate-400 hover:text-white hover:bg-slate-800'
-                : 'text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
+            aria-label="Zamknij tryb w terenie"
+            className="min-w-[32px] min-h-[32px] inline-flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
       </div>
+
+      {/* Expandable Quick Jump-to-House Drawer */}
+      {jumpListOpen && (
+        <div className="px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 space-y-2">
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={jumpQuery}
+              onChange={(e) => setJumpQuery(e.target.value)}
+              placeholder="Skocz do numeru domu lub ulicy (np. 14)..."
+              autoFocus
+              className="w-full min-h-[38px] pl-8 pr-8 py-1 text-base sm:text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-amber-600"
+            />
+            {jumpQuery && (
+              <button
+                type="button"
+                onClick={() => setJumpQuery('')}
+                aria-label="Wyczyść szukanie"
+                className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 absolute right-1 top-1/2 -translate-y-1/2"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          <div className="max-h-44 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 divide-y divide-slate-100 dark:divide-slate-800">
+            {filteredJumpStops.length === 0 ? (
+              <div className="p-3 text-center text-xs text-slate-500 dark:text-slate-400">
+                Brak pasującego adresu na dzisiejszej trasie.
+              </div>
+            ) : (
+              filteredJumpStops.map((item) => {
+                const active = item.stop.id === activeItem.stop.id;
+                const st: UnitVisitStatus = item.stop.visitStatus ?? 'pending';
+                const itemIsBlock = Boolean(
+                  item.stop.isMultiUnit ||
+                    (item.stop.units && item.stop.units.length > 0)
+                );
+                return (
+                  <button
+                    key={item.stop.id}
+                    type="button"
+                    onClick={() => {
+                      onSelectActiveStop(item.stop.id);
+                      onCenterOnStop(item.stop.id);
+                      setJumpListOpen(false);
+                      setJumpQuery('');
+                    }}
+                    className={`w-full min-h-[40px] px-2.5 py-1.5 text-left flex items-center justify-between gap-2 transition-colors ${
+                      active
+                        ? 'bg-amber-50 dark:bg-amber-950/50'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-900'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className={`w-5 h-5 text-[11px] font-mono font-bold text-white flex items-center justify-center shrink-0 tabular-nums ${
+                          itemIsBlock ? 'rounded-md' : 'rounded-full'
+                        }`}
+                        style={{ backgroundColor: activeRoute.color }}
+                      >
+                        {item.orderIndex}
+                      </span>
+                      <span className="text-xs font-medium text-slate-900 dark:text-slate-100 truncate">
+                        {item.stop.address || item.stop.label}
+                      </span>
+                    </div>
+                    <span
+                      className={`px-1.5 py-0.5 rounded border text-[11px] font-semibold shrink-0 ${UNIT_STATUS_META[st].badgeClass}`}
+                    >
+                      {itemIsBlock
+                        ? `Blok ${item.stop.units?.filter((u) => u.status === 'accepted').length ?? 0}/${item.stop.units?.length || item.stop.unitsCount || 0}`
+                        : UNIT_STATUS_META[st].shortLabel}
+                    </span>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Main Active House Info */}
       <div className="p-3 space-y-2.5">
@@ -267,13 +332,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span
-                  className={`text-[11px] font-mono tabular-nums ${
-                    nightMode
-                      ? 'text-amber-300'
-                      : 'text-amber-800 dark:text-amber-300 font-semibold'
-                  }`}
-                >
+                <span className="text-[11px] font-mono tabular-nums text-amber-800 dark:text-amber-300 font-semibold">
                   ~{activeItem.arrivalTime}
                 </span>
                 {activeItem.stop.permanentDecline && (
@@ -299,11 +358,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
                 {activeItem.stop.address || activeItem.stop.label}
               </div>
               {activeItem.stop.notes && (
-                <div
-                  className={`text-xs truncate mt-0.5 ${
-                    nightMode ? 'text-slate-300' : 'text-slate-600 dark:text-slate-300'
-                  }`}
-                >
+                <div className="text-xs truncate mt-0.5 text-slate-600 dark:text-slate-300">
                   {activeItem.stop.notes}
                 </div>
               )}
@@ -316,27 +371,22 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               onClick={() => onCenterOnStop(activeItem.stop.id)}
               title="Pokaż dom na środku mapy"
               aria-label="Wycentruj na mapie"
-              className={`min-w-[36px] min-h-[36px] inline-flex items-center justify-center rounded-lg border ${
-                nightMode
-                  ? 'border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800'
-                  : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
+              className="min-w-[36px] min-h-[36px] inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               <Crosshair className="w-4 h-4" />
             </button>
             <button
               type="button"
-              onClick={() => setNoteOpen((v) => !v)}
+              onClick={() => {
+                setNoteOpen((v) => !v);
+                setJumpListOpen(false);
+              }}
               title="Notatka lub stała odmowa"
               aria-label="Notatka lub stała odmowa"
               className={`min-w-[36px] min-h-[36px] inline-flex items-center justify-center rounded-lg border ${
                 noteOpen || activeItem.stop.notes || activeItem.stop.permanentDecline
-                  ? nightMode
-                    ? 'border-amber-500 bg-amber-950/60 text-amber-300'
-                    : 'border-amber-300 dark:border-amber-500 bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300'
-                  : nightMode
-                    ? 'border-slate-700 bg-slate-900 text-slate-300 hover:bg-slate-800'
-                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'border-amber-300 dark:border-amber-500 bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300'
+                  : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               <StickyNote className="w-4 h-4" />
@@ -346,13 +396,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
 
         {/* Inline quick note + permanent decline drawer */}
         {noteOpen && (
-          <div
-            className={`p-2.5 rounded-xl border space-y-2 ${
-              nightMode
-                ? 'bg-slate-900 border-slate-700'
-                : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700'
-            }`}
-          >
+          <div className="p-2.5 rounded-xl border bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 space-y-2">
             <div className="flex items-center gap-1.5">
               <input
                 type="text"
@@ -365,11 +409,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
                   }
                 }}
                 placeholder="Notatka (np. rodzina, chory, po 18:00)..."
-                className={`flex-1 min-w-0 min-h-[38px] px-2.5 py-1 text-base sm:text-xs rounded-lg border focus:outline-none ${
-                  nightMode
-                    ? 'bg-slate-950 border-slate-700 text-white placeholder:text-slate-500 focus:border-amber-500'
-                    : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-amber-600'
-                }`}
+                className="flex-1 min-w-0 min-h-[38px] px-2.5 py-1 text-base sm:text-xs rounded-lg border bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-amber-600"
               />
               <button
                 type="button"
@@ -393,13 +433,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
                 }
                 className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-red-600"
               />
-              <span
-                className={
-                  nightMode
-                    ? 'text-red-300'
-                    : 'text-red-800 dark:text-red-300 font-medium'
-                }
-              >
+              <span className="text-red-800 dark:text-red-300 font-medium">
                 Stała odmowa (pomiń w planach w kolejnych latach)
               </span>
             </label>
@@ -424,9 +458,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               className={`min-h-[46px] px-1.5 py-1.5 text-[11px] font-semibold rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-colors ${
                 currentStatus === 'accepted'
                   ? 'bg-emerald-600 border-emerald-500 text-white'
-                  : nightMode
-                    ? 'bg-emerald-950/70 border-emerald-800 text-emerald-200 hover:bg-emerald-900'
-                    : 'bg-emerald-50 dark:bg-emerald-950/70 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-emerald-900'
+                  : 'bg-emerald-50 dark:bg-emerald-950/70 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-emerald-900'
               }`}
             >
               <CheckCircle2 className="w-4 h-4" />
@@ -438,9 +470,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               className={`min-h-[46px] px-1.5 py-1.5 text-[11px] font-semibold rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-colors ${
                 currentStatus === 'absent'
                   ? 'bg-amber-600 border-amber-500 text-white'
-                  : nightMode
-                    ? 'bg-amber-950/70 border-amber-800 text-amber-200 hover:bg-amber-900'
-                    : 'bg-amber-50 dark:bg-amber-950/70 border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900'
+                  : 'bg-amber-50 dark:bg-amber-950/70 border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900'
               }`}
             >
               <UserX className="w-4 h-4" />
@@ -452,9 +482,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               className={`min-h-[46px] px-1.5 py-1.5 text-[11px] font-semibold rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-colors ${
                 currentStatus === 'declined'
                   ? 'bg-red-600 border-red-500 text-white'
-                  : nightMode
-                    ? 'bg-red-950/70 border-red-800 text-red-200 hover:bg-red-900'
-                    : 'bg-red-50 dark:bg-red-950/70 border-red-200 dark:border-red-800 text-red-900 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-900'
+                  : 'bg-red-50 dark:bg-red-950/70 border-red-200 dark:border-red-800 text-red-900 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-900'
               }`}
             >
               <Ban className="w-4 h-4" />
@@ -466,9 +494,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               className={`min-h-[46px] px-1.5 py-1.5 text-[11px] font-semibold rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-colors ${
                 currentStatus === 'invited'
                   ? 'bg-sky-600 border-sky-500 text-white'
-                  : nightMode
-                    ? 'bg-sky-950/70 border-sky-800 text-sky-200 hover:bg-sky-900'
-                    : 'bg-sky-50 dark:bg-sky-950/70 border-sky-200 dark:border-sky-800 text-sky-900 dark:text-sky-200 hover:bg-sky-100 dark:hover:bg-sky-900'
+                  : 'bg-sky-50 dark:bg-sky-950/70 border-sky-200 dark:border-sky-800 text-sky-900 dark:text-sky-200 hover:bg-sky-100 dark:hover:bg-sky-900'
               }`}
             >
               <BellRing className="w-4 h-4" />
@@ -487,11 +513,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               onSelectActiveStop(prevItem.stop.id);
               onCenterOnStop(prevItem.stop.id);
             }}
-            className={`min-h-[36px] px-2.5 py-1 rounded-lg font-medium inline-flex items-center gap-1 disabled:opacity-35 ${
-              nightMode
-                ? 'bg-slate-900 text-slate-200 hover:bg-slate-800 border border-slate-700'
-                : 'bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 dark:border dark:border-slate-700'
-            }`}
+            className="min-h-[36px] px-2.5 py-1 rounded-lg font-medium inline-flex items-center gap-1 disabled:opacity-35 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 dark:border dark:border-slate-700"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Poprzedni</span>
@@ -502,11 +524,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               type="button"
               onClick={() => onUpdateStopStatus(activeItem.stop.id, 'pending')}
               title="Przywróć status Oczekuje"
-              className={`min-h-[36px] px-2.5 py-1 rounded-lg font-medium inline-flex items-center gap-1 ${
-                nightMode
-                  ? 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-700'
-                  : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 dark:border dark:border-slate-700'
-              }`}
+              className="min-h-[36px] px-2.5 py-1 rounded-lg font-medium inline-flex items-center gap-1 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 dark:border dark:border-slate-700"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
@@ -517,11 +535,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               href={navUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className={`min-h-[36px] px-2.5 py-1 rounded-lg font-medium inline-flex items-center gap-1 border ${
-                nightMode
-                  ? 'bg-amber-950/60 border-amber-700 text-amber-200 hover:bg-amber-900/70'
-                  : 'bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-700 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/70'
-              }`}
+              className="min-h-[36px] px-2.5 py-1 rounded-lg font-medium inline-flex items-center gap-1 border bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-700 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/70"
             >
               <span>Nawiguj</span>
               <ExternalLink className="w-3 h-3" />
@@ -536,11 +550,7 @@ export const MapFieldOverlay: React.FC<MapFieldOverlayProps> = ({
               onSelectActiveStop(nextItem.stop.id);
               onCenterOnStop(nextItem.stop.id);
             }}
-            className={`min-h-[36px] px-2.5 py-1 rounded-lg font-semibold inline-flex items-center gap-1 disabled:opacity-35 ml-auto ${
-              nightMode
-                ? 'bg-slate-800 text-white hover:bg-slate-700 border border-slate-600'
-                : 'bg-slate-900 dark:bg-amber-700 text-white hover:bg-slate-800 dark:hover:bg-amber-600'
-            }`}
+            className="min-h-[36px] px-2.5 py-1 rounded-lg font-semibold inline-flex items-center gap-1 disabled:opacity-35 ml-auto bg-slate-900 dark:bg-amber-700 text-white hover:bg-slate-800 dark:hover:bg-amber-600"
           >
             <span>
               {nextItem ? `Następny #${nextItem.orderIndex}` : 'Koniec'}

@@ -16,6 +16,7 @@ import {
   Plus,
   Route,
   Search,
+  SlidersHorizontal,
   Trash2,
   X,
 } from 'lucide-react';
@@ -206,6 +207,7 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
     null
   );
   const [showCreatorMatchedList, setShowCreatorMatchedList] = useState(false);
+  const [showAdvancedStep3, setShowAdvancedStep3] = useState(false);
 
   const unassignedStops = useMemo(
     () => stops.filter((s) => !(s.visitDate ?? '').trim()),
@@ -612,8 +614,34 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Compact Header (house & block config lives cleanly inside Parafia i ulice) */}
-      <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 space-y-2 bg-white dark:bg-slate-900 shrink-0">
+      {/* Compact Header with Unified Planuj Switcher (Jeden dzień | Cały okres) */}
+      <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 space-y-2.5 bg-white dark:bg-slate-900 shrink-0">
+        {onGoToSchedule && (
+          <div
+            role="tablist"
+            aria-label="Tryb planowania kolędy"
+            className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={true}
+              className="min-h-[36px] px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs text-xs font-semibold transition-colors"
+            >
+              Jeden dzień
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={false}
+              onClick={onGoToSchedule}
+              className="min-h-[36px] px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium transition-colors tabular-nums"
+            >
+              Cały okres{plannedDays.length > 0 ? ` (${plannedDays.length})` : ''}
+            </button>
+          </div>
+        )}
+
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
@@ -639,15 +667,6 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
             >
               Domy i bloki
             </button>
-            {onGoToSchedule && plannedDays.length > 0 && (
-              <button
-                type="button"
-                onClick={onGoToSchedule}
-                className="text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white whitespace-nowrap min-h-[32px] inline-flex items-center"
-              >
-                Okres ({plannedDays.length}) →
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -1148,255 +1167,295 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
 
               {effectiveSingleStreets.length === 0 ? (
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                  Wybierz przynajmniej jedną ulicę powyżej, aby wybrać numery
-                  (wszystkie, parzyste lub nieparzyste) oraz kierunek przejścia
-                  od początku do końca ulicy.
+                  Wybierz przynajmniej jedną ulicę powyżej, aby ustawić kierunek
+                  przejścia i zapisać plan dnia.
                 </p>
-              ) : (
-                <>
-                  {/* Strona ulicy: Wszystkie / Parzyste / Nieparzyste z auto-wykrytymi krańcami */}
-                  <div>
-                    <div className="flex items-center justify-between gap-2 mb-1.5">
-                      <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300">
-                        Strona ulicy (wykryte numery)
+              ) : (() => {
+                const firstLbl =
+                  matchingBuildingStats.matchingBounds.minLabel ||
+                  activeParityBounds.minLabel ||
+                  '1';
+                const lastLbl =
+                  matchingBuildingStats.matchingBounds.maxLabel ||
+                  activeParityBounds.maxLabel ||
+                  'koniec';
+                const multiNote =
+                  effectiveSingleStreets.length > 1
+                    ? 'każda ul. rosnąco'
+                    : `nr ${firstLbl} → ${lastLbl}`;
+                const multiDescNote =
+                  effectiveSingleStreets.length > 1
+                    ? 'każda ul. malejąco'
+                    : `nr ${lastLbl} → ${firstLbl}`;
+                const canSideBySide =
+                  singleParity === 'all' &&
+                  selectedStreetsBounds.even.count > 0 &&
+                  selectedStreetsBounds.odd.count > 0;
+                const activeAdvancedCount =
+                  (singleParity !== 'all' ? 1 : 0) +
+                  (parsedRangeBounds.hasFilter ? 1 : 0) +
+                  (singleStartDirection === 'side_by_side' ||
+                  singleStartDirection === 'from_stop'
+                    ? 1
+                    : 0);
+                const advancedExpanded =
+                  showAdvancedStep3 || activeAdvancedCount > 0;
+
+                return (
+                  <>
+                    {/* Główne 2 kierunki widoczne od razu */}
+                    <div>
+                      <span className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1.5">
+                        Kierunek przejścia
                       </span>
-                      {selectedStreetSummaries.length === 1 &&
-                        activeParityBounds.minLabel && (
-                          <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 font-semibold tabular-nums">
-                            {activeParityBounds.minLabel ===
-                            activeParityBounds.maxLabel
-                              ? `nr ${activeParityBounds.minLabel}`
-                              : `nr ${activeParityBounds.minLabel}–${activeParityBounds.maxLabel}`}
-                          </span>
-                        )}
-                    </div>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {(
-                        [
-                          { id: 'all', label: 'Wszystkie' },
-                          { id: 'even', label: 'Parzyste' },
-                          { id: 'odd', label: 'Nieparzyste' },
-                        ] as const
-                      ).map((opt) => {
-                        const b = selectedStreetsBounds[opt.id];
-                        const disabled = opt.id !== 'all' && b.count === 0;
-                        const active = singleParity === opt.id;
-                        const rangeStr = b.minLabel
-                          ? b.minLabel === b.maxLabel
-                            ? `nr ${b.minLabel}`
-                            : `${b.minLabel}–${b.maxLabel}`
-                          : 'brak';
-                        return (
-                          <button
-                            key={opt.id}
-                            type="button"
-                            disabled={disabled}
-                            onClick={() => {
-                              setSingleParity(opt.id);
-                              setSingleRangeFrom('');
-                              setSingleRangeTo('');
-                              setSingleStartStopId('');
-                              if (
-                                opt.id !== 'all' &&
-                                singleStartDirection === 'side_by_side'
-                              ) {
-                                setSingleStartDirection('asc');
-                              }
-                            }}
-                            className={`min-h-[50px] px-2 py-1.5 rounded-xl border text-center flex flex-col items-center justify-center gap-0.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
-                              active
-                                ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
-                                : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setSingleStartDirection('asc')}
+                          className={`min-h-[54px] px-2.5 py-2 rounded-xl border text-left flex items-start gap-2 transition-colors ${
+                            singleStartDirection === 'asc'
+                              ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                              : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
+                          }`}
+                        >
+                          <ArrowUp
+                            className={`w-4 h-4 shrink-0 mt-0.5 ${
+                              singleStartDirection === 'asc'
+                                ? 'text-amber-400 dark:text-amber-600'
+                                : 'text-amber-700 dark:text-amber-400'
                             }`}
-                          >
-                            <span className="text-xs font-semibold">
-                              {opt.label}
-                            </span>
-                            <span
-                              className={`text-[11px] font-mono tabular-nums ${
-                                active
-                                  ? 'text-amber-300 dark:text-amber-700'
+                          />
+                          <div className="min-w-0">
+                            <div className="text-xs font-semibold leading-tight">
+                              Od początku do końca
+                            </div>
+                            <div
+                              className={`text-[11px] font-mono tabular-nums mt-0.5 truncate ${
+                                singleStartDirection === 'asc'
+                                  ? 'text-amber-200 dark:text-amber-800'
                                   : 'text-slate-500 dark:text-slate-400'
                               }`}
                             >
-                              {rangeStr} ({b.count})
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+                              {multiNote}
+                            </div>
+                          </div>
+                        </button>
 
-                  {/* Opcjonalny zakres numerów od-do z automatycznym wykryciem min i max */}
-                  {activeParityBounds.minNum !== null &&
-                    activeParityBounds.maxNum !== null &&
-                    activeParityBounds.minNum !== activeParityBounds.maxNum && (
-                      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 space-y-1.5">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                            Zakres numerów (opcjonalnie):
-                          </span>
-                          {parsedRangeBounds.hasFilter ? (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSingleRangeFrom('');
-                                setSingleRangeTo('');
-                                setSingleStartStopId('');
-                              }}
-                              className="text-[11px] font-semibold text-amber-800 dark:text-amber-400 hover:underline"
+                        <button
+                          type="button"
+                          onClick={() => setSingleStartDirection('desc')}
+                          className={`min-h-[54px] px-2.5 py-2 rounded-xl border text-left flex items-start gap-2 transition-colors ${
+                            singleStartDirection === 'desc'
+                              ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                              : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
+                          }`}
+                        >
+                          <ArrowDown
+                            className={`w-4 h-4 shrink-0 mt-0.5 ${
+                              singleStartDirection === 'desc'
+                                ? 'text-amber-400 dark:text-amber-600'
+                                : 'text-amber-700 dark:text-amber-400'
+                            }`}
+                          />
+                          <div className="min-w-0">
+                            <div className="text-xs font-semibold leading-tight">
+                              Od końca do początku
+                            </div>
+                            <div
+                              className={`text-[11px] font-mono tabular-nums mt-0.5 truncate ${
+                                singleStartDirection === 'desc'
+                                  ? 'text-amber-200 dark:text-amber-800'
+                                  : 'text-slate-500 dark:text-slate-400'
+                              }`}
                             >
-                              Cała ulica ({activeParityBounds.minLabel}–
-                              {activeParityBounds.maxLabel})
-                            </button>
-                          ) : (
-                            <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 tabular-nums">
-                              cała: nr {activeParityBounds.minLabel}–
-                              {activeParityBounds.maxLabel}
+                              {multiDescNote}
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Rzadsze filtry (parzyste/nieparzyste, zakres numerów, konkretny dom START) zwinięte domyślnie */}
+                    <div className="space-y-2.5">
+                      <button
+                        type="button"
+                        aria-expanded={advancedExpanded}
+                        onClick={() => setShowAdvancedStep3((v) => !v)}
+                        className="w-full min-h-[38px] px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 flex items-center justify-between gap-2 transition-colors"
+                      >
+                        <span className="inline-flex items-center gap-1.5 min-w-0">
+                          <SlidersHorizontal className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
+                          <span className="truncate">
+                            Opcje zaawansowane (parzyste, zakres nr, START)
+                          </span>
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 shrink-0">
+                          {activeAdvancedCount > 0 && (
+                            <span className="px-1.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-300 text-[10px] font-bold tabular-nums">
+                              {activeAdvancedCount}
                             </span>
                           )}
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 min-h-[38px]">
-                            <label
-                              htmlFor="single-range-from"
-                              className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0"
-                            >
-                              Od nr
-                            </label>
-                            <input
-                              id="single-range-from"
-                              type="number"
-                              inputMode="numeric"
-                              min={1}
-                              value={singleRangeFrom}
-                              onChange={(e) => {
-                                setSingleRangeFrom(e.target.value);
-                                setSingleStartStopId('');
-                              }}
-                              placeholder={String(activeParityBounds.minNum)}
-                              className="w-full min-w-0 bg-transparent text-base sm:text-xs font-mono tabular-nums text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none text-right"
-                            />
-                          </div>
-                          <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 min-h-[38px]">
-                            <label
-                              htmlFor="single-range-to"
-                              className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0"
-                            >
-                              Do nr
-                            </label>
-                            <input
-                              id="single-range-to"
-                              type="number"
-                              inputMode="numeric"
-                              min={1}
-                              value={singleRangeTo}
-                              onChange={(e) => {
-                                setSingleRangeTo(e.target.value);
-                                setSingleStartStopId('');
-                              }}
-                              placeholder={String(activeParityBounds.maxNum)}
-                              className="w-full min-w-0 bg-transparent text-base sm:text-xs font-mono tabular-nums text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none text-right"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                          <ChevronDown
+                            className={`w-3.5 h-3.5 text-slate-400 transition-transform ${
+                              advancedExpanded ? 'rotate-180' : ''
+                            }`}
+                          />
+                        </span>
+                      </button>
 
-                  {/* Kierunek kolędy: czytelne kafelki z automatycznymi numerami początku i końca */}
-                  <div>
-                    <span className="block text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1.5">
-                      Kierunek kolędy na ulicy
-                    </span>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {(() => {
-                        const firstLbl =
-                          matchingBuildingStats.matchingBounds.minLabel ||
-                          activeParityBounds.minLabel ||
-                          '1';
-                        const lastLbl =
-                          matchingBuildingStats.matchingBounds.maxLabel ||
-                          activeParityBounds.maxLabel ||
-                          'koniec';
-                        const multiNote =
-                          effectiveSingleStreets.length > 1
-                            ? 'każda ul. rosnąco'
-                            : `nr ${firstLbl} → ${lastLbl}`;
-                        const multiDescNote =
-                          effectiveSingleStreets.length > 1
-                            ? 'każda ul. malejąco'
-                            : `nr ${lastLbl} → ${firstLbl}`;
-                        const canSideBySide =
-                          singleParity === 'all' &&
-                          selectedStreetsBounds.even.count > 0 &&
-                          selectedStreetsBounds.odd.count > 0;
+                      {advancedExpanded && (
+                        <div className="space-y-3 pt-1">
+                          {/* Strona ulicy: Wszystkie / Parzyste / Nieparzyste */}
+                          <div>
+                            <div className="flex items-center justify-between gap-2 mb-1.5">
+                              <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300">
+                                Strona ulicy (wykryte numery)
+                              </span>
+                              {selectedStreetSummaries.length === 1 &&
+                                activeParityBounds.minLabel && (
+                                  <span className="text-[11px] font-mono text-amber-800 dark:text-amber-400 font-semibold tabular-nums">
+                                    {activeParityBounds.minLabel ===
+                                    activeParityBounds.maxLabel
+                                      ? `nr ${activeParityBounds.minLabel}`
+                                      : `nr ${activeParityBounds.minLabel}–${activeParityBounds.maxLabel}`}
+                                  </span>
+                                )}
+                            </div>
+                            <div className="grid grid-cols-3 gap-1.5">
+                              {(
+                                [
+                                  { id: 'all', label: 'Wszystkie' },
+                                  { id: 'even', label: 'Parzyste' },
+                                  { id: 'odd', label: 'Nieparzyste' },
+                                ] as const
+                              ).map((opt) => {
+                                const b = selectedStreetsBounds[opt.id];
+                                const disabled = opt.id !== 'all' && b.count === 0;
+                                const active = singleParity === opt.id;
+                                const rangeStr = b.minLabel
+                                  ? b.minLabel === b.maxLabel
+                                    ? `nr ${b.minLabel}`
+                                    : `${b.minLabel}–${b.maxLabel}`
+                                  : 'brak';
+                                return (
+                                  <button
+                                    key={opt.id}
+                                    type="button"
+                                    disabled={disabled}
+                                    onClick={() => {
+                                      setSingleParity(opt.id);
+                                      setSingleRangeFrom('');
+                                      setSingleRangeTo('');
+                                      setSingleStartStopId('');
+                                      if (
+                                        opt.id !== 'all' &&
+                                        singleStartDirection === 'side_by_side'
+                                      ) {
+                                        setSingleStartDirection('asc');
+                                      }
+                                    }}
+                                    className={`min-h-[50px] px-2 py-1.5 rounded-xl border text-center flex flex-col items-center justify-center gap-0.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                                      active
+                                        ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                                        : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                    }`}
+                                  >
+                                    <span className="text-xs font-semibold">
+                                      {opt.label}
+                                    </span>
+                                    <span
+                                      className={`text-[11px] font-mono tabular-nums ${
+                                        active
+                                          ? 'text-amber-300 dark:text-amber-700'
+                                          : 'text-slate-500 dark:text-slate-400'
+                                      }`}
+                                    >
+                                      {rangeStr} ({b.count})
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
 
-                        return (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => setSingleStartDirection('asc')}
-                              className={`min-h-[54px] px-2.5 py-2 rounded-xl border text-left flex items-start gap-2 transition-colors ${
-                                singleStartDirection === 'asc'
-                                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
-                                  : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
-                              }`}
-                            >
-                              <ArrowUp
-                                className={`w-4 h-4 shrink-0 mt-0.5 ${
-                                  singleStartDirection === 'asc'
-                                    ? 'text-amber-400 dark:text-amber-600'
-                                    : 'text-amber-700 dark:text-amber-400'
-                                }`}
-                              />
-                              <div className="min-w-0">
-                                <div className="text-xs font-semibold leading-tight">
-                                  Od początku do końca
+                          {/* Opcjonalny zakres numerów od-do */}
+                          {activeParityBounds.minNum !== null &&
+                            activeParityBounds.maxNum !== null &&
+                            activeParityBounds.minNum !== activeParityBounds.maxNum && (
+                              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 space-y-1.5">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                                    Zakres numerów (opcjonalnie):
+                                  </span>
+                                  {parsedRangeBounds.hasFilter ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setSingleRangeFrom('');
+                                        setSingleRangeTo('');
+                                        setSingleStartStopId('');
+                                      }}
+                                      className="text-[11px] font-semibold text-amber-800 dark:text-amber-400 hover:underline"
+                                    >
+                                      Cała ulica ({activeParityBounds.minLabel}–
+                                      {activeParityBounds.maxLabel})
+                                    </button>
+                                  ) : (
+                                    <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 tabular-nums">
+                                      cała: nr {activeParityBounds.minLabel}–
+                                      {activeParityBounds.maxLabel}
+                                    </span>
+                                  )}
                                 </div>
-                                <div
-                                  className={`text-[11px] font-mono tabular-nums mt-0.5 truncate ${
-                                    singleStartDirection === 'asc'
-                                      ? 'text-amber-200 dark:text-amber-800'
-                                      : 'text-slate-500 dark:text-slate-400'
-                                  }`}
-                                >
-                                  {multiNote}
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 min-h-[38px]">
+                                    <label
+                                      htmlFor="single-range-from"
+                                      className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0"
+                                    >
+                                      Od nr
+                                    </label>
+                                    <input
+                                      id="single-range-from"
+                                      type="number"
+                                      inputMode="numeric"
+                                      min={1}
+                                      value={singleRangeFrom}
+                                      onChange={(e) => {
+                                        setSingleRangeFrom(e.target.value);
+                                        setSingleStartStopId('');
+                                      }}
+                                      placeholder={String(activeParityBounds.minNum)}
+                                      className="w-full min-w-0 bg-transparent text-base sm:text-xs font-mono tabular-nums text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none text-right"
+                                    />
+                                  </div>
+                                  <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 min-h-[38px]">
+                                    <label
+                                      htmlFor="single-range-to"
+                                      className="text-[11px] text-slate-500 dark:text-slate-400 shrink-0"
+                                    >
+                                      Do nr
+                                    </label>
+                                    <input
+                                      id="single-range-to"
+                                      type="number"
+                                      inputMode="numeric"
+                                      min={1}
+                                      value={singleRangeTo}
+                                      onChange={(e) => {
+                                        setSingleRangeTo(e.target.value);
+                                        setSingleStartStopId('');
+                                      }}
+                                      placeholder={String(activeParityBounds.maxNum)}
+                                      className="w-full min-w-0 bg-transparent text-base sm:text-xs font-mono tabular-nums text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none text-right"
+                                    />
+                                  </div>
                                 </div>
                               </div>
-                            </button>
+                            )}
 
-                            <button
-                              type="button"
-                              onClick={() => setSingleStartDirection('desc')}
-                              className={`min-h-[54px] px-2.5 py-2 rounded-xl border text-left flex items-start gap-2 transition-colors ${
-                                singleStartDirection === 'desc'
-                                  ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
-                                  : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
-                              }`}
-                            >
-                              <ArrowDown
-                                className={`w-4 h-4 shrink-0 mt-0.5 ${
-                                  singleStartDirection === 'desc'
-                                    ? 'text-amber-400 dark:text-amber-600'
-                                    : 'text-amber-700 dark:text-amber-400'
-                                }`}
-                              />
-                              <div className="min-w-0">
-                                <div className="text-xs font-semibold leading-tight">
-                                  Od końca do początku
-                                </div>
-                                <div
-                                  className={`text-[11px] font-mono tabular-nums mt-0.5 truncate ${
-                                    singleStartDirection === 'desc'
-                                      ? 'text-amber-200 dark:text-amber-800'
-                                      : 'text-slate-500 dark:text-slate-400'
-                                  }`}
-                                >
-                                  {multiDescNote}
-                                </div>
-                              </div>
-                            </button>
-
+                          {/* Dodatkowe warianty kierunku */}
+                          <div className="grid grid-cols-2 gap-1.5">
                             <button
                               type="button"
                               disabled={!canSideBySide}
@@ -1489,47 +1548,46 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                                 </div>
                               </div>
                             </button>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </div>
+                          </div>
 
-                  {singleStartDirection === 'from_stop' &&
-                    singleMatchingStops.length > 0 && (
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between gap-2">
-                          <label
-                            htmlFor="single-start-house"
-                            className="block text-[11px] font-medium text-emerald-800 dark:text-emerald-400"
-                          >
-                            Dom początkowy (START #1)
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => setSingleStartDirection('auto')}
-                            className="text-[11px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                          >
-                            Lub automatycznie od kościoła
-                          </button>
+                          {singleStartDirection === 'from_stop' &&
+                            singleMatchingStops.length > 0 && (
+                              <div className="space-y-1.5">
+                                <div className="flex items-center justify-between gap-2">
+                                  <label
+                                    htmlFor="single-start-house"
+                                    className="block text-[11px] font-medium text-emerald-800 dark:text-emerald-400"
+                                  >
+                                    Dom początkowy (START #1)
+                                  </label>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSingleStartDirection('auto')}
+                                    className="text-[11px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                                  >
+                                    Lub automatycznie od kościoła
+                                  </button>
+                                </div>
+                                <select
+                                  id="single-start-house"
+                                  value={
+                                    singleStartStopId || singleMatchingStops[0].id
+                                  }
+                                  onChange={(e) => setSingleStartStopId(e.target.value)}
+                                  className="w-full min-h-[42px] px-3 py-2 text-base sm:text-xs bg-emerald-50/70 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-700/70 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500"
+                                >
+                                  {singleMatchingStops.map((s) => (
+                                    <option key={s.id} value={s.id}>
+                                      {s.address || s.label}
+                                      {isBlockStop(s) ? ' (Blok)' : ''}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            )}
                         </div>
-                        <select
-                          id="single-start-house"
-                          value={
-                            singleStartStopId || singleMatchingStops[0].id
-                          }
-                          onChange={(e) => setSingleStartStopId(e.target.value)}
-                          className="w-full min-h-[42px] px-3 py-2 text-base sm:text-xs bg-emerald-50/70 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-700/70 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-500"
-                        >
-                          {singleMatchingStops.map((s) => (
-                            <option key={s.id} value={s.id}>
-                              {s.address || s.label}
-                              {isBlockStop(s) ? ' (Blok)' : ''}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
+                      )}
+                    </div>
 
                   {singleMatchingStops.length > 0 && singlePreviewEstimate && (
                     <div
@@ -1641,8 +1699,9 @@ export const SidebarStops: React.FC<SidebarStopsProps> = ({
                       numerów. Zmień filtr na „Wszystkie” albo wyczyść zakres.
                     </div>
                   )}
-                </>
-              )}
+                  </>
+                );
+              })()}
 
               {effectiveSingleStreets.length > 0 && !isEditingPlannedDay && (
                 <div className="px-2.5 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/70 text-[11px] font-medium text-amber-900 dark:text-amber-200">

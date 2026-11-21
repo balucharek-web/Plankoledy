@@ -26,6 +26,7 @@ import {
   MapPinPlus,
   Menu,
   Moon,
+  Pencil,
   Pentagon,
   Route,
   Scan,
@@ -290,7 +291,8 @@ function ParishPlannerWorkspace({
     null
   );
   const [fieldModeOnMap, setFieldModeOnMap] = useState(false);
-  const [fieldNightMode, setFieldNightMode] = useState(false);
+  const [mapEditToolsOpen, setMapEditToolsOpen] = useState(false);
+  const autoRoutedDayKeysRef = useRef<Set<string>>(new Set());
   const [fieldPriestId, setFieldPriestId] = useState<number>(1);
   const [activeFieldStopId, setActiveFieldStopId] = useState<string | null>(
     null
@@ -2059,24 +2061,69 @@ function ParishPlannerWorkspace({
     exactRoutesCache,
   });
 
-  // Auto-select the active/nearest/latest planned kolęda day ONCE on initial parish load
-  // so the big map immediately displays the day's route (with 1-click switch to whole parish)
+  // Auto-select the last-used session day (from localStorage) or today's/nearest planned kolęda day ONCE on initial parish load
+  // so reopening the app on phone resumes immediately where the priest left off
   useEffect(() => {
     const parishKey = activeParishId ?? parish?.name ?? null;
     if (!parishKey || plannedDays.length === 0) return;
     if (hasAutoSelectedTodayRef.current === parishKey) return;
     hasAutoSelectedTodayRef.current = parishKey;
+
+    let restoredDate: string | null = null;
+    try {
+      const raw = localStorage.getItem(`planer_koledy_session_v1:${parishKey}`);
+      if (raw) {
+        const parsed = JSON.parse(raw) as {
+          selectedDate?: string | null;
+          fieldPriestId?: number;
+        };
+        if (
+          typeof parsed.selectedDate === 'string' &&
+          plannedDays.some((d) => d.date === parsed.selectedDate)
+        ) {
+          restoredDate = parsed.selectedDate;
+        }
+        if (
+          typeof parsed.fieldPriestId === 'number' &&
+          Number.isFinite(parsed.fieldPriestId) &&
+          parsed.fieldPriestId >= 1
+        ) {
+          setFieldPriestId(parsed.fieldPriestId);
+        }
+      }
+    } catch {
+      // Ignore storage read errors in restricted contexts
+    }
+
     if (!selectedDate) {
-      const todayIso = formatIsoDateLocal(new Date());
-      const targetDay =
-        plannedDays.find((d) => d.date === todayIso) ??
-        plannedDays.find((d) => d.date > todayIso) ??
-        plannedDays[plannedDays.length - 1];
-      if (targetDay) {
-        setSelectedDate(targetDay.date);
+      if (restoredDate) {
+        setSelectedDate(restoredDate);
+      } else {
+        const todayIso = formatIsoDateLocal(new Date());
+        const targetDay =
+          plannedDays.find((d) => d.date === todayIso) ??
+          plannedDays.find((d) => d.date > todayIso) ??
+          plannedDays[plannedDays.length - 1];
+        if (targetDay) {
+          setSelectedDate(targetDay.date);
+        }
       }
     }
   }, [activeParishId, parish?.name, plannedDays, selectedDate]);
+
+  // Persist active day & priest choice per parish for instant resume on mobile
+  useEffect(() => {
+    const parishKey = activeParishId ?? parish?.name ?? null;
+    if (!parishKey || hasAutoSelectedTodayRef.current !== parishKey) return;
+    try {
+      localStorage.setItem(
+        `planer_koledy_session_v1:${parishKey}`,
+        JSON.stringify({ selectedDate, fieldPriestId })
+      );
+    } catch {
+      // Ignore storage quota / privacy mode errors
+    }
+  }, [activeParishId, parish?.name, selectedDate, fieldPriestId]);
 
   // Keep selectedDate valid if dates were cleared/changed
   useEffect(() => {
@@ -2122,6 +2169,7 @@ function ParishPlannerWorkspace({
 
   useEffect(() => {
     setInspectedStreet(null);
+    autoRoutedDayKeysRef.current.clear();
   }, [activeParishId]);
 
   useEffect(() => {
@@ -2192,6 +2240,8 @@ function ParishPlannerWorkspace({
                 return revertedStop;
               })
             );
+            setActiveFieldStopId(stopId);
+            setHighlightedStopId(stopId);
             if (authUser && currentId && revertedStop) {
               if (isCollaboratorRef.current) {
                 void updateStopFieldByCollaboratorInFirestore(
@@ -2348,6 +2398,7 @@ function ParishPlannerWorkspace({
         explicitStops?: VisitStop[];
         explicitSeasonConfig?: SeasonPlanConfig;
         preserveMobilePane?: boolean;
+        silent?: boolean;
       }
     ) => {
       if (!parish) return;
@@ -2374,10 +2425,12 @@ function ParishPlannerWorkspace({
       const dayBreaks = getDayActiveBreaks(targetDate, effectiveSeason);
       const dayConfig: PlanConfig = { ...config, startTime: dayStart };
 
-      setInteractionMode('pan');
-      setActiveSection('routes');
-      if (!options?.preserveMobilePane) {
-        setMobilePane('panel');
+      if (!options?.silent) {
+        setInteractionMode('pan');
+        setActiveSection('routes');
+        if (!options?.preserveMobilePane) {
+          setMobilePane('panel');
+        }
       }
 
       const computed = await computeAllRoutes(
@@ -2401,6 +2454,34 @@ function ParishPlannerWorkspace({
       computeAllRoutes,
     ]
   );
+
+  // Silently fetch exact road routes in the background whenever a planned day is active and not yet cached
+  useEffect(() => {
+    if (!parish || !selectedDate || isComputing) return;
+    if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+    if (exactRoutesCache[selectedDate]) return;
+    if (!plannedDays.some((d) => d.date === selectedDate)) return;
+
+    const parishKey = activeParishId ?? parish.name;
+    const attemptKey = `${parishKey}:${selectedDate}:${config.travelMode}:${config.priestCount}`;
+    if (autoRoutedDayKeysRef.current.has(attemptKey)) return;
+    autoRoutedDayKeysRef.current.add(attemptKey);
+
+    void handleComputeRoutesForDate(selectedDate, {
+      preserveMobilePane: true,
+      silent: true,
+    });
+  }, [
+    activeParishId,
+    config.priestCount,
+    config.travelMode,
+    exactRoutesCache,
+    handleComputeRoutesForDate,
+    isComputing,
+    parish,
+    plannedDays,
+    selectedDate,
+  ]);
 
   const handleComputeRoutes = useCallback(async () => {
     await handleComputeRoutesForDate(undefined);
@@ -2495,6 +2576,11 @@ function ParishPlannerWorkspace({
         delete copy.current;
         return copy;
       });
+      for (const k of Array.from(autoRoutedDayKeysRef.current)) {
+        if (k.includes(`:${payload.date}:`)) {
+          autoRoutedDayKeysRef.current.delete(k);
+        }
+      }
 
       setSelectedDate(payload.date);
       setFocusedPriestId(null);
@@ -2890,14 +2976,37 @@ function ParishPlannerWorkspace({
             </button>
           )}
 
-          <button
-            type="button"
-            disabled={!parish || activeStopsCount === 0 || isComputing}
-            onClick={handleComputeRoutes}
-            className="min-h-[40px] px-3 sm:px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 disabled:bg-slate-300 dark:disabled:bg-slate-700 dark:disabled:text-slate-400 disabled:cursor-not-allowed rounded-xl transition-colors whitespace-nowrap shrink-0"
-          >
-            {isComputing ? 'Liczenie...' : 'Wyznacz trasy'}
-          </button>
+          {displayedRoutes.length > 0 && selectedDate ? (
+            <button
+              type="button"
+              onClick={() => {
+                setFieldModeOnMap(true);
+                setInteractionMode('pan');
+                setMobilePane('map');
+              }}
+              className="min-h-[40px] px-3 sm:px-4 py-2 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 shadow-xs"
+            >
+              <ClipboardCheck className="w-4 h-4 shrink-0" />
+              <span>W teren</span>
+            </button>
+          ) : parish && stops.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => navigateToSection('stops')}
+              className="min-h-[40px] px-3 sm:px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0"
+            >
+              <CalendarPlus className="w-4 h-4 shrink-0" />
+              <span>Zaplanuj dzień</span>
+            </button>
+          ) : parish ? (
+            <button
+              type="button"
+              onClick={() => navigateToSection('parish')}
+              className="min-h-[40px] px-3 sm:px-4 py-2 text-xs font-semibold text-white bg-amber-700 hover:bg-amber-800 rounded-xl transition-colors whitespace-nowrap shrink-0"
+            >
+              Dodaj ulice
+            </button>
+          ) : null}
         </div>
       </header>
 
@@ -3068,6 +3177,31 @@ function ParishPlannerWorkspace({
         {/* Active Workspace or Schedule */}
         {isScheduleView ? (
           <main className="flex-1 min-h-0 overflow-y-auto bg-slate-50 dark:bg-slate-950 print-reset">
+            <div className="no-print max-w-5xl mx-auto px-4 sm:px-6 pt-3 pb-1">
+              <div
+                role="tablist"
+                aria-label="Tryb planowania kolędy"
+                className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-slate-200/75 dark:bg-slate-800 max-w-sm"
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={false}
+                  onClick={() => navigateToSection('stops')}
+                  className="min-h-[36px] px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium transition-colors"
+                >
+                  Jeden dzień
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={true}
+                  className="min-h-[36px] px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs text-xs font-semibold transition-colors tabular-nums"
+                >
+                  Cały okres{plannedDays.length > 0 ? ` (${plannedDays.length})` : ''}
+                </button>
+              </div>
+            </div>
             <Suspense fallback={null}>
               <PrintScheduleSheet
                 parish={parish}
@@ -3319,7 +3453,6 @@ function ParishPlannerWorkspace({
                     parish={parish}
                     config={config}
                     routes={displayedRoutes}
-                    isExactRoute={isExactRoute}
                     plannedDays={plannedDays}
                     selectedDate={selectedDate}
                     effectiveStartTime={effectiveStartTime}
@@ -3344,18 +3477,10 @@ function ParishPlannerWorkspace({
                       setMobilePane('map');
                     }}
                     onOpenSchedule={() => navigateToSection('schedule')}
-                    onUpdateStopStatus={handleUpdateStopStatus}
                     onMoveStopOrder={handleMoveStopOrder}
                     onSetRouteStartStop={handleSetRouteStartStop}
                     onDeleteRoute={handleClearCurrentRoute}
                     onGoToPlanner={handleStartNewDayInPlanner}
-                    fieldPriestId={fieldPriestId}
-                    onChangeFieldPriestId={setFieldPriestId}
-                    activeFieldStopId={activeFieldStopId}
-                    onChangeActiveFieldStopId={setActiveFieldStopId}
-                    nightMode={fieldNightMode}
-                    onToggleNightMode={() => setFieldNightMode((v) => !v)}
-                    onUpdateStopDetails={handleUpdateStop}
                     onOpenMapFieldMode={() => {
                       setFieldModeOnMap(true);
                       setInteractionMode('pan');
@@ -3520,72 +3645,10 @@ function ParishPlannerWorkspace({
                               <span>
                                 {fieldModeOnMap
                                   ? 'Tryb terenowy: WŁ'
-                                  : 'W terenie na mapie'}
+                                  : 'Kolęda w terenie'}
                               </span>
                             </button>
                           )}
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setInteractionMode(
-                                boundary.length >= 3
-                                  ? 'edit_boundary'
-                                  : 'draw_boundary'
-                              )
-                            }
-                            className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
-                          >
-                            <Pentagon className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
-                            <span>
-                              {boundary.length >= 3
-                                ? 'Popraw granice'
-                                : 'Narysuj teren'}
-                            </span>
-                          </button>
-
-                          {boundary.length >= 3 && (
-                            <button
-                              type="button"
-                              onClick={() => setAreaScannerOpen(true)}
-                              className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-950 dark:text-emerald-200 text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
-                            >
-                              <ScanSearch className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" />
-                              <span>Wykryj z terenu</span>
-                            </button>
-                          )}
-
-                          {stops.length > 0 && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setLassoSelectedStopIds([]);
-                                setInteractionMode('lasso_select');
-                              }}
-                              className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-950 dark:text-indigo-200 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
-                            >
-                              <Scan className="w-3.5 h-3.5 text-indigo-700 dark:text-indigo-400 shrink-0" />
-                              <span>Zaznacz lassem</span>
-                            </button>
-                          )}
-
-                          <button
-                            type="button"
-                            onClick={() => setInteractionMode('pick_street')}
-                            className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
-                          >
-                            <Route className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
-                            <span>+ Ulica z mapy</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => setInteractionMode('add_stop')}
-                            className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
-                          >
-                            <MapPinPlus className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
-                            <span>+ Dom</span>
-                          </button>
 
                           <button
                             type="button"
@@ -3599,12 +3662,91 @@ function ParishPlannerWorkspace({
 
                           <button
                             type="button"
-                            onClick={() => navigateToSection('parish')}
-                            className="lg:hidden min-h-[36px] px-2.5 py-1.5 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-950 dark:text-amber-200 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
+                            aria-expanded={mapEditToolsOpen || stops.length === 0}
+                            onClick={() => setMapEditToolsOpen((v) => !v)}
+                            className={`min-h-[36px] px-2.5 py-1.5 rounded-xl border text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors ${
+                              mapEditToolsOpen || stops.length === 0
+                                ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs'
+                                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200'
+                            }`}
                           >
-                            <Church className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
-                            <span>Parafia i ulice</span>
+                            <Pencil className="w-3.5 h-3.5 shrink-0" />
+                            <span>
+                              {mapEditToolsOpen || stops.length === 0
+                                ? 'Ukryj narzędzia'
+                                : 'Edytuj mapę'}
+                            </span>
                           </button>
+
+                          {(mapEditToolsOpen || stops.length === 0) && (
+                            <>
+                              <span
+                                aria-hidden="true"
+                                className="h-5 w-px bg-slate-200 dark:bg-slate-700 mx-0.5 shrink-0"
+                              />
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setInteractionMode(
+                                    boundary.length >= 3
+                                      ? 'edit_boundary'
+                                      : 'draw_boundary'
+                                  )
+                                }
+                                className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
+                              >
+                                <Pentagon className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
+                                <span>
+                                  {boundary.length >= 3
+                                    ? 'Popraw granice'
+                                    : 'Narysuj teren'}
+                                </span>
+                              </button>
+
+                              {boundary.length >= 3 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setAreaScannerOpen(true)}
+                                  className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-950 dark:text-emerald-200 text-xs font-semibold inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
+                                >
+                                  <ScanSearch className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" />
+                                  <span>Wykryj z terenu</span>
+                                </button>
+                              )}
+
+                              {stops.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setLassoSelectedStopIds([]);
+                                    setInteractionMode('lasso_select');
+                                  }}
+                                  className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-950 dark:text-indigo-200 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
+                                >
+                                  <Scan className="w-3.5 h-3.5 text-indigo-700 dark:text-indigo-400 shrink-0" />
+                                  <span>Zaznacz lassem</span>
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={() => setInteractionMode('pick_street')}
+                                className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
+                              >
+                                <Route className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
+                                <span>+ Ulica z mapy</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setInteractionMode('add_stop')}
+                                className="min-h-[36px] px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-medium inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap transition-colors"
+                              >
+                                <MapPinPlus className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
+                                <span>+ Dom</span>
+                              </button>
+                            </>
+                          )}
                         </>
                       )}
                     </>
@@ -4011,7 +4153,6 @@ function ParishPlannerWorkspace({
                     routes={displayedRoutes}
                     fieldPriestId={fieldPriestId}
                     activeFieldStopId={activeFieldStopId}
-                    nightMode={fieldNightMode}
                     onChangePriest={(pId) => {
                       setFieldPriestId(pId);
                       setActiveFieldStopId(null);
@@ -4020,7 +4161,6 @@ function ParishPlannerWorkspace({
                       setActiveFieldStopId(stopId);
                       setHighlightedStopId(stopId);
                     }}
-                    onToggleNightMode={() => setFieldNightMode((v) => !v)}
                     onUpdateStopStatus={handleUpdateStopStatus}
                     onUpdateStopDetails={handleUpdateStop}
                     onOpenBlockUnits={(stopId) => setEditingBlockStopId(stopId)}
@@ -4209,10 +4349,10 @@ function ParishPlannerWorkspace({
         )}
       </div>
 
-      {/* Mobile Thumb-Zone Bottom Tab Bar (< lg, hidden during immersive full-screen map view) */}
+      {/* Mobile Thumb-Zone Bottom Tab Bar (< lg, 4 crisp tabs, hidden during immersive full-screen map view) */}
       <nav
         aria-label="Nawigacja mobilna"
-        className={`no-print shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 grid-cols-5 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] px-1 ${
+        className={`no-print shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 grid-cols-4 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] px-1 ${
           isMobileFullMap ? 'hidden' : 'lg:hidden grid'
         }`}
       >
@@ -4236,20 +4376,28 @@ function ParishPlannerWorkspace({
 
         <button
           type="button"
-          onClick={() => navigateToSection('stops')}
+          onClick={() =>
+            navigateToSection(
+              activeSection === 'schedule' ? 'schedule' : 'stops'
+            )
+          }
           aria-current={
-            mobilePane === 'panel' && activeSection === 'stops'
+            mobilePane === 'panel' &&
+            (activeSection === 'stops' || activeSection === 'schedule')
               ? 'page'
               : undefined
           }
           className={`min-h-[54px] flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors ${
-            mobilePane === 'panel' && activeSection === 'stops'
+            mobilePane === 'panel' &&
+            (activeSection === 'stops' || activeSection === 'schedule')
               ? 'text-amber-800 dark:text-amber-400 font-semibold'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
           }`}
         >
           <CalendarPlus className="w-5 h-5" />
-          <span>Zaplanuj</span>
+          <span className="tabular-nums">
+            Planuj{plannedDays.length > 0 ? ` (${plannedDays.length})` : ''}
+          </span>
         </button>
 
         <button
@@ -4286,26 +4434,6 @@ function ParishPlannerWorkspace({
           <Route className="w-5 h-5" />
           <span className="tabular-nums">
             Trasy{displayedRoutes.length > 0 ? ` (${displayedRoutes.length})` : ''}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => navigateToSection('schedule')}
-          aria-current={
-            mobilePane === 'panel' && activeSection === 'schedule'
-              ? 'page'
-              : undefined
-          }
-          className={`min-h-[54px] flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors ${
-            mobilePane === 'panel' && activeSection === 'schedule'
-              ? 'text-amber-800 dark:text-amber-400 font-semibold'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
-          }`}
-        >
-          <CalendarCheck className="w-5 h-5" />
-          <span className="tabular-nums">
-            Okres{plannedDays.length > 0 ? ` (${plannedDays.length})` : ''}
           </span>
         </button>
       </nav>
@@ -4458,7 +4586,9 @@ function ParishPlannerWorkspace({
         <div
           role="status"
           aria-live="polite"
-          className="no-print fixed bottom-20 lg:bottom-4 left-3 right-3 sm:left-auto sm:right-4 z-[960] bg-slate-900 text-white border border-slate-700 rounded-xl shadow-xl px-3.5 py-2.5 flex items-center justify-between gap-3 text-xs"
+          className={`no-print fixed left-3 right-3 sm:left-auto sm:right-4 z-[960] bg-slate-900 dark:bg-slate-800 text-white border border-slate-700 rounded-xl shadow-2xl px-3.5 py-2.5 flex items-center justify-between gap-3 text-xs ${
+            fieldModeOnMap ? 'top-3 sm:top-4 bottom-auto' : 'bottom-20 lg:bottom-4'
+          }`}
         >
           <span className="truncate">{undoToast.message}</span>
           <div className="flex items-center gap-2 shrink-0">

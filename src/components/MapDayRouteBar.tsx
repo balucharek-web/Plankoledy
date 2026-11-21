@@ -421,139 +421,11 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
           )}
         </div>
 
-        {/* Travel Mode Switcher (Piechotą vs Autem) + Approach Time from Church + START -> META */}
+        {/* Compact START -> META Summary + Priest Filter + Primary Action Row */}
         {routes.length > 0 && (
           <div className="px-3.5 pb-2.5 space-y-2">
-            {/* Compact Travel Mode & Approach Readout Row */}
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
-              <div
-                role="group"
-                aria-label="Sposób dotarcia na kolędę"
-                className="inline-flex items-center rounded-xl bg-slate-100 dark:bg-slate-800 p-0.5 shrink-0"
-              >
-                <button
-                  type="button"
-                  onClick={() => onChangeTravelMode('WALKING')}
-                  aria-pressed={travelMode === 'WALKING'}
-                  className={`min-h-[32px] px-2.5 py-1 rounded-lg text-[11px] font-semibold inline-flex items-center gap-1 transition-colors whitespace-nowrap ${
-                    travelMode === 'WALKING'
-                      ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  <Footprints className="w-3.5 h-3.5 text-teal-700 dark:text-teal-400 shrink-0" />
-                  <span>Piechotą</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onChangeTravelMode('DRIVING')}
-                  aria-pressed={travelMode === 'DRIVING'}
-                  className={`min-h-[32px] px-2.5 py-1 rounded-lg text-[11px] font-semibold inline-flex items-center gap-1 transition-colors whitespace-nowrap ${
-                    travelMode === 'DRIVING'
-                      ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  <Car className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
-                  <span>Autem</span>
-                </button>
-              </div>
-
-              <div className="min-w-0 text-right text-[11px] text-slate-600 dark:text-slate-300 tabular-nums truncate">
-                {approachMeters >= 30 ? (
-                  <span className="inline-flex items-center justify-end gap-1.5">
-                    <span
-                      aria-hidden="true"
-                      className={`w-2 h-2 rounded-full shrink-0 ${
-                        travelMode === 'DRIVING'
-                          ? 'bg-amber-600'
-                          : 'bg-teal-600'
-                      }`}
-                    />
-                    <span>
-                      {travelMode === 'DRIVING' ? 'Dojazd' : 'Dojście'}:{' '}
-                      <strong className="font-semibold text-slate-900 dark:text-white">
-                        {approachMinutes} min
-                      </strong>
-                      <span className="text-slate-400 dark:text-slate-500">
-                        {' '}
-                        ({formatDistance(approachMeters)})
-                      </span>
-                    </span>
-                  </span>
-                ) : liveRoadMetrics?.isLoading ? (
-                  <span className="text-slate-400 dark:text-slate-500">Wyznaczanie drogi...</span>
-                ) : firstArrivalTime ? (
-                  <span>
-                    Start pod domem:{' '}
-                    <strong className="font-semibold text-slate-900 dark:text-white">
-                      {firstArrivalTime}
-                    </strong>
-                  </span>
-                ) : null}
-              </div>
-            </div>
-
-            {/* Return Route Selector (META -> START / Kościół / Brak) + Real Road Metrics */}
-            <div className="flex items-center justify-between gap-2">
-              <div
-                role="group"
-                aria-label="Trasa powrotna z mety"
-                className="inline-flex items-center rounded-xl bg-slate-100 dark:bg-slate-800 p-0.5 shrink-0"
-              >
-                {(
-                  [
-                    { id: 'start', label: 'Na START' },
-                    { id: 'parish', label: 'Kościół' },
-                    { id: 'none', label: 'Brak' },
-                  ] as const
-                ).map((opt) => (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => onChangeReturnTarget(opt.id)}
-                    aria-pressed={returnTarget === opt.id}
-                    className={`min-h-[30px] px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap ${
-                      returnTarget === opt.id
-                        ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="min-w-0 text-right text-[11px] text-slate-600 dark:text-slate-300 tabular-nums truncate">
-                {returnTarget === 'none' ? (
-                  <span className="text-slate-400 dark:text-slate-500">Bez powrotu</span>
-                ) : returnMeters >= 30 ? (
-                  <span className="inline-flex items-center justify-end gap-1.5">
-                    <span
-                      aria-hidden="true"
-                      className="w-2 h-2 rounded-full bg-violet-600 dark:bg-violet-400 shrink-0"
-                    />
-                    <span>
-                      Powrót:{' '}
-                      <strong className="font-semibold text-slate-900 dark:text-white">
-                        {returnMinutes} min
-                      </strong>
-                      <span className="text-slate-400 dark:text-slate-500">
-                        {' '}
-                        ({formatDistance(returnMeters)})
-                      </span>
-                    </span>
-                  </span>
-                ) : liveRoadMetrics?.isLoading ? (
-                  <span className="text-slate-400 dark:text-slate-500">Liczenie powrotu...</span>
-                ) : (
-                  <span className="text-slate-400 dark:text-slate-500">Powrót po drogach</span>
-                )}
-              </div>
-            </div>
-
             {activeStartAddress && (
-              <div className="flex items-center justify-between gap-2 text-[11px] text-slate-600 dark:text-slate-300">
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 text-[11px] text-slate-600 dark:text-slate-300">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span className="w-2 h-2 rounded-full bg-emerald-600 shrink-0" />
                   <span className="font-semibold text-slate-900 dark:text-white truncate">
@@ -569,18 +441,16 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                     </>
                   )}
                 </div>
-                <span
-                  className={`shrink-0 font-medium ${
-                    hasLiveRoadGeometry
-                      ? 'text-emerald-700 dark:text-emerald-400'
-                      : 'text-slate-400 dark:text-slate-500'
-                  }`}
-                >
-                  {hasLiveRoadGeometry
-                    ? 'Po drogach'
-                    : liveRoadMetrics?.isLoading
-                      ? 'Trasa...'
-                      : 'Szacunkowo'}
+                <span className="shrink-0 font-medium text-slate-500 dark:text-slate-400 tabular-nums">
+                  {isComputingExact || liveRoadMetrics?.isLoading
+                    ? 'Układanie trasy...'
+                    : approachMeters >= 30
+                      ? `${travelMode === 'DRIVING' ? 'Dojazd' : 'Dojście'} ${approachMinutes} min`
+                      : firstArrivalTime
+                        ? `Start ${firstArrivalTime}`
+                        : hasLiveRoadGeometry
+                          ? 'Po drogach'
+                          : ''}
                 </span>
               </div>
             )}
@@ -737,8 +607,90 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
               </div>
             )}
 
+            {/* Travel Mode + Return Target inside Options */}
+            {routes.length > 0 && (
+              <div className="space-y-2 pt-0.5">
+                <div className="flex items-center justify-between gap-2">
+                  <div
+                    role="group"
+                    aria-label="Sposób dotarcia na kolędę"
+                    className="inline-flex items-center rounded-xl bg-slate-200/70 dark:bg-slate-800 p-0.5 shrink-0"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => onChangeTravelMode('WALKING')}
+                      aria-pressed={travelMode === 'WALKING'}
+                      className={`min-h-[32px] px-2.5 py-1 rounded-lg text-[11px] font-semibold inline-flex items-center gap-1 transition-colors whitespace-nowrap ${
+                        travelMode === 'WALKING'
+                          ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      <Footprints className="w-3.5 h-3.5 text-teal-700 dark:text-teal-400 shrink-0" />
+                      <span>Piechotą</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onChangeTravelMode('DRIVING')}
+                      aria-pressed={travelMode === 'DRIVING'}
+                      className={`min-h-[32px] px-2.5 py-1 rounded-lg text-[11px] font-semibold inline-flex items-center gap-1 transition-colors whitespace-nowrap ${
+                        travelMode === 'DRIVING'
+                          ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      <Car className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
+                      <span>Autem</span>
+                    </button>
+                  </div>
+                  <div className="text-[11px] text-slate-600 dark:text-slate-300 tabular-nums truncate">
+                    {approachMeters >= 30
+                      ? `${travelMode === 'DRIVING' ? 'Dojazd' : 'Dojście'}: ${approachMinutes} min (${formatDistance(approachMeters)})`
+                      : 'Start na miejscu'}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <div
+                    role="group"
+                    aria-label="Trasa powrotna z mety"
+                    className="inline-flex items-center rounded-xl bg-slate-200/70 dark:bg-slate-800 p-0.5 shrink-0"
+                  >
+                    {(
+                      [
+                        { id: 'start', label: 'Na START' },
+                        { id: 'parish', label: 'Kościół' },
+                        { id: 'none', label: 'Brak' },
+                      ] as const
+                    ).map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => onChangeReturnTarget(opt.id)}
+                        aria-pressed={returnTarget === opt.id}
+                        className={`min-h-[30px] px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap ${
+                          returnTarget === opt.id
+                            ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="text-[11px] text-slate-600 dark:text-slate-300 tabular-nums truncate">
+                    {returnTarget === 'none'
+                      ? 'Bez powrotu'
+                      : returnMeters >= 30
+                        ? `Powrót: ${returnMinutes} min (${formatDistance(returnMeters)})`
+                        : 'Powrót po drogach'}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="flex flex-wrap items-center gap-1.5">
-              {routes.length > 0 && !isExactRoute && (
+              {routes.length > 0 && (
                 <button
                   type="button"
                   disabled={isComputingExact}
@@ -747,11 +699,7 @@ export const MapDayRouteBar: React.FC<MapDayRouteBarProps> = ({
                 >
                   <Navigation className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                   <span>
-                    {isComputingExact
-                      ? 'Liczenie trasy...'
-                      : `Wyznacz po drogach (${
-                          travelMode === 'DRIVING' ? 'auto' : 'pieszo'
-                        })`}
+                    {isComputingExact ? 'Przeliczanie...' : 'Przelicz trasę'}
                   </span>
                 </button>
               )}
